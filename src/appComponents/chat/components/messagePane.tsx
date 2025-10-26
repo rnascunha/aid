@@ -7,6 +7,7 @@ import { Box, Container, Stack } from "@mui/material";
 import { providerMap } from "../data";
 import { chatRequest } from "@/actions/ai/chat";
 import { Dispatch, SetStateAction, useTransition } from "react";
+import { BouncingLoader } from "@/components/bouncingLoader";
 
 type MessagesPaneProps = {
   selectedProviderId: ProviderProps["id"];
@@ -81,6 +82,7 @@ export default function MessagesPane(props: MessagesPaneProps) {
           )}
         </Stack>
       </Box>
+      {isPending && <BouncingLoader />}
       <MessageInput
         isPending={isPending}
         onSubmit={(value) => {
