@@ -1,18 +1,32 @@
 import { StaticImageData } from "next/image";
 
-export interface UserProps {
+export interface ProviderProps {
   id: string;
   name: string;
   logo: StaticImageData;
+  provider: string;
+  model: string;
   online: boolean;
 }
 
+interface ChatErrorMessage {
+  error: string;
+  detail: string;
+}
+
+interface ChatSuccessMessage {
+  success: true;
+  response: string;
+}
+
+export type ChatMessage = ChatErrorMessage | ChatSuccessMessage
+
 export interface MessageProps {
   id: string;
-  content: string;
+  content: ChatMessage;
   timestamp: number;
   unread?: boolean;
-  sender: UserProps | "You";
+  sender: ProviderProps | "You";
   attachment?: {
     fileName: string;
     type: string;
@@ -26,4 +40,4 @@ export interface MessageProps {
 //   messages: MessageProps[];
 // };
 
-export type ChatProps = Record<UserProps["id"], MessageProps[]>;
+export type ChatProps = Record<ProviderProps["id"], MessageProps[]>;

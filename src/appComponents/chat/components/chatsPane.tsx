@@ -1,17 +1,17 @@
 import ChatListItem from "./chatListItem";
-import { ChatProps, UserProps } from "../types";
+import { ChatProps, ProviderProps } from "../types";
 import { Box, Container, List, Typography } from "@mui/material";
-import { users } from "../data";
+import { providerMap } from "../data";
 
 type ChatsPaneProps = {
   chats: ChatProps;
-  chatList: UserProps["id"][];
-  setSelectedUserId: (chat: UserProps["id"]) => void;
-  selectedUserId: UserProps["id"];
+  chatList: ProviderProps["id"][];
+  setSelectedProviderId: (chat: ProviderProps["id"]) => void;
+  selectedProviderId: ProviderProps["id"];
 };
 
 export default function ChatsPane(props: ChatsPaneProps) {
-  const { chats, chatList, setSelectedUserId, selectedUserId } = props;
+  const { chats, chatList, selectedProviderId, setSelectedProviderId } = props;
 
   return (
     <Box
@@ -44,15 +44,15 @@ export default function ChatsPane(props: ChatsPaneProps) {
         </Typography>
         <List dense>
           {chatList.map((id) => {
-            const user = users.find((u) => u.id === id) as UserProps;
+            const user = providerMap.get(id) as ProviderProps;
             return (
               <ChatListItem
                 key={user.id}
                 id={user.id}
                 sender={user}
                 messages={chats[user.id]}
-                setSelectedUserId={setSelectedUserId}
-                selectedUserId={selectedUserId}
+                setSelectedProviderId={setSelectedProviderId}
+                selectedProviderId={selectedProviderId}
               />
             );
           })}

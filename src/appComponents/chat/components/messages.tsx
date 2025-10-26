@@ -2,8 +2,8 @@
 
 import { Container } from "@mui/material";
 import { useState } from "react";
-import { ChatProps, UserProps } from "../types";
-import { users, chats as allChats } from "../data";
+import { ChatProps, ProviderProps } from "../types";
+import { providers, chats as allChats } from "../data";
 import ChatsPane from "./chatsPane";
 import MessagesPane from "./messagePane";
 
@@ -21,8 +21,8 @@ function sortedChats(chats: ChatProps) {
 }
 
 export function Messages() {
-  const [selectedUserId, setSelectedUserId] = useState<UserProps["id"]>(
-    users[0].id
+  const [selectedProviderId, setSelectedUserId] = useState<ProviderProps["id"]>(
+    providers[0].id
   );
   const [chats, setChats] = useState(allChats);
 
@@ -63,12 +63,12 @@ export function Messages() {
         <ChatsPane
           chats={chats}
           chatList={sortedChats(chats)}
-          selectedUserId={selectedUserId}
-          setSelectedUserId={setSelectedUserId}
+          selectedProviderId={selectedProviderId}
+          setSelectedProviderId={setSelectedUserId}
         />
       </Container>
       <MessagesPane
-        selectedUserId={selectedUserId}
+        selectedProviderId={selectedProviderId}
         chats={chats}
         setChats={setChats}
       />

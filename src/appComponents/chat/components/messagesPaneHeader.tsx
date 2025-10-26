@@ -1,11 +1,11 @@
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import { UserProps } from "../types";
+import { ProviderProps } from "../types";
 import { toggleMessagesPane } from "../utils";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { StaticAvatar } from "./avatarWithStatus";
 
 type MessagesPaneHeaderProps = {
-  sender: UserProps;
+  sender: ProviderProps;
 };
 
 export default function MessagesPaneHeader(props: MessagesPaneHeaderProps) {

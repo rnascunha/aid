@@ -1,14 +1,45 @@
 "use state";
 
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
-import { MessageProps } from "../types";
+import { ChatMessage, MessageProps } from "../types";
 import { Avatar, Box, Container, Stack, Typography } from "@mui/material";
 import dayjs from "@/libs/dayjs";
 import { useEffect, useState } from "react";
+import { createHiperlinks } from "@/libs/links";
 
 type ChatBubbleProps = MessageProps & {
   variant: "sent" | "received";
 };
+
+function getContentData(content: ChatMessage) {
+  if ("success" in content)
+    return (
+      <Typography
+        fontSize="14px"
+        sx={{
+          whiteSpace: "pre-line",
+        }}
+      >
+        {createHiperlinks(content.response)}
+      </Typography>
+    );
+
+  return (
+    <Stack>
+      <Typography fontSize="16px" fontWeight="bold">
+        {content.error}
+      </Typography>
+      <Typography
+        fontSize="14px"
+        sx={{
+          whiteSpace: "pre-line",
+        }}
+      >
+        {createHiperlinks(content.detail)}
+      </Typography>
+    </Stack>
+  );
+}
 
 export default function ChatBubble(props: ChatBubbleProps) {
   const { content, variant, timestamp, attachment = undefined } = props;
@@ -74,14 +105,17 @@ export default function ChatBubble(props: ChatBubbleProps) {
                   borderTopRightRadius: 0,
                 }
               : {
-                  backgroundColor: "rgba(200, 200, 200, 0.7)",
+                  backgroundColor:
+                    "success" in content
+                      ? "rgba(200, 200, 200, 0.7)"
+                      : "rgba(200, 5, 5, 0.5)",
                   color: "black",
                   borderTopLeftRadius: 0,
                   borderTopRightRadius: "10px",
                 },
           ]}
         >
-          <Typography fontSize="14px">{content}</Typography>
+          {getContentData(content)}
         </Container>
       )}
     </Box>

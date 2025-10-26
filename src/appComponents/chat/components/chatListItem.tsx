@@ -1,5 +1,5 @@
 import AvatarWithStatus from "./avatarWithStatus";
-import { MessageProps, UserProps } from "../types";
+import { ChatMessage, MessageProps, ProviderProps } from "../types";
 import {
   Divider,
   ListItem,
@@ -15,10 +15,10 @@ import { useEffect, useState } from "react";
 type ChatListItemProps = ListItemButtonProps & {
   id: string;
   unread?: boolean;
-  sender: UserProps;
+  sender: ProviderProps;
   messages: MessageProps[];
-  selectedUserId?: UserProps["id"];
-  setSelectedUserId: (chat: UserProps["id"]) => void;
+  selectedProviderId?: ProviderProps["id"];
+  setSelectedProviderId: (chat: ProviderProps["id"]) => void;
 };
 
 function getFormatedTimestamp(messages: MessageProps[]) {
@@ -27,12 +27,19 @@ function getFormatedTimestamp(messages: MessageProps[]) {
     : "";
 }
 
+function getDetailMessage(message: ChatMessage | undefined) {
+  if (!message) return "";
+  if ("error" in message) return message.error;
+  return message.response;
+}
+
 export default function ChatListItem(props: ChatListItemProps) {
-  const { id, sender, messages, selectedUserId, setSelectedUserId } = props;
+  const { id, sender, messages, selectedProviderId, setSelectedProviderId } =
+    props;
   const [formatTimestamp, setFormatTimestamp] = useState(
     getFormatedTimestamp(messages)
   );
-  const selected = selectedUserId === id;
+  const selected = selectedProviderId === id;
 
   useEffect(() => {
     const handle = setInterval(
@@ -42,12 +49,14 @@ export default function ChatListItem(props: ChatListItemProps) {
     return () => clearInterval(handle);
   }, [messages]);
 
+  const message = messages.at(-1)?.content;
+
   return (
     <Fragment>
       <ListItem sx={{ p: 0 }}>
         <ListItemButton
           onClick={() => {
-            setSelectedUserId(id);
+            setSelectedProviderId(id);
           }}
           selected={selected}
           color="neutral"
@@ -69,14 +78,29 @@ export default function ChatListItem(props: ChatListItemProps) {
                 src={sender.logo}
                 alt={sender.name}
               />
-              <Typography>{sender.name}</Typography>
+              <Stack>
+                <Typography>{sender.name}</Typography>
+                <Typography
+                  fontSize="small"
+                  color="textSecondary"
+                  sx={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: "1",
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {sender.model}
+                </Typography>
+              </Stack>
             </Stack>
-            <Typography color="textSecondary" fontSize="small">
+            <Typography color="textSecondary" fontSize="small" noWrap>
               {formatTimestamp}
             </Typography>
           </Stack>
           <Typography
-            color="textSecondary"
+            color={message && "success" in message ? "textSecondary" : "error"}
             fontSize="small"
             sx={{
               display: "-webkit-box",
@@ -86,7 +110,7 @@ export default function ChatListItem(props: ChatListItemProps) {
               textOverflow: "ellipsis",
             }}
           >
-            {messages.at(-1)?.content ?? ""}
+            {getDetailMessage(message)}
           </Typography>
         </ListItemButton>
       </ListItem>

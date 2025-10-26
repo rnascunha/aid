@@ -6,11 +6,12 @@ import { useState } from "react";
 
 export type MessageInputProps = {
   onSubmit: (value: string) => void;
+  isPending: boolean;
 };
 
 export default function MessageInput(props: MessageInputProps) {
   const [text, setText] = useState("");
-  const { onSubmit } = props;
+  const { onSubmit, isPending } = props;
   const handleClick = () => {
     if (text.trim() !== "") {
       onSubmit(text);
@@ -30,7 +31,7 @@ export default function MessageInput(props: MessageInputProps) {
         input: {
           endAdornment: (
             <Button
-              disabled={text.trim() === ""}
+              disabled={text.trim() === "" || isPending}
               color="primary"
               sx={{ alignSelf: "center", borderRadius: "sm", height: "100%" }}
               endIcon={<SendRoundedIcon />}
@@ -42,6 +43,7 @@ export default function MessageInput(props: MessageInputProps) {
         },
       }}
       onKeyDown={(event) => {
+        if (isPending) return;
         if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
           handleClick();
         }

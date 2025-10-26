@@ -2,18 +2,23 @@ import AvatarWithStatus from "./avatarWithStatus";
 import ChatBubble from "./chatBubble";
 import MessageInput from "./messageInput";
 import MessagesPaneHeader from "./messagesPaneHeader";
-import { ChatProps, MessageProps, UserProps } from "../types";
+import { ChatProps, MessageProps, ProviderProps } from "../types";
 import { Box, Container, Stack } from "@mui/material";
-import { users } from "../data";
+import { providerMap } from "../data";
+import { chatRequest } from "@/actions/ai/chat";
+import { Dispatch, SetStateAction, useTransition } from "react";
 
 type MessagesPaneProps = {
-  selectedUserId: UserProps["id"];
+  selectedProviderId: ProviderProps["id"];
   chats: ChatProps;
-  setChats: (chats: ChatProps) => void;
+  setChats: Dispatch<SetStateAction<ChatProps>>;
 };
 
 export default function MessagesPane(props: MessagesPaneProps) {
-  const { selectedUserId, chats, setChats } = props;
+  const { selectedProviderId, chats, setChats } = props;
+  const [isPending, startTransition] = useTransition();
+
+  const provider = providerMap.get(selectedProviderId) as ProviderProps;
 
   return (
     <Container
@@ -24,9 +29,7 @@ export default function MessagesPane(props: MessagesPaneProps) {
         gap: 1,
       }}
     >
-      <MessagesPaneHeader
-        sender={users.find((u) => u.id === selectedUserId) as UserProps}
-      />
+      <MessagesPaneHeader sender={provider} />
       <Box
         sx={{
           display: "flex",
@@ -51,46 +54,69 @@ export default function MessagesPane(props: MessagesPaneProps) {
             p: 0.5,
           }}
         >
-          {chats[selectedUserId].map((message: MessageProps, index: number) => {
-            const isYou = message.sender === "You";
-            return (
-              <Stack
-                key={index}
-                direction="row"
-                spacing={2}
-                sx={{ flexDirection: isYou ? "row-reverse" : "row" }}
-              >
-                {message.sender !== "You" && (
-                  <AvatarWithStatus
-                    online={message.sender.online}
-                    src={message.sender.logo}
-                    alt={message.sender.name}
+          {chats[selectedProviderId].map(
+            (message: MessageProps, index: number) => {
+              const isYou = message.sender === "You";
+              return (
+                <Stack
+                  key={index}
+                  direction="row"
+                  spacing={2}
+                  sx={{ flexDirection: isYou ? "row-reverse" : "row" }}
+                >
+                  {message.sender !== "You" && (
+                    <AvatarWithStatus
+                      online={message.sender.online}
+                      src={message.sender.logo}
+                      alt={message.sender.name}
+                    />
+                  )}
+                  <ChatBubble
+                    variant={isYou ? "sent" : "received"}
+                    {...message}
                   />
-                )}
-                <ChatBubble
-                  variant={isYou ? "sent" : "received"}
-                  {...message}
-                />
-              </Stack>
-            );
-          })}
+                </Stack>
+              );
+            }
+          )}
         </Stack>
       </Box>
       <MessageInput
+        isPending={isPending}
         onSubmit={(value) => {
-          const newId = chats[selectedUserId].length + 1;
+          const newId = chats[selectedProviderId].length + 1;
           const newIdString = newId.toString();
-          setChats({
-            ...chats,
-            [selectedUserId]: [
-              ...chats[selectedUserId],
+          setChats((prev) => ({
+            ...prev,
+            [selectedProviderId]: [
+              ...prev[selectedProviderId],
               {
                 id: newIdString,
                 sender: "You",
-                content: value,
+                content: { response: value, success: true },
                 timestamp: Date.now(),
               },
             ],
+          }));
+          startTransition(async () => {
+            const response = await chatRequest(
+              provider.provider,
+              provider.model,
+              value
+            );
+            const newIdString2 = `${newId}:r`;
+            setChats((prev) => ({
+              ...prev,
+              [selectedProviderId]: [
+                ...prev[selectedProviderId],
+                {
+                  id: newIdString2,
+                  sender: provider,
+                  content: response,
+                  timestamp: Date.now(),
+                },
+              ],
+            }));
           });
         }}
       />
