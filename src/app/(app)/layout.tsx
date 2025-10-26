@@ -23,7 +23,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           leftMenuChildren={<SideMenuContent sx={{ mt: "51px" }} />}
         >
           <Container
-            maxWidth="lg"
+            maxWidth="xl"
             disableGutters
             sx={{
               height: "100%",

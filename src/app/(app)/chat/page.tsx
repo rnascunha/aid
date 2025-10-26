@@ -1,5 +1,5 @@
-import { Typography } from "@mui/material";
+import { Chat } from "@/appComponents/chat/chat";
 
 export default function ChatPage() {
-  return <Typography>Chat</Typography>;
+  return <Chat />;
 }
