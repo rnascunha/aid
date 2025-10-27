@@ -1,5 +1,6 @@
-import { Messages } from "./components/messages";
+import { Chat } from "@/components/chat/chat";
+import { chats, providers } from "./data";
 
-export function Chat() {
-  return <Messages />;
+export function ChatApp() {
+  return <Chat providers={providers} chats={chats} />;
 }

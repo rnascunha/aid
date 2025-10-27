@@ -1,9 +1,11 @@
-import Box from "@mui/material/Box";
+import Box, { BoxProps } from "@mui/material/Box";
 
-export function BouncingLoader() {
+export function BouncingLoader(props: BoxProps) {
+  const { sx, ...others } = props;
   return (
     <Box
       sx={{
+        ...sx,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -28,6 +30,7 @@ export function BouncingLoader() {
           },
         },
       }}
+      {...others}
     >
       <Box sx={{ animationDelay: "0.0s !important" }} />
       <Box sx={{ animationDelay: "0.1s !important" }} />

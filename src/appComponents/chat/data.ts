@@ -1,4 +1,4 @@
-import { ChatProps, ProviderProps } from "./types";
+import { ChatMessagesProps, ProviderProps } from "@/components/chat/types";
 
 import openai from "@/images/ai/openai.png";
 import anthropic from "@/images/ai/anthropic.svg";
@@ -13,7 +13,6 @@ import nebius from "@/images/ai/nebius.svg";
 import sambanova from "@/images/ai/sambanova.svg";
 import vertex from "@/images/ai/vertex-ai.svg";
 import xai from "@/images/ai/xai.svg";
-// import deepgram from "@/images/ai/deepgram.jpeg";
 
 export const providers: ProviderProps[] = [
   {
@@ -120,17 +119,11 @@ export const providers: ProviderProps[] = [
     logo: xai,
     online: true,
   },
-  // {
-  //   name: "Deepgram",
-  //   id: "deepgram",
-  //   logo: deepgram,
-  //   online: true,
-  // },
 ] as const;
 
-export const providerMap = new Map(providers.map((p) => [p.id, p]));
+// export const providerMap = new Map(providers.map((p) => [p.id, p]));
 
-export const chats: ChatProps = providers.reduce((acc, u) => {
+export const chats: ChatMessagesProps = providers.reduce((acc, u) => {
   acc[u.id] = [];
   return acc;
-}, {} as ChatProps);
+}, {} as ChatMessagesProps);

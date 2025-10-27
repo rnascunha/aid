@@ -1,5 +1,4 @@
-import AvatarWithStatus from "./avatarWithStatus";
-import { ChatMessage, MessageProps, ProviderProps } from "../types";
+import { ChatMessage, MessageProps, ProviderProps } from "./types";
 import {
   Divider,
   ListItem,
@@ -11,14 +10,15 @@ import {
 import { Fragment } from "react/jsx-runtime";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+import AvatarWithStatus from "./avatarWithStatus";
 
 type ChatListItemProps = ListItemButtonProps & {
-  id: string;
+  provider: ProviderProps;
   unread?: boolean;
   sender: ProviderProps;
   messages: MessageProps[];
-  selectedProviderId?: ProviderProps["id"];
-  setSelectedProviderId: (chat: ProviderProps["id"]) => void;
+  selectedProvider: ProviderProps;
+  setSelectedProvider: (chat: ProviderProps) => void;
 };
 
 function getFormatedTimestamp(messages: MessageProps[]) {
@@ -33,13 +33,17 @@ function getDetailMessage(message: ChatMessage | undefined) {
   return message.response;
 }
 
-export default function ChatListItem(props: ChatListItemProps) {
-  const { id, sender, messages, selectedProviderId, setSelectedProviderId } =
-    props;
+export default function ChatListItem({
+  provider,
+  sender,
+  messages,
+  selectedProvider,
+  setSelectedProvider,
+}: ChatListItemProps) {
   const [formatTimestamp, setFormatTimestamp] = useState(
     getFormatedTimestamp(messages)
   );
-  const selected = selectedProviderId === id;
+  const selected = selectedProvider.id === provider.id;
 
   useEffect(() => {
     const handle = setInterval(
@@ -56,7 +60,7 @@ export default function ChatListItem(props: ChatListItemProps) {
       <ListItem sx={{ p: 0 }}>
         <ListItemButton
           onClick={() => {
-            setSelectedProviderId(id);
+            setSelectedProvider(provider);
           }}
           selected={selected}
           color="neutral"

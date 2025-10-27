@@ -1,15 +1,9 @@
-"use state";
-
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
-import { ChatMessage, MessageProps } from "../types";
+import { ChatMessage, MessageProps } from "./types";
 import { Avatar, Box, Container, Stack, Typography } from "@mui/material";
 import dayjs from "@/libs/dayjs";
 import { useEffect, useState } from "react";
 import { createHiperlinks } from "@/libs/links";
-
-type ChatBubbleProps = MessageProps & {
-  variant: "sent" | "received";
-};
 
 function getContentData(content: ChatMessage) {
   if ("success" in content)
@@ -41,8 +35,13 @@ function getContentData(content: ChatMessage) {
   );
 }
 
-export default function ChatBubble(props: ChatBubbleProps) {
-  const { content, variant, timestamp, attachment = undefined } = props;
+interface MessageBubbleProps {
+  variant: "sent" | "received";
+  message: MessageProps;
+}
+
+export function MessageBubble({ variant, message }: MessageBubbleProps) {
+  const { content, timestamp, attachment = undefined } = message;
   const isSent = variant === "sent";
   const [formatTimestamp, setFormatTimestamp] = useState(dayjs().to(timestamp));
 

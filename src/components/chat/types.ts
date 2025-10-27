@@ -14,12 +14,12 @@ interface ChatErrorMessage {
   detail: string;
 }
 
-interface ChatSuccessMessage {
+export interface ChatSuccessMessage {
   success: true;
   response: string;
 }
 
-export type ChatMessage = ChatErrorMessage | ChatSuccessMessage
+export type ChatMessage = ChatErrorMessage | ChatSuccessMessage;
 
 export interface MessageProps {
   id: string;
@@ -34,10 +34,10 @@ export interface MessageProps {
   };
 }
 
-// export interface ChatProps {
-//   id: string;
-//   sender: UserProps;
-//   messages: MessageProps[];
-// };
+export type ChatMessagesProps = Record<ProviderProps["id"], MessageProps[]>;
 
-export type ChatProps = Record<ProviderProps["id"], MessageProps[]>;
+export type MessageRoleType = "user" | "assistant";
+export interface MessageContext {
+  role: MessageRoleType;
+  content: string;
+}

@@ -1,21 +1,24 @@
 "use server";
 
-import { ChatMessage } from "@/appComponents/chat/types";
+import { ChatMessage } from "@/components/chat/types";
 import { asyncSpawn } from "@/libs/process";
+import { pythonPath } from "./contants";
+import { MessageContext } from "@/components/chat/types";
 
-const pythonPath = "./scripts/.venv/bin/python";
 const pythonChatScript = "./scripts/chat.py";
 
 export async function chatRequest(
   provider: string,
   model: string,
-  message: string
+  message: string,
+  context?: MessageContext[]
 ): Promise<ChatMessage> {
   const pythonChat = (await asyncSpawn(pythonPath, [
     pythonChatScript,
     provider,
     model,
     message,
+    ...(context?.map((c) => JSON.stringify(c)) ?? []),
   ])) as string;
 
   try {
