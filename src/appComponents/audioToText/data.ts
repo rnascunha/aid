@@ -108,3 +108,37 @@ export const chats: ChatMessagesProps = providers.reduce((acc, u) => {
   acc[u.id] = [];
   return acc;
 }, {} as ChatMessagesProps);
+
+export interface AudioToTextLanguage {
+  value: string;
+  label: string;
+  flagCode?: string;
+}
+
+export const audiToTextLanguageOptions: AudioToTextLanguage[] = [
+  { value: "en", label: "English", flagCode: "us" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
+  { value: "it", label: "Italian" },
+  { value: "pt", label: "Portuguese", flagCode: "br" },
+  { value: "ja", label: "Japan", flagCode: "jp" },
+  { value: "ko", label: "Korean", flagCode: "kr" },
+  { value: "zh", label: "Chinese", flagCode: "cn" },
+  { value: "ar", label: "Arabic", flagCode: "sa" },
+  { value: "hi", label: "Hindi", flagCode: "in" },
+  { value: "ru", label: "Russian" },
+  { value: "nl", label: "Nederlands" },
+  { value: "pl", label: "Polish" },
+  { value: "sv", label: "Swedish", flagCode: "se" },
+  { value: "da", label: "Danish", flagCode: "dk" },
+  { value: "no", label: "Norwegian" },
+  { value: "fi", label: "Finnish" },
+  { value: "tr", label: "Turkish" },
+  { value: "th", label: "Thai" },
+  { value: "vi", label: "Vietnamese", flagCode: "vn" },
+];
+
+export interface AudioToTextOptions {
+  language: (typeof audiToTextLanguageOptions)[number]["value"];
+}

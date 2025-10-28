@@ -1,11 +1,15 @@
 import { ReactNode } from "react";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container } from "@mui/material";
 
 type ChatsPaneProps = {
+  chatHeader: ReactNode;
   providersList: ReactNode;
 };
 
-export default function ChatsPane({ providersList }: ChatsPaneProps) {
+export default function ChatsPane({
+  chatHeader,
+  providersList,
+}: ChatsPaneProps) {
   return (
     <Box
       sx={{
@@ -24,17 +28,7 @@ export default function ChatsPane({ providersList }: ChatsPaneProps) {
           p: 0,
         }}
       >
-        <Typography
-          variant="h3"
-          component="h1"
-          sx={{
-            fontSize: "20px",
-            fontWeight: "lg",
-            mr: "auto",
-          }}
-        >
-          AIs
-        </Typography>
+        {chatHeader}
         {providersList}
       </Container>
     </Box>

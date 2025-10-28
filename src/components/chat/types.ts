@@ -21,18 +21,20 @@ export interface ChatSuccessMessage {
 
 export type ChatMessage = ChatErrorMessage | ChatSuccessMessage;
 
+export interface Attachment {
+  name: string;
+  size: number;
+  type: string;
+  data: string;
+}
+
 export interface MessageProps {
   id: string;
   content: ChatMessage;
   timestamp: number;
   unread?: boolean;
   sender: ProviderProps | "You";
-  attachment?: {
-    fileName: string;
-    type: string;
-    size: number;
-    file: string;
-  };
+  attachment?: Attachment;
 }
 
 export type ChatMessagesProps = Record<ProviderProps["id"], MessageProps[]>;

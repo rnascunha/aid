@@ -24,36 +24,32 @@ export type AudioToTextMessage =
   | AudioToTextMessageError;
 
 export async function audioToText(
-  state: AudioToTextMessage | null,
-  formData: FormData
-) {
-  const file = formData.get("audio") as File | null;
-  return await audioToTextBase(file, "deepgram", "nova-2");
-}
-
-export async function audioToText2(
-  file: File | null,
   provider: string,
-  model: string
+  model: string,
+  file: Blob | null,
+  language: string
 ) {
-  return await audioToTextBase(file, provider, model);
+  return await audioToTextBase(provider, model, file, language);
 }
 
 async function audioToTextBase(
-  file: File | null,
   provider: string,
-  model: string
+  model: string,
+  data: Blob | null,
+  language: string
 ): Promise<AudioToTextMessage> {
-  if (!file) {
+  if (!data) {
     return {
       error: "No file sent",
       detail: "No valid file was sent to be transcripted",
     };
   }
 
+  const name = crypto.randomUUID();
+
   try {
     await mkdir(tempPath, { recursive: true });
-    await saveFile(file, tempPath);
+    await saveFile(data, tempPath, name);
   } catch (e) {
     return {
       error: "Error creating file",
@@ -61,12 +57,13 @@ async function audioToTextBase(
     };
   }
 
-  const filePath = path.join(tempPath, file.name);
+  const filePath = path.join(tempPath, name);
   const pythonText = (await asyncSpawn(pythonPath, [
     pythonChatScript,
     provider,
     model,
     filePath,
+    language,
   ])) as string;
 
   try {

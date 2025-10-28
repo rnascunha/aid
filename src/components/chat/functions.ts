@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import {
+  Attachment,
   ChatMessagesProps,
   ChatSuccessMessage,
   MessageContext,
@@ -80,12 +81,12 @@ export function messageSubmit(
 }
 
 export async function attachmentSubmit(
-  attachment: File,
+  attachment: Attachment,
   newId: number,
   provider: ProviderProps,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  message?: string
 ) {
-  // const data = ;
   const newIdString = newId.toString();
   setChats((prev) => ({
     ...prev,
@@ -94,14 +95,12 @@ export async function attachmentSubmit(
       {
         id: newIdString,
         sender: "You",
-        content: { response: attachment.name, success: true },
-        timestamp: Date.now(),
-        attachment: {
-          fileName: attachment.name,
-          size: attachment.size,
-          type: attachment.type,
-          file: URL.createObjectURL(attachment),
+        content: {
+          response: message ?? `File: ${attachment.name}`,
+          success: true,
         },
+        timestamp: Date.now(),
+        attachment,
       },
     ],
   }));

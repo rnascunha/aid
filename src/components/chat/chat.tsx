@@ -11,6 +11,7 @@ import MessagesHeader from "./messagesHeader";
 import { contextMessages, messageResponse, messageSubmit } from "./functions";
 import { BouncingLoader } from "../bouncingLoader";
 import { MessageList } from "./messageList";
+import { ChatHeader } from "./chatHeader";
 
 export interface ChatProps {
   providers: ProviderProps[];
@@ -26,6 +27,7 @@ export function Chat({ providers, chats: allChats }: ChatProps) {
     <ChatContainer
       chatsPane={
         <ChatsPane
+          chatHeader={<ChatHeader />}
           providersList={
             <ChatList
               providers={providers}

@@ -117,13 +117,13 @@ function AttachmentMessage({
             <InsertDriveFileRoundedIcon />
           </Avatar>
           <div>
-            <Typography>{file.fileName}</Typography>
+            <Typography>{file.name}</Typography>
             <Typography>{formatBytes(file.size)}</Typography>
           </div>
         </Stack>
         {file.type.startsWith("audio/") && (
           <audio controls>
-            <source src={file.file} type={file.type} title={file.fileName} />
+            <source src={file.data} type={file.type} title={file.name} />
           </audio>
         )}
       </Stack>

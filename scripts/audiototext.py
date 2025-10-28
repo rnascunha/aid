@@ -7,7 +7,7 @@ load_dotenv("./scripts/.env")
 
 provider_list = set(["openai", "google", "deepgram", "huggingface"])
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     error_out = {
         "error": "Wrong number of arguments",
         "detail": "Arguments must be: <provider> <model> <message>",
@@ -19,6 +19,7 @@ if len(sys.argv) != 4:
 provider = sys.argv[1]
 model = sys.argv[2]
 file = sys.argv[3]
+language = sys.argv[4]
 
 if provider not in provider_list:
     error_out = {
@@ -36,8 +37,7 @@ def runAudioToText(provider, model, file):
     client = ai.Client()
 
     result = client.audio.transcriptions.create(
-        model=f"{provider}:{model}",
-        file=file,
+        model=f"{provider}:{model}", file=file, language=language
     )
 
     return result.text

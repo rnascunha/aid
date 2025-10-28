@@ -11,8 +11,9 @@ import { ChatMessagesProps, ProviderProps } from "@/components/chat/types";
 import { useState, useTransition } from "react";
 import { AudioInput } from "./components/audioInput";
 import { attachmentSubmit } from "@/components/chat/functions";
-import { audioToText2 } from "@/actions/ai/audiototext";
-// import { audioToText2 } from "@/actions/ai/audiototext";
+import { audioToText } from "@/actions/ai/audiototext";
+import { AudioToTextOptions } from "./data";
+import { ChatHeader } from "./components/chatHeader";
 
 interface AudioToTextPros {
   providers: ProviderProps[];
@@ -22,11 +23,14 @@ interface AudioToTextPros {
 export function AudioToText({ providers, chats: allChats }: AudioToTextPros) {
   const [selectedProvider, setSelectedProvider] = useState(providers[0]);
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
+  const [opts, setOpts] = useState<AudioToTextOptions>({ language: "en" });
   const [isPending, startTransition] = useTransition();
+
   return (
     <ChatContainer
       chatsPane={
         <ChatsPane
+          chatHeader={<ChatHeader opts={opts} setOpts={setOpts} />}
           providersList={
             <ChatList
               providers={providers}
@@ -49,10 +53,13 @@ export function AudioToText({ providers, chats: allChats }: AudioToTextPros) {
                 const newId = chats[selectedProvider.id].length + 1;
                 attachmentSubmit(file, newId, selectedProvider, setChats);
                 startTransition(async () => {
-                  const response = await audioToText2(
-                    file,
+                  const res = await fetch(file.data);
+                  const blob = await res.blob();
+                  const response = await audioToText(
                     selectedProvider.provider,
-                    selectedProvider.model
+                    selectedProvider.model,
+                    blob,
+                    opts.language
                   );
                   const newIdString2 = `${newId}:r`;
                   setChats((prev) => ({
