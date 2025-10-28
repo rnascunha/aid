@@ -2,7 +2,7 @@
 
 import { ChatMessage } from "@/components/chat/types";
 import { asyncSpawn } from "@/libs/process";
-import { pythonPath } from "./contants";
+import { pythonPath } from "./constants";
 import { MessageContext } from "@/components/chat/types";
 
 const pythonChatScript = "./scripts/chat.py";

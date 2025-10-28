@@ -25,14 +25,24 @@ export default function MessagesHeader({ provider }: MessagesPaneHeaderProps) {
         sx={{ alignItems: "center" }}
       >
         <StaticAvatar src={provider.logo} alt={provider.name} />
-        <Typography
-          component="h2"
-          noWrap
-          fontSize="medium"
-          sx={{ fontWeight: "bold" }}
-        >
-          {provider.name}
-        </Typography>
+        <Stack>
+          <Typography
+            component="h2"
+            noWrap
+            fontSize="medium"
+            sx={{ fontWeight: "bold" }}
+          >
+            {provider.name}
+          </Typography>
+          <Typography
+            component="h3"
+            noWrap
+            fontSize="small"
+            color="textSecondary  "
+          >
+            {provider.model}
+          </Typography>
+        </Stack>
       </Stack>
     </Stack>
   );

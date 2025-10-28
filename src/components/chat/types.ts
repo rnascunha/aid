@@ -30,7 +30,8 @@ export interface MessageProps {
   attachment?: {
     fileName: string;
     type: string;
-    size: string;
+    size: number;
+    file: string;
   };
 }
 

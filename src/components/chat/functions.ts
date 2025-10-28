@@ -79,6 +79,34 @@ export function messageSubmit(
   }));
 }
 
+export async function attachmentSubmit(
+  attachment: File,
+  newId: number,
+  provider: ProviderProps,
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
+) {
+  // const data = ;
+  const newIdString = newId.toString();
+  setChats((prev) => ({
+    ...prev,
+    [provider.id]: [
+      ...prev[provider.id],
+      {
+        id: newIdString,
+        sender: "You",
+        content: { response: attachment.name, success: true },
+        timestamp: Date.now(),
+        attachment: {
+          fileName: attachment.name,
+          size: attachment.size,
+          type: attachment.type,
+          file: URL.createObjectURL(attachment),
+        },
+      },
+    ],
+  }));
+}
+
 export async function messageResponse(
   message: string,
   newId: number,

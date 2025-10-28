@@ -1,4 +1,4 @@
-import { ProviderProps } from "@/components/chat/types";
+import { ChatMessagesProps, ProviderProps } from "@/components/chat/types";
 
 import openai from "@/images/ai/openai.png";
 import vertex from "@/images/ai/vertex-ai.svg";
@@ -104,4 +104,7 @@ export const providers: ProviderProps[] = [
   },
 ] as const;
 
-export const providerMap = new Map(providers.map((p) => [p.id, p]));
+export const chats: ChatMessagesProps = providers.reduce((acc, u) => {
+  acc[u.id] = [];
+  return acc;
+}, {} as ChatMessagesProps);

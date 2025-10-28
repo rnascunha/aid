@@ -4,7 +4,7 @@ import { saveFile } from "@/libs/file";
 import { asyncSpawn } from "@/libs/process";
 import { mkdir, unlink } from "fs/promises";
 import path from "path";
-import { pythonPath } from "./contants";
+import { pythonPath } from "./constants";
 
 const pythonChatScript = "./scripts/audiototext.py";
 const tempPath = "./tmp";
@@ -28,10 +28,22 @@ export async function audioToText(
   formData: FormData
 ) {
   const file = formData.get("audio") as File | null;
-  return await audioToTextBase(file);
+  return await audioToTextBase(file, "deepgram", "nova-2");
 }
 
-async function audioToTextBase(file: File | null): Promise<AudioToTextMessage> {
+export async function audioToText2(
+  file: File | null,
+  provider: string,
+  model: string
+) {
+  return await audioToTextBase(file, provider, model);
+}
+
+async function audioToTextBase(
+  file: File | null,
+  provider: string,
+  model: string
+): Promise<AudioToTextMessage> {
   if (!file) {
     return {
       error: "No file sent",
@@ -52,8 +64,8 @@ async function audioToTextBase(file: File | null): Promise<AudioToTextMessage> {
   const filePath = path.join(tempPath, file.name);
   const pythonText = (await asyncSpawn(pythonPath, [
     pythonChatScript,
-    "deepgram",
-    "nova-2",
+    provider,
+    model,
     filePath,
   ])) as string;
 
