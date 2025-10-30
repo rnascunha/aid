@@ -18,7 +18,7 @@ export function AudioInput({ onSubmit, isPending }: AudioInputProps) {
       alignItems="center"
       sx={{
         minHeight: "100px",
-        mx: 4,
+        mx: { sm: 4, xs: 0 },
         my: 2,
         border: "1px solid",
         borderRadius: "5px",

@@ -21,6 +21,12 @@ export default function MessagesPane({
         display: "flex",
         flexDirection: "column",
         gap: 1,
+        overflow: "hidden",
+        transform: {
+          xs: "translateX(calc(200% * (var(--MessagesPane-slideIn, 0))))",
+          sm: "none",
+        },
+        transition: "transform 0.4s, width 0.4s",
       }}
     >
       {header}

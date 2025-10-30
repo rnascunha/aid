@@ -1,17 +1,34 @@
-import { Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 
-export function ChatHeader() {
+import { ReactNode } from "react";
+
+export function ChatHeader({
+  chatOptions = undefined,
+}: {
+  chatOptions?: ReactNode;
+}) {
   return (
-    <Typography
-      variant="h3"
-      component="h1"
+    <Stack
       sx={{
-        fontSize: "20px",
-        fontWeight: "lg",
-        mr: "auto",
+        pt: 0.5,
+        pr: 1,
       }}
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
     >
-      AIs
-    </Typography>
+      <Typography
+        variant="h3"
+        component="h1"
+        sx={{
+          fontSize: "20px",
+          fontWeight: "bold",
+          mr: "auto",
+        }}
+      >
+        AIs
+      </Typography>
+      {chatOptions}
+    </Stack>
   );
 }

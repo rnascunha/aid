@@ -1,7 +1,8 @@
 "use client";
 
 import { Container } from "@mui/material";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { openMessagesPane } from "./utils";
 
 interface ChatContainer {
   chatsPane: ReactNode;
@@ -9,11 +10,16 @@ interface ChatContainer {
 }
 
 export function ChatContainer({ chatsPane, MessagePane }: ChatContainer) {
+  useEffect(() => {
+    openMessagesPane();
+  }, []);
+
   return (
     <Container
       maxWidth="xl"
       disableGutters
       sx={{
+        position: "relative",
         flex: 1,
         width: "100%",
         mx: "auto",
@@ -29,7 +35,8 @@ export function ChatContainer({ chatsPane, MessagePane }: ChatContainer) {
       <Container
         disableGutters
         sx={{
-          position: { xs: "fixed", sm: "sticky" },
+          position: { xs: "absolute", sm: "sticky" },
+          backgroundColor: "inherit",
           transform: {
             xs: "translateX(calc(100% * (var(--MessagesPane-slideIn, 0) - 1)))",
             sm: "none",
@@ -37,10 +44,13 @@ export function ChatContainer({ chatsPane, MessagePane }: ChatContainer) {
           transition: "transform 0.4s, width 0.4s",
           zIndex: 100,
           width: "100%",
+          height: "100%",
           pl: 3,
           pr: 0,
           borderRight: "1px solid",
           borderColor: "divider",
+          top: 0,
+          left: 0,
         }}
       >
         {chatsPane}

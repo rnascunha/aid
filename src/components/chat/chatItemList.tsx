@@ -11,6 +11,7 @@ import { Fragment } from "react/jsx-runtime";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import AvatarWithStatus from "./avatarWithStatus";
+import { toggleMessagesPane } from "./utils";
 
 type ChatListItemProps = ListItemButtonProps & {
   provider: ProviderProps;
@@ -61,6 +62,7 @@ export default function ChatListItem({
         <ListItemButton
           onClick={() => {
             setSelectedProvider(provider);
+            toggleMessagesPane();
           }}
           selected={selected}
           color="neutral"

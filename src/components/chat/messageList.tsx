@@ -2,35 +2,45 @@ import { Box, Stack } from "@mui/material";
 import AvatarWithStatus from "./avatarWithStatus";
 import { MessageProps } from "./types";
 import { MessageBubble } from "./messageBubble";
+import { useEffect, useRef } from "react";
 
 interface MessageListProps {
   messages: MessageProps[];
 }
 
 export function MessageList({ messages }: MessageListProps) {
+  const el = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const elem = el.current;
+    if (!elem) return;
+    setTimeout(() => {
+      elem.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 300);
+  }, [messages]);
+
   return (
     <Box
       sx={{
-        display: "flex",
         flex: 1,
         minHeight: 0,
         px: 2,
         py: 3,
         overflowY: "auto",
-        flexDirection: "column-reverse",
         position: "relative",
       }}
     >
       <Stack
         spacing={2}
+        ref={el}
         sx={{
           justifyContent: "flex-end",
           position: "absolute",
           top: 0,
           left: 0,
-          height: "100%",
           width: "100%",
           p: 0.5,
+          overflowX: "hidden",
         }}
       >
         {messages.map((message: MessageProps, index: number) => {

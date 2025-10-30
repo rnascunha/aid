@@ -13,6 +13,7 @@ import nebius from "@/images/ai/nebius.svg";
 import sambanova from "@/images/ai/sambanova.svg";
 import vertex from "@/images/ai/vertex-ai.svg";
 import xai from "@/images/ai/xai.svg";
+import { ChatSettings, Tool } from "./types";
 
 export const providers: ProviderProps[] = [
   {
@@ -127,3 +128,24 @@ export const chats: ChatMessagesProps = providers.reduce((acc, u) => {
   acc[u.id] = [];
   return acc;
 }, {} as ChatMessagesProps);
+
+export const toolsList: Tool[] = [
+  { id: "get_current_datetime", label: "Current date/time" },
+];
+export const toolsMap = toolsList.reduce((acc, t) => {
+  acc[t.id] = t;
+  return acc;
+}, {} as Record<string, Tool>);
+
+export const settings: ChatSettings = {
+  general: { temperature: 0.75 },
+  context: {
+    systemPrompt: "You are a helpful assistant.",
+    maxContextMessages: 10,
+    maxElapsedTimeMessages: 15 * 60 * 1000,
+  },
+  tools: {
+    maxTurns: 2,
+    tools: ["get_current_datetime"],
+  },
+};

@@ -47,7 +47,7 @@ export default async function LoginPage({
         }}
       />
       <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
-        Aid
+        AId
       </Typography>
       <Typography>
         <i>Login com</i>

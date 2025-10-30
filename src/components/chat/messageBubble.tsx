@@ -13,6 +13,7 @@ function getContentData(content: ChatMessage) {
         fontSize="14px"
         sx={{
           whiteSpace: "pre-line",
+          wordBreak: "break-word",
         }}
       >
         {createHiperlinks(content.response)}
@@ -28,6 +29,7 @@ function getContentData(content: ChatMessage) {
         fontSize="14px"
         sx={{
           whiteSpace: "pre-line",
+          wordBreak: "break-word",
         }}
       >
         {createHiperlinks(content.detail)}
@@ -145,7 +147,7 @@ export function MessageBubble({ variant, message }: MessageBubbleProps) {
   }, [timestamp]);
 
   return (
-    <Box sx={{ maxWidth: "60%", minWidth: "auto" }}>
+    <Box sx={{ maxWidth: { sm: "60%", xs: "80%" }, minWidth: "auto" }}>
       <Stack
         direction="row"
         spacing={2}

@@ -12,6 +12,8 @@ import { contextMessages, messageResponse, messageSubmit } from "./functions";
 import { BouncingLoader } from "../bouncingLoader";
 import { MessageList } from "./messageList";
 import { ChatHeader } from "./chatHeader";
+import { settings as initSettings } from "@/appComponents/chat/data";
+import { SettingsDialog } from "@/appComponents/chat/components/settingsDialog";
 
 export interface ChatProps {
   providers: ProviderProps[];
@@ -22,12 +24,19 @@ export function Chat({ providers, chats: allChats }: ChatProps) {
   const [selectedProvider, setSelectedProvider] = useState(providers[0]);
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [isPending, startTransition] = useTransition();
+  const [settings, setSettings] = useState(initSettings);
 
   return (
     <ChatContainer
       chatsPane={
         <ChatsPane
-          chatHeader={<ChatHeader />}
+          chatHeader={
+            <ChatHeader
+              chatOptions={
+                <SettingsDialog settings={settings} setSettings={setSettings} />
+              }
+            />
+          }
           providersList={
             <ChatList
               providers={providers}
@@ -55,10 +64,12 @@ export function Chat({ providers, chats: allChats }: ChatProps) {
                       newId,
                       selectedProvider,
                       setChats,
-                      contextMessages(chats[selectedProvider.id], {
-                        max: 10,
-                        elapsedTimeMs: 15 * 60 * 1000,
-                      })
+                      settings,
+                      chats[selectedProvider.id]
+                      // contextMessages(chats[selectedProvider.id], {
+                      //   max: 10,
+                      //   elapsedTimeMs: 15 * 60 * 1000,
+                      // })
                     )
                 );
               }}

@@ -4,21 +4,24 @@ import { ChatMessage } from "@/components/chat/types";
 import { asyncSpawn } from "@/libs/process";
 import { pythonPath } from "./constants";
 import { MessageContext } from "@/components/chat/types";
+import { GeneralSettings, ToolsSettings } from "@/appComponents/chat/types";
 
 const pythonChatScript = "./scripts/chat.py";
+
+type ChatSettingsPython = GeneralSettings & ToolsSettings;
 
 export async function chatRequest(
   provider: string,
   model: string,
-  message: string,
-  context?: MessageContext[]
+  messages: MessageContext[],
+  settings: ChatSettingsPython
 ): Promise<ChatMessage> {
   const pythonChat = (await asyncSpawn(pythonPath, [
     pythonChatScript,
     provider,
     model,
-    message,
-    ...(context?.map((c) => JSON.stringify(c)) ?? []),
+    JSON.stringify(messages),
+    JSON.stringify(settings),
   ])) as string;
 
   try {

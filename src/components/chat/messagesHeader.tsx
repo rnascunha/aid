@@ -1,6 +1,9 @@
 import { ProviderProps } from "./types";
-import { Stack, Typography } from "@mui/material";
+import { IconButton, Stack, Typography } from "@mui/material";
 import { StaticAvatar } from "./avatarWithStatus";
+
+import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
+import { toggleMessagesPane } from "./utils";
 
 type MessagesPaneHeaderProps = {
   provider: ProviderProps;
@@ -11,14 +14,20 @@ export default function MessagesHeader({ provider }: MessagesPaneHeaderProps) {
     <Stack
       direction="row"
       sx={{
-        justifyContent: "space-between",
         py: { xs: 2, md: 2 },
         px: { xs: 1, md: 2 },
         borderBottom: "1px solid",
         borderColor: "divider",
-        backgroundColor: "background.body",
+        overflow: "hidden"
       }}
     >
+      <IconButton
+        color="default"
+        sx={{ pr: 2, display: { xs: "inline-flex", sm: "none" } }}
+        onClick={() => toggleMessagesPane()}
+      >
+        <ArrowBackIosNewRoundedIcon />
+      </IconButton>
       <Stack
         direction="row"
         spacing={{ xs: 1, md: 2 }}
@@ -38,7 +47,15 @@ export default function MessagesHeader({ provider }: MessagesPaneHeaderProps) {
             component="h3"
             noWrap
             fontSize="small"
-            color="textSecondary  "
+            color="textSecondary"
+            sx={{
+              // maxWidth: "100%",
+              display: "-webkit-box",
+              WebkitLineClamp: "1",
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
           >
             {provider.model}
           </Typography>

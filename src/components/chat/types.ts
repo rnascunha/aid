@@ -39,7 +39,7 @@ export interface MessageProps {
 
 export type ChatMessagesProps = Record<ProviderProps["id"], MessageProps[]>;
 
-export type MessageRoleType = "user" | "assistant";
+export type MessageRoleType = "user" | "assistant" | "system";
 export interface MessageContext {
   role: MessageRoleType;
   content: string;

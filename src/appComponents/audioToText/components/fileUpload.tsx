@@ -4,7 +4,6 @@ import { Button, Stack, Tooltip, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import { useRef } from "react";
-import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import { Attachment } from "@/components/chat/types";
 
 const VisuallyHiddenInput = styled("input")({
@@ -32,7 +31,12 @@ export function AudioFileUploadButton({
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   return (
-    <Stack direction="row" alignSelf="center" alignItems="center">
+    <Stack
+      direction="row"
+      alignSelf="center"
+      alignItems="center"
+      flexWrap="wrap"
+    >
       <Button
         component="label"
         variant="contained"
@@ -55,12 +59,14 @@ export function AudioFileUploadButton({
               setFile(null);
               return;
             }
-            setFile({
+            const newFile = {
               name: file.name,
               type: file.type,
               size: file.size,
               data: URL.createObjectURL(file),
-            });
+            };
+            setFile(newFile);
+            onSubmit(newFile);
           }}
         />
       </Button>
@@ -81,14 +87,6 @@ export function AudioFileUploadButton({
           </Button>
         </span>
       </Tooltip>
-      <Button
-        variant="outlined"
-        disabled={file === null || isPending}
-        onClick={() => onSubmit(file)}
-        endIcon={<SendRoundedIcon />}
-      >
-        Send
-      </Button>
     </Stack>
   );
 }
