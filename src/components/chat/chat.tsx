@@ -8,7 +8,7 @@ import { ChatMessagesProps, ProviderProps } from "./types";
 import MessagesPane from "./messagePane";
 import MessageInput from "./messageInput";
 import MessagesHeader from "./messagesHeader";
-import { contextMessages, messageResponse, messageSubmit } from "./functions";
+import { messageResponse, messageSubmit } from "./functions";
 import { BouncingLoader } from "../bouncingLoader";
 import { MessageList } from "./messageList";
 import { ChatHeader } from "./chatHeader";
@@ -66,10 +66,6 @@ export function Chat({ providers, chats: allChats }: ChatProps) {
                       setChats,
                       settings,
                       chats[selectedProvider.id]
-                      // contextMessages(chats[selectedProvider.id], {
-                      //   max: 10,
-                      //   elapsedTimeMs: 15 * 60 * 1000,
-                      // })
                     )
                 );
               }}

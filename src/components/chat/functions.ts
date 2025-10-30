@@ -5,7 +5,6 @@ import {
   ChatSuccessMessage,
   MessageContext,
   MessageProps,
-  MessageRoleType,
   ProviderProps,
 } from "./types";
 import { chatRequest } from "@/actions/ai/chat";
