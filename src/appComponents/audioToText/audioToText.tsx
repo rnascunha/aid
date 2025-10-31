@@ -12,7 +12,7 @@ import { useState, useTransition } from "react";
 import { AudioInput } from "./components/audioInput";
 import { attachmentSubmit } from "@/components/chat/functions";
 import { audioToText } from "@/actions/ai/audiototext";
-import { AudioToTextOptions } from "./data";
+import { AudioToTextOptions, initAudioOptions } from "./data";
 import { ChatHeader } from "./components/chatHeader";
 
 interface AudioToTextPros {
@@ -23,7 +23,7 @@ interface AudioToTextPros {
 export function AudioToText({ providers, chats: allChats }: AudioToTextPros) {
   const [selectedProvider, setSelectedProvider] = useState(providers[0]);
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
-  const [opts, setOpts] = useState<AudioToTextOptions>({ language: "en" });
+  const [opts, setOpts] = useState<AudioToTextOptions>(initAudioOptions);
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -48,6 +48,8 @@ export function AudioToText({ providers, chats: allChats }: AudioToTextPros) {
           messages={<MessageList messages={chats[selectedProvider.id]} />}
           input={
             <AudioInput
+              opts={opts}
+              setOpts={setOpts}
               onSubmit={(file) => {
                 if (!file) return;
                 const newId = chats[selectedProvider.id].length + 1;
@@ -59,7 +61,7 @@ export function AudioToText({ providers, chats: allChats }: AudioToTextPros) {
                     selectedProvider.provider,
                     selectedProvider.model,
                     blob,
-                    opts.language
+                    opts
                   );
                   const newIdString2 = `${newId}:r`;
                   setChats((prev) => ({

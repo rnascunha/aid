@@ -141,4 +141,8 @@ export const audiToTextLanguageOptions: AudioToTextLanguage[] = [
 
 export interface AudioToTextOptions {
   language: (typeof audiToTextLanguageOptions)[number]["value"];
+  temperature: number;
+  prompt: string;
 }
+
+export const initAudioOptions = { language: "en", temperature: 0.75, prompt: "" }

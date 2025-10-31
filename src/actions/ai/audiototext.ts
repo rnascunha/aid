@@ -5,6 +5,7 @@ import { asyncSpawn } from "@/libs/process";
 import { mkdir, unlink } from "fs/promises";
 import path from "path";
 import { pythonPath } from "./constants";
+import { AudioToTextOptions } from "@/appComponents/audioToText/data";
 
 const pythonChatScript = "./scripts/audiototext.py";
 const tempPath = "./tmp";
@@ -27,16 +28,16 @@ export async function audioToText(
   provider: string,
   model: string,
   file: Blob | null,
-  language: string
+  options: AudioToTextOptions
 ) {
-  return await audioToTextBase(provider, model, file, language);
+  return await audioToTextBase(provider, model, file, options);
 }
 
 async function audioToTextBase(
   provider: string,
   model: string,
   data: Blob | null,
-  language: string
+  options: AudioToTextOptions
 ): Promise<AudioToTextMessage> {
   if (!data) {
     return {
@@ -63,7 +64,7 @@ async function audioToTextBase(
     provider,
     model,
     filePath,
-    language,
+    JSON.stringify(options),
   ])) as string;
 
   try {

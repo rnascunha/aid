@@ -1,21 +1,39 @@
-import { Stack } from "@mui/material";
-import { useState } from "react";
+import { Stack, TextField } from "@mui/material";
 
 import { AudioFileUploadButton } from "./fileUpload";
 import { MicInput } from "./micInput";
 import { Attachment } from "@/components/chat/types";
+import { AudioToTextOptions } from "../data";
+import { Dispatch, SetStateAction, useMemo } from "react";
+import { debounce } from "@/libs/debounce";
 
 interface AudioInputProps {
+  opts: AudioToTextOptions;
+  setOpts: Dispatch<SetStateAction<AudioToTextOptions>>;
   onSubmit: (file: Attachment | null) => void;
   isPending: boolean;
 }
 
-export function AudioInput({ onSubmit, isPending }: AudioInputProps) {
-  const [file, setFile] = useState<Attachment | null>(null);
+export function AudioInput({
+  onSubmit,
+  isPending,
+  opts,
+  setOpts,
+}: AudioInputProps) {
+  const updatePrompt = useMemo(
+    () =>
+      debounce(
+        (value: string) => setOpts((prev) => ({ ...prev, prompt: value })),
+        500
+      ),
+    [setOpts]
+  );
+
   return (
     <Stack
       justifyContent="center"
       alignItems="center"
+      direction="row"
       sx={{
         minHeight: "100px",
         mx: { sm: 4, xs: 0 },
@@ -25,6 +43,14 @@ export function AudioInput({ onSubmit, isPending }: AudioInputProps) {
         borderColor: "background.paper",
       }}
     >
+      <TextField
+        label=""
+        sx={{ pl: 1 }}
+        variant="standard"
+        fullWidth
+        defaultValue={opts.prompt}
+        onChange={(ev) => updatePrompt(ev.target.value)}
+      />
       <Stack direction="row" gap={1}>
         <MicInput
           isPending={isPending}
@@ -37,12 +63,7 @@ export function AudioInput({ onSubmit, isPending }: AudioInputProps) {
             })
           }
         />
-        <AudioFileUploadButton
-          file={file}
-          setFile={setFile}
-          isPending={isPending}
-          onSubmit={onSubmit}
-        />
+        <AudioFileUploadButton isPending={isPending} onSubmit={onSubmit} />
       </Stack>
     </Stack>
   );

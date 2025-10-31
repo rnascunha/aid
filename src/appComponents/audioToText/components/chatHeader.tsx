@@ -1,8 +1,9 @@
-import { Tooltip } from "@mui/material";
+import { Stack, Tooltip } from "@mui/material";
 import { SelectLanguage } from "./selectLanguage";
 import { AudioToTextOptions } from "../data";
 import { Dispatch, SetStateAction } from "react";
 import { ChatHeader as ChatHeaderOrigin } from "@/components/chat/chatHeader";
+import { OptionsDialog } from "./optionsDialog";
 
 export function ChatHeader({
   opts,
@@ -14,14 +15,19 @@ export function ChatHeader({
   return (
     <ChatHeaderOrigin
       chatOptions={
-        <Tooltip title="Source language" placement="left">
-          <span>
-            <SelectLanguage
-              language={opts.language}
-              setLanguage={(l) => setOpts((prev) => ({ ...prev, language: l }))}
-            />
-          </span>
-        </Tooltip>
+        <Stack direction="row" alignItems="center">
+          <OptionsDialog opts={opts} setOpts={setOpts} />
+          <Tooltip title="Source language">
+            <span>
+              <SelectLanguage
+                language={opts.language}
+                setLanguage={(l) =>
+                  setOpts((prev) => ({ ...prev, language: l }))
+                }
+              />
+            </span>
+          </Tooltip>
+        </Stack>
       }
     />
   );

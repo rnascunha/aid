@@ -3,7 +3,16 @@ import json
 from dotenv import load_dotenv
 import aisuite as ai
 
+from pydantic import BaseModel
+
 load_dotenv("./scripts/.env")
+
+
+class SettingsValidate(BaseModel):
+    temperature: float
+    language: str
+    prompt: str
+
 
 provider_list = set(["openai", "google", "deepgram", "huggingface"])
 
@@ -19,7 +28,20 @@ if len(sys.argv) != 5:
 provider = sys.argv[1]
 model = sys.argv[2]
 file = sys.argv[3]
-language = sys.argv[4]
+settings = sys.argv[4]
+
+try:
+    settingsParsed = json.loads(settings)
+    SettingsValidate(**settingsParsed)
+except Exception as e:
+    error_out = {
+        "error": "Error parsing settings",
+        "detail": str(e),
+    }
+    json_out = json.dumps(error_out)
+    print(json_out, end=None)
+    sys.exit(3)
+
 
 if provider not in provider_list:
     error_out = {
@@ -31,20 +53,24 @@ if provider not in provider_list:
     sys.exit(2)
 
 
-def runAudioToText(provider, model, file):
+def runAudioToText(provider, model, file, settings):
     """Convert audio file to text"""
 
     client = ai.Client()
 
     result = client.audio.transcriptions.create(
-        model=f"{provider}:{model}", file=file, language=language
+        model=f"{provider}:{model}",
+        file=file,
+        language=settings["language"],
+        prompt=settings["prompt"],
+        temperature=settings["temperature"],
     )
 
     return result.text
 
 
 try:
-    response = runAudioToText(provider, model, file)
+    response = runAudioToText(provider, model, file, settingsParsed)
     out = {"success": True, "response": response}
     json_out = json.dumps(out)
     print(json_out, end=None)

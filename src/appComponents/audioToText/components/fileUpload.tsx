@@ -1,10 +1,9 @@
 import styled from "@emotion/styled";
-import { Button, Stack, Tooltip, Typography } from "@mui/material";
+import { IconButton, Stack, Tooltip } from "@mui/material";
 
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import CloseIcon from "@mui/icons-material/Close";
 import { useRef } from "react";
 import { Attachment } from "@/components/chat/types";
+import AudioFileIcon from "@mui/icons-material/AudioFile";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -19,13 +18,9 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export function AudioFileUploadButton({
-  file,
-  setFile,
   isPending,
   onSubmit,
 }: {
-  file: Attachment | null;
-  setFile: (file: Attachment | null) => void;
   isPending: boolean;
   onSubmit: (file: Attachment | null) => void;
 }) {
@@ -37,54 +32,37 @@ export function AudioFileUploadButton({
       alignItems="center"
       flexWrap="wrap"
     >
-      <Button
-        component="label"
-        variant="contained"
-        startIcon={<CloudUploadIcon />}
-        disabled={isPending}
-        sx={{
-          textTransform: "none",
-        }}
-      >
-        <Typography noWrap>{file ? file.name : "AUDIO FILE"}</Typography>
-        <VisuallyHiddenInput
-          ref={inputRef}
-          type="file"
-          accept="audio/*"
-          name="audio"
-          disabled={isPending}
-          onChange={(ev) => {
-            const file = ev.target.files?.[0];
-            if (!file) {
-              setFile(null);
-              return;
-            }
-            const newFile = {
-              name: file.name,
-              type: file.type,
-              size: file.size,
-              data: URL.createObjectURL(file),
-            };
-            setFile(newFile);
-            onSubmit(newFile);
-          }}
-        />
-      </Button>
-      <Tooltip title="Remove file">
+      <Tooltip title="Upload file">
         <span>
-          <Button
-            variant="text"
-            sx={{
-              minWidth: "32px",
-            }}
-            onClick={() => {
-              setFile(null);
-              inputRef.current!.value = "";
-            }}
-            disabled={file === null || isPending}
+          <IconButton
+            component="label"
+            color="primary"
+            size="large"
+            disabled={isPending}
           >
-            <CloseIcon />
-          </Button>
+            <AudioFileIcon fontSize="large" />
+            <VisuallyHiddenInput
+              ref={inputRef}
+              type="file"
+              accept="audio/*"
+              name="audio"
+              disabled={isPending}
+              onChange={(ev) => {
+                const file = ev.target.files?.[0];
+                if (!file) {
+                  return;
+                }
+                const newFile = {
+                  name: file.name,
+                  type: file.type,
+                  size: file.size,
+                  data: URL.createObjectURL(file),
+                };
+                onSubmit(newFile);
+                inputRef.current!.value = "";
+              }}
+            />
+          </IconButton>
         </span>
       </Tooltip>
     </Stack>
