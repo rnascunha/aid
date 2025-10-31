@@ -4,7 +4,7 @@ import { ChatContainer } from "./chatContainer";
 import ChatsPane from "./chatsPane";
 import { ChatList } from "./chatList";
 import { useState, useTransition } from "react";
-import { ChatMessagesProps, ProviderProps } from "./types";
+import { ChatMessagesProps, ModelProps } from "./types";
 import MessagesPane from "./messagePane";
 import MessageInput from "./messageInput";
 import MessagesHeader from "./messagesHeader";
@@ -16,12 +16,12 @@ import { settings as initSettings } from "@/appComponents/chat/data";
 import { SettingsDialog } from "@/appComponents/chat/components/settingsDialog";
 
 export interface ChatProps {
-  providers: ProviderProps[];
+  models: ModelProps[];
   chats: ChatMessagesProps;
 }
 
-export function Chat({ providers, chats: allChats }: ChatProps) {
-  const [selectedProvider, setSelectedProvider] = useState(providers[0]);
+export function Chat({ models, chats: allChats }: ChatProps) {
+  const [selectedModel, setSelectedModel] = useState(models[0]);
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [isPending, startTransition] = useTransition();
   const [settings, setSettings] = useState(initSettings);
@@ -37,35 +37,36 @@ export function Chat({ providers, chats: allChats }: ChatProps) {
               }
             />
           }
-          providersList={
+          modelsList={
             <ChatList
-              providers={providers}
+              models={models}
               chats={chats}
-              selectedProvider={selectedProvider}
-              setSelectedProvider={setSelectedProvider}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
             />
           }
         />
       }
+      // MessagePane={<div></div>}
       MessagePane={
         <MessagesPane
-          header={<MessagesHeader provider={selectedProvider} />}
+          header={<MessagesHeader model={selectedModel} />}
           loader={isPending && <BouncingLoader />}
-          messages={<MessageList messages={chats[selectedProvider.id]} />}
+          messages={<MessageList messages={chats[selectedModel.id]} />}
           input={
             <MessageInput
               onSubmit={(value) => {
-                const newId = chats[selectedProvider.id].length + 1;
-                messageSubmit(value, newId, selectedProvider, setChats);
+                const newId = chats[selectedModel.id].length + 1;
+                messageSubmit(value, newId, selectedModel, setChats);
                 startTransition(
                   async () =>
                     await messageResponse(
                       value,
                       newId,
-                      selectedProvider,
+                      selectedModel,
                       setChats,
                       settings,
-                      chats[selectedProvider.id]
+                      chats[selectedModel.id]
                     )
                 );
               }}

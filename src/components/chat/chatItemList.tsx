@@ -1,4 +1,4 @@
-import { ChatMessage, MessageProps, ProviderProps } from "./types";
+import { ChatMessage, MessageProps, ModelProps } from "./types";
 import {
   Divider,
   ListItem,
@@ -10,16 +10,16 @@ import {
 import { Fragment } from "react/jsx-runtime";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import AvatarWithStatus from "./avatarWithStatus";
+import { StaticAvatar } from "./staticAvatar";
 import { toggleMessagesPane } from "./utils";
+import { providerMap } from "@/appComponents/chat/data";
 
 type ChatListItemProps = ListItemButtonProps & {
-  provider: ProviderProps;
-  unread?: boolean;
-  sender: ProviderProps;
+  model: ModelProps;
+  sender: ModelProps;
   messages: MessageProps[];
-  selectedProvider: ProviderProps;
-  setSelectedProvider: (chat: ProviderProps) => void;
+  selectedModel: ModelProps;
+  setSelectedModel: (chat: ModelProps) => void;
 };
 
 function getFormatedTimestamp(messages: MessageProps[]) {
@@ -35,16 +35,16 @@ function getDetailMessage(message: ChatMessage | undefined) {
 }
 
 export default function ChatListItem({
-  provider,
+  model,
   sender,
   messages,
-  selectedProvider,
-  setSelectedProvider,
+  selectedModel,
+  setSelectedModel,
 }: ChatListItemProps) {
   const [formatTimestamp, setFormatTimestamp] = useState(
     getFormatedTimestamp(messages)
   );
-  const selected = selectedProvider.id === provider.id;
+  const selected = selectedModel.id === model.id;
 
   useEffect(() => {
     const handle = setInterval(
@@ -61,7 +61,7 @@ export default function ChatListItem({
       <ListItem sx={{ p: 0 }}>
         <ListItemButton
           onClick={() => {
-            setSelectedProvider(provider);
+            setSelectedModel(model);
             toggleMessagesPane();
           }}
           selected={selected}
@@ -79,9 +79,8 @@ export default function ChatListItem({
             alignItems="center"
           >
             <Stack direction="row" spacing={1.5} alignItems="center">
-              <AvatarWithStatus
-                online={sender.online}
-                src={sender.logo}
+              <StaticAvatar
+                src={providerMap[sender.providerId].logo}
                 alt={sender.name}
               />
               <Stack>

@@ -1,13 +1,13 @@
 import { AppBar, Stack, Typography } from "@mui/material";
 import ModeSwitch from "../modeSwitch";
-// import { UserHeader } from "./userHeader";
-// import { auth } from "@/auth";
-// import { Session } from "next-auth";
+import { UserHeader } from "./userHeader";
+import { auth } from "@/auth";
+import { Session } from "next-auth";
 import { SideMenuButton } from "../sideMenu";
 import Link from "next/link";
 
 export default async function NavBar() {
-  // const session = await auth();
+  const session = await auth();
   return (
     <AppBar
       variant="elevation"
@@ -36,7 +36,7 @@ export default async function NavBar() {
         </Typography>
       </Stack>
       <Stack direction="row" gap={1}>
-        {/* <UserHeader session={session as Session} /> */}
+        <UserHeader session={session as Session} />
         <ModeSwitch />
       </Stack>
     </AppBar>

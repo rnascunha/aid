@@ -5,8 +5,13 @@ export interface ProviderProps {
   name: string;
   logo: StaticImageData;
   provider: string;
+}
+
+export interface ModelProps {
+  id: string;
+  providerId: string;
+  name: string;
   model: string;
-  online: boolean;
 }
 
 interface ChatErrorMessage {
@@ -32,12 +37,11 @@ export interface MessageProps {
   id: string;
   content: ChatMessage;
   timestamp: number;
-  unread?: boolean;
-  sender: ProviderProps | "You";
+  sender: ModelProps | "You";
   attachment?: Attachment;
 }
 
-export type ChatMessagesProps = Record<ProviderProps["id"], MessageProps[]>;
+export type ChatMessagesProps = Record<ModelProps["id"], MessageProps[]>;
 
 export type MessageRoleType = "user" | "assistant" | "system";
 export interface MessageContext {

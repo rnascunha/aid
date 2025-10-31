@@ -5,12 +5,13 @@ import {
   ChatSuccessMessage,
   MessageContext,
   MessageProps,
-  ProviderProps,
+  ModelProps,
 } from "./types";
 import { chatRequest } from "@/actions/ai/chat";
 import { ChatSettings, ContextSettings } from "@/appComponents/chat/types";
+import { providerMap } from "@/appComponents/chat/data";
 
-export function sortedProviders(chats: ChatMessagesProps) {
+export function sortedModels(chats: ChatMessagesProps) {
   const list = Object.keys(chats) as (keyof ChatMessagesProps)[];
   list.sort((c1, c2) => {
     const m1 = chats[c1].at(-1);
@@ -62,7 +63,7 @@ export function contextMessages(
 export function messageSubmit(
   message: string,
   newId: number,
-  provider: ProviderProps,
+  provider: ModelProps,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>
 ) {
   const newIdString = newId.toString();
@@ -83,15 +84,15 @@ export function messageSubmit(
 export async function attachmentSubmit(
   attachment: Attachment,
   newId: number,
-  provider: ProviderProps,
+  model: ModelProps,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
   message?: string
 ) {
   const newIdString = newId.toString();
   setChats((prev) => ({
     ...prev,
-    [provider.id]: [
-      ...prev[provider.id],
+    [model.id]: [
+      ...prev[model.id],
       {
         id: newIdString,
         sender: "You",
@@ -127,7 +128,7 @@ function mergeMessages(
 export async function messageResponse(
   message: string,
   newId: number,
-  provider: ProviderProps,
+  model: ModelProps,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
   settings: ChatSettings,
   chats: MessageProps[]
@@ -135,19 +136,19 @@ export async function messageResponse(
   const messages = mergeMessages(message, settings.context, chats);
 
   const response = await chatRequest(
-    provider.provider,
-    provider.model,
+    providerMap[model.providerId].provider,
+    model.model,
     messages,
     { ...settings.general, ...settings.tools }
   );
   const newIdString2 = `${newId}:r`;
   setChats((prev) => ({
     ...prev,
-    [provider.id]: [
-      ...prev[provider.id],
+    [model.id]: [
+      ...prev[model.id],
       {
         id: newIdString2,
-        sender: provider,
+        sender: model,
         content: response,
         timestamp: Date.now(),
       },

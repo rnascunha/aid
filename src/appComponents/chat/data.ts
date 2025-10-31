@@ -1,4 +1,10 @@
-import { ChatMessagesProps, ProviderProps } from "@/components/chat/types";
+import {
+  ChatMessagesProps,
+  ModelProps,
+  ProviderProps,
+} from "@/components/chat/types";
+
+import { ChatSettings, Tool } from "./types";
 
 import openai from "@/images/ai/openai.png";
 import anthropic from "@/images/ai/anthropic.svg";
@@ -13,118 +19,189 @@ import nebius from "@/images/ai/nebius.svg";
 import sambanova from "@/images/ai/sambanova.svg";
 import vertex from "@/images/ai/vertex-ai.svg";
 import xai from "@/images/ai/xai.svg";
-import { ChatSettings, Tool } from "./types";
+import deepgram from "@/images/ai/deepgram.jpeg";
+import huggingface from "@/images/ai/hugging-face.svg";
 
 export const providers: ProviderProps[] = [
   {
     name: "Open AI",
     id: "openai",
     provider: "openai",
-    model: "gpt-4o",
     logo: openai,
-    online: true,
   },
   {
     name: "Anthropic",
     id: "anthropic",
     provider: "anthropic",
-    model: "claude-3-5-sonnet-20240620",
     logo: anthropic,
-    online: true,
   },
   {
     name: "Cerebras",
     id: "cerebras",
     provider: "cerebras",
-    model: "llama3.1-8b",
     logo: cerebras,
-    online: true,
   },
   {
     name: "Cohere",
     id: "cohere",
     provider: "cohere",
-    model: "command-r-plus-08-2024",
     logo: cohere,
-    online: true,
   },
   {
     name: "Deepseek",
     id: "deepseek",
     provider: "deepseek",
-    model: "deepseek-reasoner",
     logo: deepseek,
-    online: true,
   },
   {
     name: "Groq",
     id: "groq",
     provider: "groq",
-    model: "meta-llama/llama-4-maverick-17b-128e-instruct",
     logo: groq,
-    online: true,
   },
   {
     name: "IBM Watson",
     id: "watsonx",
     provider: "watsonx",
-    model: "openai/gpt-oss-120b",
     logo: watson,
-    online: true,
   },
   {
     name: "Inception Labs",
     id: "inception-labs",
     provider: "openai",
-    model: "mercury",
     logo: inception,
-    online: true,
   },
   {
     name: "Mistral AI",
     id: "mistral",
     provider: "mistral",
-    model: "mistral-large-latest",
     logo: mistral,
-    online: true,
   },
   {
     name: "Nebius",
     id: "nebius",
     provider: "nebius",
-    model: "meta-llama/Llama-3.3-70B-Instruct",
     logo: nebius,
-    online: true,
   },
   {
     name: "Sambanova",
     id: "sambanova",
     provider: "sambanova",
-    model: "Llama-4-Maverick-17B-128E-Instruct",
     logo: sambanova,
-    online: true,
   },
   {
     name: "Vertex AI",
     id: "google",
     provider: "google",
-    model: "gemini-1.5-pro-001",
     logo: vertex,
-    online: true,
   },
   {
     name: "Xai",
     id: "xai",
     provider: "xai",
-    model: "grok-3-latest",
     logo: xai,
-    online: true,
   },
-] as const;
+  {
+    name: "Hugging Face",
+    id: "huggingface",
+    logo: huggingface,
+    provider: "huggingface",
+  },
+  {
+    name: "Deepgram",
+    id: "deepgram",
+    provider: "deepgram",
+    logo: deepgram,
+  },
+];
 
-// export const providerMap = new Map(providers.map((p) => [p.id, p]));
+export const providerMap = providers.reduce((acc, p) => {
+  acc[p.id] = p;
+  return acc;
+}, {} as Record<ProviderProps["id"], ProviderProps>);
 
-export const chats: ChatMessagesProps = providers.reduce((acc, u) => {
+export const models: ModelProps[] = [
+  {
+    id: "openai:0",
+    providerId: "openai",
+    name: "Open AI GPT-4o",
+    model: "gpt-4o",
+  },
+  {
+    id: "anthropic:0",
+    name: "Anthropic Claude 3.5",
+    providerId: "anthropic",
+    model: "claude-3-5-sonnet-20240620",
+  },
+  {
+    id: "cerberas:0",
+    name: "Cerebras LLama 3.1",
+    providerId: "cerebras",
+    model: "llama3.1-8b",
+  },
+  {
+    id: "cohere:0",
+    name: "Cohere Command",
+    providerId: "cohere",
+    model: "command-r-plus-08-2024",
+  },
+  {
+    id: "deepseek:0",
+    name: "Deepseek Reasoner",
+    providerId: "deepseek",
+    model: "deepseek-reasoner",
+  },
+  {
+    id: "groq:0",
+    name: "Groq Llama 4",
+    providerId: "groq",
+    model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+  },
+  {
+    id: "watsonx:0",
+    name: "IBM Watson GPT OSS",
+    providerId: "watsonx",
+    model: "openai/gpt-oss-120b",
+  },
+  {
+    id: "inception-labs:0",
+    name: "Inception Labs Mercury",
+    providerId: "inception-labs",
+    model: "mercury",
+  },
+  {
+    id: "mistral:0",
+    name: "Mistral AI Large",
+    providerId: "mistral",
+    model: "mistral-large-latest",
+  },
+  {
+    id: "nebius:0",
+    name: "Nebius",
+    providerId: "nebius",
+    model: "meta-llama/Llama-3.3-70B-Instruct",
+  },
+  {
+    id: "sambanova:0",
+    name: "Sambanova Llama 4",
+    providerId: "sambanova",
+    model: "Llama-4-Maverick-17B-128E-Instruct",
+  },
+  {
+    id: "google:0",
+    name: "Gemini 1.5",
+    providerId: "google",
+    model: "gemini-1.5-pro-001",
+  },
+  {
+    id: "xai:0",
+    name: "Xai Grok 3",
+    providerId: "xai",
+    model: "grok-3-latest",
+  },
+];
+
+export const chats: ChatMessagesProps = models.reduce((acc, u) => {
   acc[u.id] = [];
   return acc;
 }, {} as ChatMessagesProps);
@@ -132,6 +209,7 @@ export const chats: ChatMessagesProps = providers.reduce((acc, u) => {
 export const toolsList: Tool[] = [
   { id: "get_current_datetime", label: "Current date/time" },
 ];
+
 export const toolsMap = toolsList.reduce((acc, t) => {
   acc[t.id] = t;
   return acc;

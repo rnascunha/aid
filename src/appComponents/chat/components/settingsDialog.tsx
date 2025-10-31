@@ -33,7 +33,7 @@ export function SettingsDialog({
           "& .MuiDialog-container": {
             "& .MuiPaper-root": {
               width: "100%",
-              maxWidth: "500px", // Set your width here
+              maxWidth: "500px",
               height: "450px",
               maxHeight: "80%",
             },

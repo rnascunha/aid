@@ -1,6 +1,6 @@
 import { Chat } from "@/components/chat/chat";
-import { chats, providers } from "./data";
+import { chats, models } from "./data";
 
 export function ChatApp() {
-  return <Chat providers={providers} chats={chats} />;
+  return <Chat models={models} chats={chats} />;
 }

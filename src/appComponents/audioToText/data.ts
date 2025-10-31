@@ -1,110 +1,81 @@
-import { ChatMessagesProps, ProviderProps } from "@/components/chat/types";
+import { ChatMessagesProps, ModelProps } from "@/components/chat/types";
 
-import openai from "@/images/ai/openai.png";
-import vertex from "@/images/ai/vertex-ai.svg";
-import deepgram from "@/images/ai/deepgram.jpeg";
-import huggingface from "@/images/ai/hugging-face.png";
-
-export const providers: ProviderProps[] = [
+export const models: ModelProps[] = [
   {
-    name: "Open AI",
-    id: "openai",
-    provider: "openai",
+    name: "Open AI Whisper 1",
+    id: "openai:0",
+    providerId: "openai",
     model: "whisper-1",
-    logo: openai,
-    online: true,
   },
   {
     name: "Deepgram",
-    id: "deepgram",
-    provider: "deepgram",
+    id: "deepgram:1",
+    providerId: "deepgram",
     model: "nova-2",
-    logo: deepgram,
-    online: true,
   },
   {
     name: "Deepgram",
-    id: "deepgram2",
-    provider: "deepgram",
+    id: "deepgram:2",
+    providerId: "deepgram",
     model: "nova",
-    logo: deepgram,
-    online: true,
   },
   {
     name: "Deepgram",
-    id: "deepgram3",
-    provider: "deepgram",
+    id: "deepgram:3",
+    providerId: "deepgram",
     model: "enhanced",
-    logo: deepgram,
-    online: true,
   },
   {
     name: "Deepgram",
-    id: "deepgram4",
-    provider: "deepgram",
+    id: "deepgram:4",
+    providerId: "deepgram",
     model: "base",
-    logo: deepgram,
-    online: true,
   },
   {
     name: "Google",
-    id: "google",
-    provider: "google",
+    id: "google:1",
+    providerId: "google",
     model: "default",
-    logo: vertex,
-    online: true,
   },
   {
     name: "Google",
-    id: "google2",
-    provider: "google",
+    id: "google:2",
+    providerId: "google",
     model: "latest_long",
-    logo: vertex,
-    online: true,
   },
   {
     name: "Google",
-    id: "google3",
-    provider: "google",
+    id: "google:3",
+    providerId: "google",
     model: "latest_short",
-    logo: vertex,
-    online: true,
   },
   {
     name: "Hugging Face",
-    id: "huggingface",
-    provider: "huggingface",
+    id: "huggingface:0",
+    providerId: "huggingface",
     model: "openai/whisper-large-v3",
-    logo: huggingface,
-    online: true,
   },
   {
     name: "Hugging Face",
-    id: "huggingface1",
-    provider: "huggingface",
+    id: "huggingface:1",
+    providerId: "huggingface",
     model: "openai/whisper-tiny",
-    logo: huggingface,
-    online: true,
   },
   {
     name: "Hugging Face",
-    id: "huggingface2",
-    provider: "huggingface",
+    id: "huggingface:2",
+    providerId: "huggingface",
     model: "facebook/wav2vec2-base-960h",
-    logo: huggingface,
-    online: true,
   },
   {
     name: "Hugging Face",
-    id: "huggingface3",
-    provider: "huggingface",
+    id: "huggingface:3",
+    providerId: "huggingface",
     model: "facebook/wav2vec2-large-xlsr-53",
-    logo: huggingface,
-    online: true,
   },
-] as const;
+];
 
-export const chats: ChatMessagesProps = providers.reduce((acc, u) => {
+export const chats: ChatMessagesProps = models.reduce((acc, u) => {
   acc[u.id] = [];
   return acc;
 }, {} as ChatMessagesProps);
@@ -145,4 +116,8 @@ export interface AudioToTextOptions {
   prompt: string;
 }
 
-export const initAudioOptions = { language: "en", temperature: 0.75, prompt: "" }
+export const initAudioOptions = {
+  language: "en",
+  temperature: 0.75,
+  prompt: "",
+};

@@ -1,37 +1,37 @@
 import { List } from "@mui/material";
-import { ChatMessagesProps, ProviderProps } from "./types";
+import { ChatMessagesProps, ModelProps } from "./types";
 import { Dispatch, SetStateAction } from "react";
 import ChatListItem from "./chatItemList";
-import { sortedProviders } from "./functions";
+import { sortedModels } from "./functions";
 
 interface ChatListProps {
-  providers: ProviderProps[];
+  models: ModelProps[];
   chats: ChatMessagesProps;
-  selectedProvider: ProviderProps;
-  setSelectedProvider: Dispatch<SetStateAction<ProviderProps>>;
+  selectedModel: ModelProps;
+  setSelectedModel: Dispatch<SetStateAction<ModelProps>>;
 }
 
 export function ChatList({
-  providers,
+  models,
   chats,
-  selectedProvider,
-  setSelectedProvider,
+  selectedModel,
+  setSelectedModel,
 }: ChatListProps) {
-  const sortProvidersId = sortedProviders(chats);
-  const sortProviders = sortProvidersId.map((id) =>
-    providers.find((p) => p.id === id)
-  ) as ProviderProps[];
+  const sortModelsId = sortedModels(chats);
+  const sortModels = sortModelsId.map((id) =>
+    models.find((p) => p.id === id)
+  ) as ModelProps[];
   return (
     <List dense>
-      {sortProviders.map((p) => {
+      {sortModels.map((p) => {
         return (
           <ChatListItem
             key={p.id}
-            provider={p}
+            model={p}
             sender={p}
             messages={chats[p.id]}
-            setSelectedProvider={setSelectedProvider}
-            selectedProvider={selectedProvider}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
           />
         );
       })}

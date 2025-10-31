@@ -1,8 +1,9 @@
 import { Box, Stack } from "@mui/material";
-import AvatarWithStatus from "./avatarWithStatus";
+import { StaticAvatar } from "./staticAvatar";
 import { MessageProps } from "./types";
 import { MessageBubble } from "./messageBubble";
 import { useEffect, useRef } from "react";
+import { providerMap } from "@/appComponents/chat/data";
 
 interface MessageListProps {
   messages: MessageProps[];
@@ -53,9 +54,8 @@ export function MessageList({ messages }: MessageListProps) {
               sx={{ flexDirection: isYou ? "row-reverse" : "row" }}
             >
               {message.sender !== "You" && (
-                <AvatarWithStatus
-                  online={message.sender.online}
-                  src={message.sender.logo}
+                <StaticAvatar
+                  src={providerMap[message.sender.providerId].logo}
                   alt={message.sender.name}
                 />
               )}

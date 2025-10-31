@@ -1,15 +1,16 @@
-import { ProviderProps } from "./types";
+import { ModelProps } from "./types";
 import { IconButton, Stack, Typography } from "@mui/material";
-import { StaticAvatar } from "./avatarWithStatus";
+import { StaticAvatar } from "./staticAvatar";
 
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import { toggleMessagesPane } from "./utils";
+import { providerMap } from "@/appComponents/chat/data";
 
 type MessagesPaneHeaderProps = {
-  provider: ProviderProps;
+  model: ModelProps;
 };
 
-export default function MessagesHeader({ provider }: MessagesPaneHeaderProps) {
+export default function MessagesHeader({ model }: MessagesPaneHeaderProps) {
   return (
     <Stack
       direction="row"
@@ -18,7 +19,7 @@ export default function MessagesHeader({ provider }: MessagesPaneHeaderProps) {
         px: { xs: 1, md: 2 },
         borderBottom: "1px solid",
         borderColor: "divider",
-        overflow: "hidden"
+        overflow: "hidden",
       }}
     >
       <IconButton
@@ -33,7 +34,10 @@ export default function MessagesHeader({ provider }: MessagesPaneHeaderProps) {
         spacing={{ xs: 1, md: 2 }}
         sx={{ alignItems: "center" }}
       >
-        <StaticAvatar src={provider.logo} alt={provider.name} />
+        <StaticAvatar
+          src={providerMap[model.providerId].logo}
+          alt={model.name}
+        />
         <Stack>
           <Typography
             component="h2"
@@ -41,7 +45,7 @@ export default function MessagesHeader({ provider }: MessagesPaneHeaderProps) {
             fontSize="medium"
             sx={{ fontWeight: "bold" }}
           >
-            {provider.name}
+            {model.name}
           </Typography>
           <Typography
             component="h3"
@@ -57,7 +61,7 @@ export default function MessagesHeader({ provider }: MessagesPaneHeaderProps) {
               textOverflow: "ellipsis",
             }}
           >
-            {provider.model}
+            {model.model}
           </Typography>
         </Stack>
       </Stack>
