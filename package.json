@@ -18,6 +18,8 @@
     "@mui/material": "^7.3.4",
     "@mui/material-nextjs": "^7.3.3",
     "dayjs": "^1.11.18",
+    "dexie": "^4.2.1",
+    "dexie-react-hooks": "^4.2.0",
     "next": "16.0.0",
     "next-auth": "^5.0.0-beta.29",
     "react": "19.2.0",

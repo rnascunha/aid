@@ -67,18 +67,17 @@ export function messageSubmit(
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>
 ) {
   const newIdString = newId.toString();
+  const newMessage = {
+    id: newIdString,
+    sender: "You",
+    content: { response: message, success: true },
+    timestamp: Date.now(),
+  } as MessageProps;
   setChats((prev) => ({
     ...prev,
-    [provider.id]: [
-      ...prev[provider.id],
-      {
-        id: newIdString,
-        sender: "You",
-        content: { response: message, success: true },
-        timestamp: Date.now(),
-      },
-    ],
+    [provider.id]: [...prev[provider.id], newMessage],
   }));
+  return newMessage;
 }
 
 export async function attachmentSubmit(
@@ -142,16 +141,15 @@ export async function messageResponse(
     { ...settings.general, ...settings.tools }
   );
   const newIdString2 = `${newId}:r`;
+  const newMessage = {
+    id: newIdString2,
+    sender: model,
+    content: response,
+    timestamp: Date.now(),
+  };
   setChats((prev) => ({
     ...prev,
-    [model.id]: [
-      ...prev[model.id],
-      {
-        id: newIdString2,
-        sender: model,
-        content: response,
-        timestamp: Date.now(),
-      },
-    ],
+    [model.id]: [...prev[model.id], newMessage],
   }));
+  return newMessage;
 }
