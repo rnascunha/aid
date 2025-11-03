@@ -34,19 +34,19 @@ export default function MessagesHeader({
           width: "100%",
         }}
       >
-        <IconButton
-          color="default"
-          sx={{ pr: 2, display: { xs: "inline-flex", sm: "none" } }}
-          onClick={() => toggleMessagesPane()}
-        >
-          <ArrowBackIosNewRoundedIcon />
-        </IconButton>
         <Stack
           direction="row"
           spacing={{ xs: 1, md: 2 }}
           sx={{ alignItems: "center" }}
           justifyContent="space-between"
         >
+          <IconButton
+            color="default"
+            sx={{ pr: 2, display: { xs: "inline-flex", sm: "none" } }}
+            onClick={() => toggleMessagesPane()}
+          >
+            <ArrowBackIosNewRoundedIcon />
+          </IconButton>
           <StaticAvatar
             src={providerMap[model.providerId].logo}
             alt={model.name}

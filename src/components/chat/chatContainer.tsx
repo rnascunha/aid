@@ -5,11 +5,16 @@ import { ReactNode, useEffect } from "react";
 import { openMessagesPane } from "./utils";
 
 interface ChatContainer {
+  chatHeader: ReactNode;
   chatsPane: ReactNode;
   MessagePane: ReactNode;
 }
 
-export function ChatContainer({ chatsPane, MessagePane }: ChatContainer) {
+export function ChatContainer({
+  chatHeader,
+  chatsPane,
+  MessagePane,
+}: ChatContainer) {
   useEffect(() => {
     openMessagesPane();
   }, []);
@@ -45,14 +50,17 @@ export function ChatContainer({ chatsPane, MessagePane }: ChatContainer) {
           zIndex: 100,
           width: "100%",
           height: "100%",
-          pl: 3,
+          pl: 1,
           pr: 0,
           borderRight: "1px solid",
           borderColor: "divider",
           top: 0,
           left: 0,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
+        {chatHeader}
         {chatsPane}
       </Container>
       {MessagePane}

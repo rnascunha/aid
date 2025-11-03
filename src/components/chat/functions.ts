@@ -62,13 +62,12 @@ export function contextMessages(
 
 export function messageSubmit(
   message: string,
-  newId: number,
+  newId: string,
   provider: ModelProps,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>
 ) {
-  const newIdString = newId.toString();
   const newMessage = {
-    id: newIdString,
+    id: newId,
     sender: "You",
     content: { response: message, success: true },
     timestamp: Date.now(),
@@ -126,7 +125,7 @@ function mergeMessages(
 
 export async function messageResponse(
   message: string,
-  newId: number,
+  newId: string,
   model: ModelProps,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
   settings: ChatSettings,
@@ -140,9 +139,9 @@ export async function messageResponse(
     messages,
     { ...settings.general, ...settings.tools }
   );
-  const newIdString2 = `${newId}:r`;
+  const newIdString = `${newId}:r`;
   const newMessage = {
-    id: newIdString2,
+    id: newIdString,
     sender: model,
     content: response,
     timestamp: Date.now(),
@@ -152,4 +151,65 @@ export async function messageResponse(
     [model.id]: [...prev[model.id], newMessage],
   }));
   return newMessage;
+}
+
+/**
+ *
+ */
+
+export async function onDeleteModelMessages(
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  modelId?: string
+) {
+  if (modelId) {
+    setChats((prev) => ({
+      ...prev,
+      [modelId]: [],
+    }));
+    return;
+  }
+  setChats((prev) =>
+    Object.keys(prev).reduce((acc, v) => {
+      acc[v] = [];
+      return acc;
+    }, {} as ChatMessagesProps)
+  );
+}
+
+function removeModel(
+  models: ModelProps[],
+  setModels: Dispatch<SetStateAction<ModelProps[]>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setSelectedModel: Dispatch<SetStateAction<ModelProps | undefined>>,
+  modelId: string
+) {
+  setModels((prev) => prev.filter((f) => f.id !== modelId));
+  setSelectedModel((prev) =>
+    prev === undefined
+      ? undefined
+      : prev.id !== modelId
+      ? prev
+      : (models.find((f) => f.id !== modelId) as ModelProps)
+  );
+  setChats((prev) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [modelId]: remove, ...rest } = prev;
+    return rest;
+  });
+}
+
+export async function addRemoveModel(
+  models: ModelProps[],
+  setModels: Dispatch<SetStateAction<ModelProps[]>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setSelectedModel: Dispatch<SetStateAction<ModelProps | undefined>>,
+  model: string | ModelProps
+) {
+  if (typeof model === "string") {
+    await removeModel(models, setModels, setChats, setSelectedModel, model);
+    return;
+  }
+  setModels((prev) => [...prev, model]);
+  setChats((prev) => ({ ...prev, [model.id]: [] }));
+  if (models.length === 0) setSelectedModel(model);
 }

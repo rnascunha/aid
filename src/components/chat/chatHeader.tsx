@@ -11,7 +11,7 @@ export function ChatHeader({
     <Stack
       sx={{
         pt: 0.5,
-        pr: 1,
+        px: 1,
       }}
       direction="row"
       justifyContent="space-between"

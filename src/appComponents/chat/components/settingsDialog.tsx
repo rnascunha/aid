@@ -15,9 +15,11 @@ import { ChatSettings } from "@/appComponents/chat/types";
 export function SettingsDialog({
   settings,
   setSettings,
+  onDeleteMessages,
 }: {
   settings: ChatSettings;
   setSettings: Dispatch<SetStateAction<ChatSettings>>;
+  onDeleteMessages: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -42,7 +44,11 @@ export function SettingsDialog({
       >
         <DialogTitle>Settings</DialogTitle>
         <DialogContent>
-          <Settings settings={settings} setSettings={setSettings} />
+          <Settings
+            settings={settings}
+            setSettings={setSettings}
+            onDeleteMessages={onDeleteMessages}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Close</Button>

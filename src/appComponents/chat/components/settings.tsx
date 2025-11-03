@@ -2,6 +2,7 @@ import { ArrayPanel, PanelConfig } from "@/components/panels";
 import {
   Checkbox,
   Container,
+  Divider,
   FormControlLabel,
   FormGroup,
   InputAdornment,
@@ -22,6 +23,7 @@ import { toolsList, toolsMap } from "../data";
 import { debounce } from "@/libs/debounce";
 
 import CircleIcon from "@mui/icons-material/Circle";
+import { DeleteAllMessagesButton } from "@/components/chat/deleteMessagesButton";
 
 const defaultSx: SxProps = {
   p: 3,
@@ -30,12 +32,14 @@ const defaultSx: SxProps = {
 function GeneralSettingsContainer({
   general,
   setSettings,
+  onDeleteMessages,
 }: {
   general: GeneralSettings;
   setSettings: (v: Partial<GeneralSettings>) => void;
+  onDeleteMessages: () => Promise<void>;
 }) {
   return (
-    <Stack sx={defaultSx}>
+    <Stack sx={defaultSx} gap={2}>
       <TextField
         label="Temperature"
         type="number"
@@ -45,6 +49,8 @@ function GeneralSettingsContainer({
           htmlInput: { min: 0, step: 0.05 },
         }}
       />
+      <Divider />
+      <DeleteAllMessagesButton onDelete={onDeleteMessages} />
     </Stack>
   );
 }
@@ -166,9 +172,11 @@ function SavedIndicator({ isSaved }: { isSaved: boolean }) {
 export function Settings({
   settings,
   setSettings,
+  onDeleteMessages,
 }: {
   settings: ChatSettings;
   setSettings: Dispatch<SetStateAction<ChatSettings>>;
+  onDeleteMessages: () => Promise<void>;
 }) {
   const [isSaved, setIsSaved] = useState(true);
 
@@ -195,6 +203,7 @@ export function Settings({
         <GeneralSettingsContainer
           general={settings.general}
           setSettings={(v) => saveData(v, "general")}
+          onDeleteMessages={onDeleteMessages}
         />
       ),
     },

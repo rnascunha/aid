@@ -18,7 +18,7 @@ type ChatListItemProps = ListItemButtonProps & {
   model: ModelProps;
   sender: ModelProps;
   messages: MessageProps[];
-  selectedModel: ModelProps;
+  selectedModel: ModelProps | undefined;
   setSelectedModel: (chat: ModelProps) => void;
 };
 
@@ -44,7 +44,7 @@ export default function ChatListItem({
   const [formatTimestamp, setFormatTimestamp] = useState(
     getFormatedTimestamp(messages)
   );
-  const selected = selectedModel.id === model.id;
+  const selected = selectedModel?.id === model.id;
 
   useEffect(() => {
     const handle = setInterval(

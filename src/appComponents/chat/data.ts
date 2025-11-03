@@ -215,7 +215,7 @@ export const toolsMap = toolsList.reduce((acc, t) => {
   return acc;
 }, {} as Record<string, Tool>);
 
-export const settings: ChatSettings = {
+export const defaultSettings: ChatSettings = {
   general: { temperature: 0.75 },
   context: {
     systemPrompt: "You are a helpful assistant.",

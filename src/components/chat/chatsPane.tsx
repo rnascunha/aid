@@ -2,11 +2,11 @@ import { ReactNode } from "react";
 import { Box, Container } from "@mui/material";
 
 type ChatsPaneProps = {
-  chatHeader: ReactNode;
+  chatHeader?: ReactNode;
   modelsList: ReactNode;
 };
 
-export default function ChatsPane({ chatHeader, modelsList }: ChatsPaneProps) {
+export default function ChatsPane({ modelsList }: ChatsPaneProps) {
   return (
     <Box
       sx={{
@@ -23,9 +23,9 @@ export default function ChatsPane({ chatHeader, modelsList }: ChatsPaneProps) {
           top: 0,
           left: 0,
           p: 0,
+          height: "100%",
         }}
       >
-        {chatHeader}
         {modelsList}
       </Container>
     </Box>

@@ -2,121 +2,154 @@
 
 import { ChatContainer } from "./chatContainer";
 import ChatsPane from "./chatsPane";
-import { ChatList } from "./chatList";
-import { Dispatch, SetStateAction, useState, useTransition } from "react";
+import { ChatList, EmptyChatList } from "./chatList";
+import { useEffect, useState, useTransition } from "react";
 import { ChatMessagesProps, MessageProps, ModelProps } from "./types";
-import MessagesPane from "./messagePane";
+import { EmptyMessagesPane, MessagesPane } from "./messagePane";
 import MessageInput from "./messageInput";
 import MessagesHeader from "./messagesHeader";
-import { messageResponse, messageSubmit } from "./functions";
+import {
+  addRemoveModel,
+  messageResponse,
+  messageSubmit,
+  onDeleteModelMessages,
+} from "./functions";
 import { BouncingLoader } from "../bouncingLoader";
 import { MessageList } from "./messageList";
 import { ChatHeader } from "./chatHeader";
-import { settings as initSettings } from "@/appComponents/chat/data";
 import { SettingsDialog } from "@/appComponents/chat/components/settingsDialog";
 import { DeleteMessagesButton } from "./deleteMessagesButton";
+import { Stack } from "@mui/material";
+import { AddModel } from "./addModel";
+import { generateUUID } from "@/libs/uuid";
+import { ChatSettings } from "@/appComponents/chat/types";
 
 export interface ChatProps {
   models: ModelProps[];
   chats: ChatMessagesProps;
+  settings: ChatSettings;
   onMessage?: (
     message: MessageProps,
     contactId: string
   ) => Promise<void> | void;
-  onDelete?: (modelId?: string) => Promise<void> | void;
-}
-
-async function onDeleteModelMessages(
-  modelId: string,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  onDeleteModel?: (modelId: string) => Promise<void> | void
-) {
-  await onDeleteModel?.(modelId);
-  setChats((prev) => ({
-    ...prev,
-    [modelId]: [],
-  }));
+  onDeleteMessages?: (modelId?: string) => Promise<void> | void;
+  onAddRemoveModel?: (model: string | ModelProps) => Promise<void> | void;
+  onSettingsChange?: (settings: ChatSettings) => Promise<void> | void;
 }
 
 export function Chat({
-  models,
+  models: allModels,
   chats: allChats,
+  settings: initSettings,
   onMessage,
-  onDelete,
+  onDeleteMessages,
+  onAddRemoveModel,
+  onSettingsChange,
 }: ChatProps) {
-  const [selectedModel, setSelectedModel] = useState(models[0]);
+  const [models, setModels] = useState<ModelProps[]>(allModels);
+  const [selectedModel, setSelectedModel] = useState<ModelProps | undefined>(
+    undefined
+  );
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [isPending, startTransition] = useTransition();
   const [settings, setSettings] = useState(initSettings);
 
+  useEffect(() => {
+    onSettingsChange?.(settings);
+  }, [settings, onSettingsChange]);
+
+  const onMessageHandler = async (message: string) => {
+    const newId = generateUUID();
+    const newMessage = messageSubmit(message, newId, selectedModel!, setChats);
+    await onMessage?.(newMessage, selectedModel!.id);
+    startTransition(async () => {
+      const response = await messageResponse(
+        message,
+        newId,
+        selectedModel!,
+        setChats,
+        settings,
+        chats[selectedModel!.id]
+      );
+      await onMessage?.(response, selectedModel!.id);
+    });
+  };
+
+  const onDeleteAllMessagesHandler = async () => {
+    onDeleteModelMessages(setChats);
+    await onDeleteMessages?.();
+  };
+  const onDeleteModelMessagesHandler = async (modelId: string) => {
+    onDeleteModelMessages(setChats, modelId);
+    await onDeleteMessages?.(modelId);
+  };
+  const onAddRemoveModelHandler = async (model: string | ModelProps) => {
+    addRemoveModel(models, setModels, setChats, setSelectedModel, model);
+    await onAddRemoveModel?.(model);
+  };
+
   return (
     <ChatContainer
+      chatHeader={
+        <ChatHeader
+          chatOptions={
+            <Stack direction="row" gap={0.5}>
+              <AddModel
+                models={models}
+                addRemoveModel={onAddRemoveModelHandler}
+              />
+              <SettingsDialog
+                settings={settings}
+                setSettings={setSettings}
+                onDeleteMessages={onDeleteAllMessagesHandler}
+              />
+            </Stack>
+          }
+        />
+      }
       chatsPane={
         <ChatsPane
-          chatHeader={
-            <ChatHeader
-              chatOptions={
-                <SettingsDialog settings={settings} setSettings={setSettings} />
-              }
-            />
-          }
           modelsList={
-            <ChatList
-              models={models}
-              chats={chats}
-              selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
-            />
+            models.length === 0 ? (
+              <EmptyChatList
+                models={models}
+                onAddModel={onAddRemoveModelHandler}
+              />
+            ) : (
+              <ChatList
+                models={models}
+                chats={chats}
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
+              />
+            )
           }
         />
       }
       MessagePane={
-        <MessagesPane
-          header={
-            <MessagesHeader
-              model={selectedModel}
-              options={
-                <DeleteMessagesButton
-                  onDelete={async () =>
-                    await onDeleteModelMessages(
-                      selectedModel.id,
-                      setChats,
-                      onDelete
-                    )
-                  }
-                />
-              }
-            />
-          }
-          loader={isPending && <BouncingLoader />}
-          messages={<MessageList messages={chats[selectedModel.id]} />}
-          input={
-            <MessageInput
-              onSubmit={(value) => {
-                const newId = chats[selectedModel.id].length + 1;
-                const newMessage = messageSubmit(
-                  value,
-                  newId,
-                  selectedModel,
-                  setChats
-                );
-                if (onMessage) onMessage(newMessage, selectedModel.id);
-                startTransition(async () => {
-                  const response = await messageResponse(
-                    value,
-                    newId,
-                    selectedModel,
-                    setChats,
-                    settings,
-                    chats[selectedModel.id]
-                  );
-                  if (onMessage) onMessage(response, selectedModel.id);
-                });
-              }}
-              isPending={isPending}
-            />
-          }
-        />
+        !selectedModel ? (
+          <EmptyMessagesPane />
+        ) : (
+          <MessagesPane
+            header={
+              <MessagesHeader
+                model={selectedModel}
+                options={
+                  <DeleteMessagesButton
+                    onDelete={async () =>
+                      await onDeleteModelMessagesHandler(selectedModel.id)
+                    }
+                  />
+                }
+              />
+            }
+            loader={isPending && <BouncingLoader />}
+            messages={<MessageList messages={chats[selectedModel.id]} />}
+            input={
+              <MessageInput onSubmit={onMessageHandler} isPending={isPending} />
+            }
+          />
+        )
       }
     />
   );

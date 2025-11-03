@@ -1,3 +1,4 @@
+import { ChatSettings } from "@/appComponents/chat/types";
 import {
   Attachment,
   ChatMessage,
@@ -18,11 +19,19 @@ interface MessageDB {
 
 export const chatDB = new Dexie("ChatStorage") as Dexie & {
   chatMessages: Table<MessageDB, [string, string]>;
+  models: Table<ModelProps, string>;
+  settings: Table<ChatSettings, string>;
 };
 
 chatDB.version(1).stores({
   chatMessages: "[id+contactId], contactId",
+  models: "id",
+  settings: "",
 });
+
+/**
+ * Messages
+ */
 
 export async function onMessage(message: MessageProps, contactId: string) {
   const msg: MessageDB = {
@@ -49,6 +58,7 @@ export async function getAllMessages(
     const sender =
       m.type === "sent" ? "You" : models.find((o) => o.id === m.contactId);
     if (!sender) return acc;
+    if (!acc[m.contactId]) acc[m.contactId] = [];
     acc[m.contactId].push({
       id: m.id,
       content: m.content,
@@ -72,4 +82,41 @@ async function deleteAllMessages() {
 
 export async function deleteMessages(modelId?: string) {
   await (modelId ? deleteModelMessages(modelId) : deleteAllMessages());
+}
+
+/**
+ * Models
+ */
+
+export async function getAllModels() {
+  return await chatDB.models.toArray();
+}
+
+async function addModel(model: ModelProps) {
+  await chatDB.models.add(model);
+}
+
+async function removeModel(modelId: string) {
+  await Promise.all([
+    chatDB.models.delete(modelId),
+    deleteModelMessages(modelId),
+  ]);
+}
+
+export async function onAddRemoveModel(model: string | ModelProps) {
+  if (typeof model === "string") return await removeModel(model);
+  await addModel(model);
+}
+
+/**
+ * settings
+ */
+const defaultSettingsKey = "default";
+
+export async function getSettings() {
+  return await chatDB.settings.get(defaultSettingsKey);
+}
+
+export async function updateSettings(s: ChatSettings) {
+  await chatDB.settings.put(s, defaultSettingsKey);
 }

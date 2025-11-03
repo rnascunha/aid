@@ -1,32 +1,54 @@
 "use client";
 
 import { Chat } from "@/components/chat/chat";
-import { chats, models } from "./data";
-import { deleteMessages, getAllMessages, onMessage } from "@/libs/chatStorage";
+import {
+  deleteMessages,
+  getAllMessages,
+  getAllModels,
+  getSettings,
+  onAddRemoveModel,
+  onMessage,
+  updateSettings,
+} from "@/libs/chatStorage";
 import { useEffect, useState } from "react";
-import { ChatMessagesProps } from "@/components/chat/types";
+import { ChatMessagesProps, ModelProps } from "@/components/chat/types";
 import CenterSpinner from "@/components/spinner/centerSpinner";
+import { ChatSettings } from "./types";
+import { defaultSettings } from "./data";
+// import { chats, models } from "./data";
 
 export function ChatApp() {
-  const [mount, setMount] = useState<null | ChatMessagesProps>(null);
+  const [dbData, setDbData] = useState<null | {
+    chats: ChatMessagesProps;
+    models: ModelProps[];
+    settings?: ChatSettings;
+  }>(null);
 
   useEffect(() => {
-    getAllMessages(models)
-      .then((f) => {
-        setMount(f);
-        console.log(f);
-      })
-      .catch(() => setMount(chats));
+    async function getData() {
+      const [models, settings] = await Promise.all([
+        getAllModels(),
+        getSettings(),
+      ]);
+      const chats = await getAllMessages(models);
+      return { models, chats, settings };
+    }
+    getData().then((d) => setDbData(d));
   }, []);
 
-  return mount === null ? (
+  return dbData === null ? (
     <CenterSpinner />
   ) : (
     <Chat
-      models={models}
-      chats={mount}
+      models={dbData.models}
+      chats={dbData.chats}
+      settings={dbData.settings ?? defaultSettings}
+      // models={models}
+      // chats={chats}
       onMessage={onMessage}
-      onDelete={deleteMessages}
+      onDeleteMessages={deleteMessages}
+      onAddRemoveModel={onAddRemoveModel}
+      onSettingsChange={updateSettings}
     />
   );
 }

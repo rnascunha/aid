@@ -15,43 +15,88 @@ interface DeleteMessagesButtonProps {
   onDelete: () => Promise<void>;
 }
 
+function DeleteMessageDialog({
+  open,
+  description,
+  onClose,
+  onDelete,
+}: {
+  open: boolean;
+  description: string;
+  onClose: () => void;
+  onDelete: () => Promise<void>;
+}) {
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      aria-labelledby="delete-message-dialog-title"
+      aria-describedby="delete-message-dialog-description"
+    >
+      <DialogTitle id="delete-message-dialog-title">
+        {"Delete Messages"}
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText id="delete-message-dialog-description">
+          {description}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button
+          onClick={async () => {
+            await onDelete();
+            onClose();
+          }}
+          autoFocus
+        >
+          OK
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export function DeleteMessagesButton({ onDelete }: DeleteMessagesButtonProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Tooltip title="Delete model messages">
+      <Tooltip title="Delete messages">
         <IconButton onClick={() => setOpen(true)}>
           <DeleteIcon />
         </IconButton>
       </Tooltip>
-      <Dialog
+      <DeleteMessageDialog
         open={open}
+        description="Do you want to delete all messages from this model?"
         onClose={() => setOpen(false)}
-        aria-labelledby="delete-message-dialog-title"
-        aria-describedby="delete-message-dialog-description"
+        onDelete={onDelete}
+      />
+    </>
+  );
+}
+
+export function DeleteAllMessagesButton({
+  onDelete,
+}: DeleteMessagesButtonProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        variant="contained"
+        startIcon={<DeleteIcon />}
+        onClick={() => setOpen(true)}
       >
-        <DialogTitle id="delete-message-dialog-title">
-          {"Delete Model Messages"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete-message-dialog-description">
-            Do you want to delete all messages from this model?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button
-            onClick={async () => {
-              await onDelete();
-              setOpen(false);
-            }}
-            autoFocus
-          >
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
+        Delete all messages
+      </Button>
+      <DeleteMessageDialog
+        open={open}
+        description="Do you want to delete all messages?"
+        onClose={() => setOpen(false)}
+        onDelete={onDelete}
+      />
     </>
   );
 }
