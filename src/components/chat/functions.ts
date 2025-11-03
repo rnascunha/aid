@@ -7,7 +7,7 @@ import {
   MessageProps,
   ModelProps,
 } from "./types";
-import { chatRequest } from "@/actions/ai/chat";
+import { fetchChatRequest } from "@/actions/ai/chat";
 import { ChatSettings, ContextSettings } from "@/appComponents/chat/types";
 import { providerMap } from "@/appComponents/chat/data";
 
@@ -81,18 +81,17 @@ export function messageSubmit(
 
 export async function attachmentSubmit(
   attachment: Attachment,
-  newId: number,
+  newId: string,
   model: ModelProps,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
   message?: string
 ) {
-  const newIdString = newId.toString();
   setChats((prev) => ({
     ...prev,
     [model.id]: [
       ...prev[model.id],
       {
-        id: newIdString,
+        id: newId,
         sender: "You",
         content: {
           response: message ?? `File: ${attachment.name}`,
@@ -133,7 +132,7 @@ export async function messageResponse(
 ) {
   const messages = mergeMessages(message, settings.context, chats);
 
-  const response = await chatRequest(
+  const response = await fetchChatRequest(
     providerMap[model.providerId].provider,
     model.model,
     messages,

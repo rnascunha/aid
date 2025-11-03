@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import aisuite as ai
 import ai_tools as tools
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic.types import PositiveInt
 from typing import List, Literal
 
@@ -18,18 +18,14 @@ class MessagesContext(BaseModel):
     content: str
 
 
-class MessageListValidate(BaseModel):
-    messages: List[MessagesContext]
-
-
 class SettingsValidate(BaseModel):
     temperature: float
     tools: List[Literal["get_current_datetime"]]
     maxTurns: PositiveInt
 
 
-provider_list = set(
-    [
+class ChatInputValidate(BaseModel):
+    provider: Literal[
         "openai",
         "anthropic",
         "google",
@@ -44,54 +40,22 @@ provider_list = set(
         "nebius",
         "xai",
     ]
-)
+    model: str = Field(min_length=1)
+    messages: List[MessagesContext]
+    settings: SettingsValidate
 
-if len(sys.argv) != 5:
-    error_out = {
-        "error": "Wrong number of arguments",
-        "detail": "Arguments must be: <provider> <model> <messages> <settings>",
-    }
-    json_out = json.dumps(error_out)
-    print(json_out, end=None)
-    sys.exit(1)
 
-provider = sys.argv[1]
-model = sys.argv[2]
-messages = sys.argv[3]
-settings = sys.argv[4]
-
-try:
-    messagesParsed = json.loads(messages)
-    MessageListValidate(**{"messages": messagesParsed})
-except Exception as e:
-    error_out = {
-        "error": "Error parsing messages",
-        "detail": str(e),
-    }
-    json_out = json.dumps(error_out)
-    print(json_out, end=None)
-    sys.exit(2)
-
-try:
-    settingsParsed = json.loads(settings)
-    SettingsValidate(**settingsParsed)
-except Exception as e:
-    error_out = {
-        "error": "Error parsing settings",
-        "detail": str(e),
-    }
-    json_out = json.dumps(error_out)
-    print(json_out, end=None)
-    sys.exit(3)
-
-if provider not in provider_list:
-    error_out = {
-        "error": "Invalid provider",
-        "detail": f"Provider '{provider}' is not a valid provider",
-    }
-    json_out = json.dumps(error_out)
-    print(json_out, end=None)
-    sys.exit(4)
+def check_arguments(arg):
+    try:
+        data = json.loads(arg)
+        ChatInputValidate(**data)
+        return data
+    except Exception as e:
+        return {
+            "code": 2,
+            "error": "Error parsing inputs",
+            "detail": str(e),
+        }
 
 
 def runChat(provider, model, messages, settings):
@@ -112,16 +76,40 @@ def runChat(provider, model, messages, settings):
     return response.choices[0].message.content
 
 
-try:
-    response = runChat(provider, model, messagesParsed, settingsParsed)
-    out = {"success": True, "response": response}
-    json_out = json.dumps(out)
+def runAppChat(input):
+    check = check_arguments(input)
+    if "error" in check:
+        return check
+
+    try:
+        provider = check["provider"]
+        model = check["model"]
+        messages = check["messages"]
+        settings = check["settings"]
+
+        response = runChat(provider, model, messages, settings)
+        return {"success": True, "response": response}
+    except Exception as e:
+        return {
+            "code": 5,
+            "error": "Error running chat request",
+            "detail": str(e),
+        }
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        response = {
+            "code": 1,
+            "error": "Wrong number of arguments",
+            "detail": "Argument must be: { provider: <provider>, model: <model>, messages: <messages>, settings: <settings>}",
+        }
+        json_out = json.dumps(response)
+        print(json_out, end=None)
+        sys.exit(1)
+
+    response = runAppChat(sys.argv[1])
+    json_out = json.dumps(response)
     print(json_out, end=None)
-except Exception as e:
-    error_out = {
-        "error": "Error running chat request",
-        "detail": str(e),
-    }
-    json_out = json.dumps(error_out)
-    print(json_out, end=None)
-    sys.exit(3)
+    if "error" in response:
+        sys.exit(response["code"])

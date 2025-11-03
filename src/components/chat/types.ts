@@ -15,6 +15,7 @@ export interface ModelProps {
 }
 
 interface ChatErrorMessage {
+  code: number;
   error: string;
   detail: string;
 }

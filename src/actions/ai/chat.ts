@@ -2,7 +2,7 @@
 
 import { ChatMessage } from "@/components/chat/types";
 import { asyncSpawn } from "@/libs/process";
-import { pythonPath } from "./constants";
+import { pythonPath, serverAPIhost } from "./constants";
 import { MessageContext } from "@/components/chat/types";
 import { GeneralSettings, ToolsSettings } from "@/appComponents/chat/types";
 
@@ -18,10 +18,7 @@ export async function chatRequest(
 ): Promise<ChatMessage> {
   const pythonChat = (await asyncSpawn(pythonPath, [
     pythonChatScript,
-    provider,
-    model,
-    JSON.stringify(messages),
-    JSON.stringify(settings),
+    JSON.stringify({ provider, model, messages, settings }),
   ])) as string;
 
   try {
@@ -30,8 +27,39 @@ export async function chatRequest(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return {
+      code: 9,
       error: "Error parsing data",
       detail: pythonChat,
+    };
+  }
+}
+
+export async function fetchChatRequest(
+  provider: string,
+  model: string,
+  messages: MessageContext[],
+  settings: ChatSettingsPython
+): Promise<ChatMessage> {
+  try {
+    const response = await fetch(`${serverAPIhost}/chat/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ provider, model, messages, settings }),
+    });
+    if (!response.ok)
+      return {
+        code: 8,
+        error: "HTTP Request Error",
+        detail: `Status: ${response.status}, `,
+      };
+    return await response.json();
+  } catch (e) {
+    return {
+      code: 9,
+      error: "Fetch Data Error",
+      detail: (e as Error).message,
     };
   }
 }

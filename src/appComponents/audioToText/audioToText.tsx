@@ -15,6 +15,7 @@ import { audioToText } from "@/actions/ai/audiototext";
 import { AudioToTextOptions, initAudioOptions } from "./data";
 import { ChatHeader } from "./components/chatHeader";
 import { providerMap } from "../chat/data";
+import { generateUUID } from "@/libs/uuid";
 
 interface AudioToTextPros {
   models: ModelProps[];
@@ -62,7 +63,7 @@ export function AudioToText({ models, chats: allChats }: AudioToTextPros) {
                 setOpts={setOpts}
                 onSubmit={(file) => {
                   if (!file) return;
-                  const newId = chats[selectedModel.id].length + 1;
+                  const newId = generateUUID();
                   attachmentSubmit(file, newId, selectedModel, setChats);
                   startTransition(async () => {
                     const res = await fetch(file.data);
@@ -73,13 +74,13 @@ export function AudioToText({ models, chats: allChats }: AudioToTextPros) {
                       blob,
                       opts
                     );
-                    const newIdString2 = `${newId}:r`;
+                    const newIdString = `${newId}:r`;
                     setChats((prev) => ({
                       ...prev,
                       [selectedModel.id]: [
                         ...prev[selectedModel.id],
                         {
-                          id: newIdString2,
+                          id: newIdString,
                           sender: selectedModel,
                           content: response,
                           timestamp: Date.now(),

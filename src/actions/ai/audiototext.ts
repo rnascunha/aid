@@ -16,6 +16,7 @@ interface AudioToTextMessageSuccess {
 }
 
 interface AudioToTextMessageError {
+  code: number;
   error: string;
   detail: string;
 }
@@ -41,6 +42,7 @@ async function audioToTextBase(
 ): Promise<AudioToTextMessage> {
   if (!data) {
     return {
+      code: 9,
       error: "No file sent",
       detail: "No valid file was sent to be transcripted",
     };
@@ -53,6 +55,7 @@ async function audioToTextBase(
     await saveFile(data, tempPath, name);
   } catch (e) {
     return {
+      code: 10,
       error: "Error creating file",
       detail: (e as Error).toString(),
     };
@@ -78,6 +81,7 @@ async function audioToTextBase(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return {
+      code: 11,
       error: "Error parsing data",
       detail: pythonText,
     };
