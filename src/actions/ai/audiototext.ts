@@ -4,7 +4,7 @@ import { saveFile } from "@/libs/file";
 import { asyncSpawn } from "@/libs/process";
 import { mkdir, unlink } from "fs/promises";
 import path from "path";
-import { pythonPath } from "./constants";
+import { pythonPath, serverAPIhost } from "./constants";
 import { AudioToTextOptions } from "@/appComponents/audioToText/data";
 
 const pythonChatScript = "./scripts/audiototext.py";
@@ -84,6 +84,36 @@ async function audioToTextBase(
       code: 11,
       error: "Error parsing data",
       detail: pythonText,
+    };
+  }
+}
+
+export async function fetchAudioToText(
+  provider: string,
+  model: string,
+  file: string,
+  options: AudioToTextOptions
+) {
+  try {
+    const response = await fetch(`${serverAPIhost}/audiototext/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ provider, model, file, settings: options }),
+    });
+    if (!response.ok)
+      return {
+        code: 8,
+        error: "HTTP Request Error",
+        detail: `Status: ${response.status}, `,
+      };
+    return await response.json();
+  } catch (e) {
+    return {
+      code: 9,
+      error: "Fetch Data Error",
+      detail: (e as Error).message,
     };
   }
 }

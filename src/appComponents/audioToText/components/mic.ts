@@ -28,7 +28,7 @@ export class Mic {
     this._mediaRecorder.onstop = () => {
       const blob = new Blob(this._chunks, { type: "audio/ogg; codecs=opus" });
       this._chunks = [];
-      const audioURL = window.URL.createObjectURL(blob);
+      const audioURL = URL.createObjectURL(blob);
       this._onStop(audioURL, blob.size);
     };
   }

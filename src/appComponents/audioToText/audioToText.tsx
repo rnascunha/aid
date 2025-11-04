@@ -11,11 +11,12 @@ import { ChatMessagesProps, ModelProps } from "@/components/chat/types";
 import { useState, useTransition } from "react";
 import { AudioInput } from "./components/audioInput";
 import { attachmentSubmit } from "@/components/chat/functions";
-import { audioToText } from "@/actions/ai/audiototext";
+import { fetchAudioToText } from "@/actions/ai/audiototext";
 import { AudioToTextOptions, initAudioOptions } from "./data";
 import { ChatHeader } from "./components/chatHeader";
 import { providerMap } from "../chat/data";
 import { generateUUID } from "@/libs/uuid";
+import { blobTobase64 } from "@/libs/base64";
 
 interface AudioToTextPros {
   models: ModelProps[];
@@ -68,10 +69,11 @@ export function AudioToText({ models, chats: allChats }: AudioToTextPros) {
                   startTransition(async () => {
                     const res = await fetch(file.data);
                     const blob = await res.blob();
-                    const response = await audioToText(
+                    const base64 = await blobTobase64(blob, file.type);
+                    const response = await fetchAudioToText(
                       providerMap[selectedModel.providerId].provider,
                       selectedModel.model,
-                      blob,
+                      base64,
                       opts
                     );
                     const newIdString = `${newId}:r`;
