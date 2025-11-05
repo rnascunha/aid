@@ -11,8 +11,8 @@ import { Fragment } from "react/jsx-runtime";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { StaticAvatar } from "./staticAvatar";
-import { toggleMessagesPane } from "../../libs/chat/utils";
-import { providerMap } from "@/appComponents/chat/data";
+import { toggleMessagesPane } from "@/libs/chat/utils";
+import { providerMap } from "@/libs/chat/data";
 
 type ChatListItemProps = ListItemButtonProps & {
   model: ModelProps;

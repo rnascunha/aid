@@ -4,8 +4,8 @@ import { StaticAvatar } from "./staticAvatar";
 
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import { toggleMessagesPane } from "../../libs/chat/utils";
-import { providerMap } from "@/appComponents/chat/data";
 import { ReactNode } from "react";
+import { providerMap } from "@/libs/chat/data";
 
 type MessagesPaneHeaderProps = {
   model: ModelProps;

@@ -3,7 +3,7 @@ import { StaticAvatar } from "./staticAvatar";
 import { MessageProps } from "../../libs/chat/types";
 import { MessageBubble } from "./messageBubble";
 import { useEffect, useRef } from "react";
-import { providerMap } from "@/appComponents/chat/data";
+import { providerMap } from "@/libs/chat/data";
 
 interface MessageListProps {
   messages: MessageProps[];

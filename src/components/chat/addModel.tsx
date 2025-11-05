@@ -18,10 +18,10 @@ import { ModelProps, ProviderProps } from "../../libs/chat/types";
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 import { StaticAvatar } from "./staticAvatar";
-import { providerMap, providers } from "@/appComponents/chat/data";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { SelectProvider } from "./selectProvider";
 import { generateUUID } from "@/libs/uuid";
+import { providerMap, providers } from "@/libs/chat/data";
 
 function ModelItem({
   model,
@@ -183,10 +183,7 @@ export function AddModelButton({ models, addRemoveModel }: AddModelProps) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button
-        variant="contained"
-        onClick={() => setOpen(true)}
-      >
+      <Button variant="contained" onClick={() => setOpen(true)}>
         Add model
       </Button>
       <AddModelDialog

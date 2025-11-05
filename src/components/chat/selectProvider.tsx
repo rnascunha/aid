@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { ProviderProps } from "../../libs/chat/types";
 import { StaticAvatar } from "./staticAvatar";
-import { providerMap } from "@/appComponents/chat/data";
+import { providerMap } from "@/libs/chat/data";
 
 function ProviderItem({ provider }: { provider: ProviderProps }) {
   return (

@@ -8,7 +8,7 @@ import { Dispatch, SetStateAction } from "react";
 import { AudioToTextSettings } from "./types";
 import { blobTobase64 } from "@/libs/base64";
 import { fetchAudioToText } from "@/actions/ai/audiototext";
-import { providerMap } from "../chat/data";
+import { providerMap } from "@/libs/chat/data";
 
 export async function attachmentResponse(
   file: Attachment,

@@ -3,7 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 import { ChatSettings } from "./types";
 import { mergeMessages } from "@/libs/chat/functions";
 import { fetchChatRequest } from "@/actions/ai/chat";
-import { providerMap } from "./data";
+import { providerMap } from "@/libs/chat/data";
 
 export async function messageResponse(
   message: string,
