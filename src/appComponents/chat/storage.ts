@@ -1,11 +1,12 @@
 import { ChatSettings } from "@/appComponents/chat/types";
+import { deleteMessages, getAllMessages, onMessage } from "@/libs/chat/storage";
 import {
   Attachment,
   ChatMessage,
   ChatMessagesProps,
   MessageProps,
   ModelProps,
-} from "@/components/chat/types";
+} from "@/libs/chat/types";
 import Dexie, { type Table } from "dexie";
 
 interface MessageDB {
@@ -33,55 +34,18 @@ chatDB.version(1).stores({
  * Messages
  */
 
-export async function onMessage(message: MessageProps, contactId: string) {
-  const msg: MessageDB = {
-    id: message.id,
-    content: message.content,
-    timestamp: message.timestamp,
-    contactId,
-    attachment: message.attachment,
-    type: message.sender === "You" ? "sent" : "received",
-  };
-  await chatDB.chatMessages.add(msg);
+export async function onChatMessage(message: MessageProps, contactId: string) {
+  return await onMessage(chatDB.chatMessages, message, contactId);
 }
 
-export async function getAllMessages(
+export async function getAllChatMessages(
   models: ModelProps[]
 ): Promise<ChatMessagesProps> {
-  const messages = await chatDB.chatMessages.toArray();
-
-  const baseChats = models.reduce((acc, m) => {
-    acc[m.id] = [];
-    return acc;
-  }, {} as ChatMessagesProps);
-  const chats = messages.reduce((acc, m) => {
-    const sender =
-      m.type === "sent" ? "You" : models.find((o) => o.id === m.contactId);
-    if (!sender) return acc;
-    if (!acc[m.contactId]) acc[m.contactId] = [];
-    acc[m.contactId].push({
-      id: m.id,
-      content: m.content,
-      attachment: m.attachment,
-      sender,
-      timestamp: m.timestamp,
-    });
-    return acc;
-  }, baseChats);
-
-  return chats;
+  return await getAllMessages(chatDB.chatMessages, models);
 }
 
-async function deleteModelMessages(modelId: string) {
-  await chatDB.chatMessages.where("contactId").equals(modelId).delete();
-}
-
-async function deleteAllMessages() {
-  await chatDB.chatMessages.clear();
-}
-
-export async function deleteMessages(modelId?: string) {
-  await (modelId ? deleteModelMessages(modelId) : deleteAllMessages());
+export async function deleteChatMessages(modelId?: string) {
+  await deleteMessages(chatDB.chatMessages, modelId);
 }
 
 /**
@@ -99,7 +63,7 @@ async function addModel(model: ModelProps) {
 async function removeModel(modelId: string) {
   await Promise.all([
     chatDB.models.delete(modelId),
-    deleteModelMessages(modelId),
+    deleteChatMessages(modelId),
   ]);
 }
 

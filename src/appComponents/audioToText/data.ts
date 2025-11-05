@@ -1,4 +1,4 @@
-import { ChatMessagesProps, ModelProps } from "@/components/chat/types";
+import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
 
 export const models: ModelProps[] = [
   {
@@ -110,13 +110,7 @@ export const audiToTextLanguageOptions: AudioToTextLanguage[] = [
   { value: "vi", label: "Vietnamese", flagCode: "vn" },
 ];
 
-export interface AudioToTextOptions {
-  language: (typeof audiToTextLanguageOptions)[number]["value"];
-  temperature: number;
-  prompt: string;
-}
-
-export const initAudioOptions = {
+export const initAudioSettings = {
   language: "en",
   temperature: 0.75,
   prompt: "",

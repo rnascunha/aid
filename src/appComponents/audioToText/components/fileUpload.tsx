@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { IconButton, Stack, Tooltip } from "@mui/material";
 
 import { useRef } from "react";
-import { Attachment } from "@/components/chat/types";
+import { Attachment } from "@/libs/chat/types";
 import AudioFileIcon from "@mui/icons-material/AudioFile";
 
 const VisuallyHiddenInput = styled("input")({

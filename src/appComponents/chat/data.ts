@@ -2,7 +2,7 @@ import {
   ChatMessagesProps,
   ModelProps,
   ProviderProps,
-} from "@/components/chat/types";
+} from "@/libs/chat/types";
 
 import { ChatSettings, Tool } from "./types";
 

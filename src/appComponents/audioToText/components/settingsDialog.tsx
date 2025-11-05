@@ -9,15 +9,17 @@ import {
 
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Options } from "./options";
-import { AudioToTextOptions } from "../data";
+import { Settings } from "./settings";
+import { AudioToTextSettings } from "../types";
 
-export function OptionsDialog({
-  opts,
-  setOpts,
+export function SettingsDialog({
+  settings,
+  setSettings,
+  onDeleteMessages,
 }: {
-  opts: AudioToTextOptions;
-  setOpts: Dispatch<SetStateAction<AudioToTextOptions>>;
+  settings: AudioToTextSettings;
+  setSettings: Dispatch<SetStateAction<AudioToTextSettings>>;
+  onDeleteMessages: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -42,7 +44,11 @@ export function OptionsDialog({
       >
         <DialogTitle>Options</DialogTitle>
         <DialogContent>
-          <Options opts={opts} setOpts={setOpts} />
+          <Settings
+            settings={settings}
+            setSettings={setSettings}
+            onDeleteMessages={onDeleteMessages}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Close</Button>

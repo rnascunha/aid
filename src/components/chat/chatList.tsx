@@ -1,8 +1,8 @@
 import { List, Stack } from "@mui/material";
-import { ChatMessagesProps, ModelProps } from "./types";
+import { ChatMessagesProps, ModelProps } from "../../libs/chat/types";
 import { Dispatch, SetStateAction } from "react";
 import ChatListItem from "./chatItemList";
-import { sortedModels } from "./functions";
+import { sortedModels } from "../../libs/chat/functions";
 import { AddModelButton } from "./addModel";
 
 import HubIcon from "@mui/icons-material/Hub";

@@ -3,41 +3,118 @@
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatList } from "@/components/chat/chatList";
-import ChatsPane from "@/components/chat/chatsPane";
+import { ChatsPane } from "@/components/chat/chatsPane";
 import { MessageList } from "@/components/chat/messageList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
-import MessagesHeader from "@/components/chat/messagesHeader";
-import { ChatMessagesProps, ModelProps } from "@/components/chat/types";
-import { useState, useTransition } from "react";
+import { MessagesHeader } from "@/components/chat/messagesHeader";
+import {
+  Attachment,
+  ChatMessagesProps,
+  MessageProps,
+  ModelProps,
+} from "@/libs/chat/types";
+import { useEffect, useState, useTransition } from "react";
 import { AudioInput } from "./components/audioInput";
-import { attachmentSubmit } from "@/components/chat/functions";
-import { fetchAudioToText } from "@/actions/ai/audiototext";
-import { AudioToTextOptions, initAudioOptions } from "./data";
-import { ChatHeader } from "./components/chatHeader";
-import { providerMap } from "../chat/data";
+import { attachmentSubmit, onDeleteModelMessages } from "@/libs/chat/functions";
+import { initAudioSettings } from "./data";
 import { generateUUID } from "@/libs/uuid";
-import { blobTobase64 } from "@/libs/base64";
+import { AudioToTextSettings } from "./types";
+import { attachmentResponse } from "./functions";
+import { DeleteMessagesButton } from "@/components/chat/deleteMessagesButton";
+import { ChatHeader } from "@/components/chat/chatHeader";
+import { Stack } from "@mui/material";
+import { SettingsDialog } from "./components/settingsDialog";
+import { SelectLanguage } from "./components/selectLanguage";
 
 interface AudioToTextPros {
   models: ModelProps[];
   chats: ChatMessagesProps;
+  onMessage?: (
+    message: MessageProps,
+    contactId: string
+  ) => Promise<void> | void;
+  onDeleteMessages?: (modelId?: string) => Promise<void> | void;
+  onSettingsChange?: (settings: AudioToTextSettings) => Promise<void> | void;
 }
 
-export function AudioToText({ models, chats: allChats }: AudioToTextPros) {
+export function AudioToText({
+  models,
+  chats: allChats,
+  onMessage,
+  onDeleteMessages,
+  onSettingsChange,
+}: AudioToTextPros) {
   const [selectedModel, setSelectedModel] = useState<ModelProps | undefined>(
-    models[0]
+    undefined
   );
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
-  const [opts, setOpts] = useState<AudioToTextOptions>(initAudioOptions);
+  const [settings, setSettings] =
+    useState<AudioToTextSettings>(initAudioSettings);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    onSettingsChange?.(settings);
+  }, [settings, onSettingsChange]);
+
+  const onMessageHandler = async (file: Attachment | null) => {
+    if (!file) return;
+    const newId = generateUUID();
+    const newMessage = await attachmentSubmit(
+      file,
+      newId,
+      selectedModel!,
+      setChats
+    );
+    await onMessage?.(newMessage, selectedModel!.id);
+    startTransition(async () => {
+      const response = await attachmentResponse(
+        file,
+        newId,
+        selectedModel!,
+        setChats,
+        settings
+      );
+      await onMessage?.(response, selectedModel!.id);
+    });
+  };
+
+  const onDeleteAllMessagesHandler = async () => {
+    onDeleteModelMessages(setChats);
+    await onDeleteMessages?.();
+  };
+  const onDeleteModelMessagesHandler = async (modelId: string) => {
+    onDeleteModelMessages(setChats, modelId);
+    await onDeleteMessages?.(modelId);
+  };
 
   return (
     <ChatContainer
-      chatHeader={<ChatHeader opts={opts} setOpts={setOpts} />}
+      chatHeader={
+        <ChatHeader
+          chatOptions={
+            <Stack direction="row" gap={0.5}>
+              <SelectLanguage
+                language={settings.language}
+                setLanguage={(ln) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    language: ln,
+                  }))
+                }
+              />
+              <SettingsDialog
+                settings={settings}
+                setSettings={setSettings}
+                onDeleteMessages={onDeleteAllMessagesHandler}
+              />
+            </Stack>
+          }
+        />
+      }
       chatsPane={
         <ChatsPane
           modelsList={
-            !selectedModel ? (
+            models.length === 0 ? (
               <EmptyMessagesPane />
             ) : (
               <ChatList
@@ -55,42 +132,25 @@ export function AudioToText({ models, chats: allChats }: AudioToTextPros) {
           <EmptyMessagesPane />
         ) : (
           <MessagesPane
-            header={<MessagesHeader model={selectedModel} />}
+            header={
+              <MessagesHeader
+                model={selectedModel}
+                options={
+                  <DeleteMessagesButton
+                    onDelete={async () =>
+                      await onDeleteModelMessagesHandler(selectedModel.id)
+                    }
+                  />
+                }
+              />
+            }
             loader={isPending && <BouncingLoader />}
             messages={<MessageList messages={chats[selectedModel.id]} />}
             input={
               <AudioInput
-                opts={opts}
-                setOpts={setOpts}
-                onSubmit={(file) => {
-                  if (!file) return;
-                  const newId = generateUUID();
-                  attachmentSubmit(file, newId, selectedModel, setChats);
-                  startTransition(async () => {
-                    const res = await fetch(file.data);
-                    const blob = await res.blob();
-                    const base64 = await blobTobase64(blob, file.type);
-                    const response = await fetchAudioToText(
-                      providerMap[selectedModel.providerId].provider,
-                      selectedModel.model,
-                      base64,
-                      opts
-                    );
-                    const newIdString = `${newId}:r`;
-                    setChats((prev) => ({
-                      ...prev,
-                      [selectedModel.id]: [
-                        ...prev[selectedModel.id],
-                        {
-                          id: newIdString,
-                          sender: selectedModel,
-                          content: response,
-                          timestamp: Date.now(),
-                        },
-                      ],
-                    }));
-                  });
-                }}
+                settings={settings}
+                setSettings={setSettings}
+                onSubmit={onMessageHandler}
                 isPending={isPending}
               />
             }

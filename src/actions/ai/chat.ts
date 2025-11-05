@@ -1,9 +1,9 @@
 "use server";
 
-import { ChatMessage } from "@/components/chat/types";
+import { ChatMessage } from "@/libs/chat/types";
 import { asyncSpawn } from "@/libs/process";
 import { pythonPath, serverAPIhost } from "./constants";
-import { MessageContext } from "@/components/chat/types";
+import { MessageContext } from "@/libs/chat/types";
 import { GeneralSettings, ToolsSettings } from "@/appComponents/chat/types";
 
 const pythonChatScript = "./scripts/chat.py";

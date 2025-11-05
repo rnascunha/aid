@@ -6,7 +6,7 @@ type ChatsPaneProps = {
   modelsList: ReactNode;
 };
 
-export default function ChatsPane({ modelsList }: ChatsPaneProps) {
+export function ChatsPane({ modelsList }: ChatsPaneProps) {
   return (
     <Box
       sx={{

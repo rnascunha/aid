@@ -1,6 +1,6 @@
 import { Box, Stack } from "@mui/material";
 import { StaticAvatar } from "./staticAvatar";
-import { MessageProps } from "./types";
+import { MessageProps } from "../../libs/chat/types";
 import { MessageBubble } from "./messageBubble";
 import { useEffect, useRef } from "react";
 import { providerMap } from "@/appComponents/chat/data";

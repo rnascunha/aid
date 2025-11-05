@@ -5,7 +5,7 @@ import { asyncSpawn } from "@/libs/process";
 import { mkdir, unlink } from "fs/promises";
 import path from "path";
 import { pythonPath, serverAPIhost } from "./constants";
-import { AudioToTextOptions } from "@/appComponents/audioToText/data";
+import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 
 const pythonChatScript = "./scripts/audiototext.py";
 const tempPath = "./tmp";
@@ -29,7 +29,7 @@ export async function audioToText(
   provider: string,
   model: string,
   file: Blob | null,
-  options: AudioToTextOptions
+  options: AudioToTextSettings
 ) {
   return await audioToTextBase(provider, model, file, options);
 }
@@ -38,7 +38,7 @@ async function audioToTextBase(
   provider: string,
   model: string,
   data: Blob | null,
-  options: AudioToTextOptions
+  settings: AudioToTextSettings
 ): Promise<AudioToTextMessage> {
   if (!data) {
     return {
@@ -67,7 +67,7 @@ async function audioToTextBase(
     provider,
     model,
     filePath,
-    JSON.stringify(options),
+    JSON.stringify(settings),
   ])) as string;
 
   try {
@@ -92,7 +92,7 @@ export async function fetchAudioToText(
   provider: string,
   model: string,
   file: string,
-  options: AudioToTextOptions
+  settings: AudioToTextSettings
 ) {
   try {
     const response = await fetch(`${serverAPIhost}/audiototext/`, {
@@ -100,7 +100,7 @@ export async function fetchAudioToText(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ provider, model, file, settings: options }),
+      body: JSON.stringify({ provider, model, file, settings }),
     });
     if (!response.ok)
       return {

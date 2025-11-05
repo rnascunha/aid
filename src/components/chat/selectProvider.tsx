@@ -5,7 +5,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { ProviderProps } from "./types";
+import { ProviderProps } from "../../libs/chat/types";
 import { StaticAvatar } from "./staticAvatar";
 import { providerMap } from "@/appComponents/chat/data";
 

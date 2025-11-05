@@ -1,5 +1,5 @@
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
-import { ChatMessage, MessageProps } from "./types";
+import { ChatMessage, MessageProps } from "../../libs/chat/types";
 import { Avatar, Box, Container, Stack, Typography } from "@mui/material";
 import dayjs from "@/libs/dayjs";
 import { useEffect, useState } from "react";

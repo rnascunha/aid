@@ -7,9 +7,7 @@ import {
   MessageProps,
   ModelProps,
 } from "./types";
-import { fetchChatRequest } from "@/actions/ai/chat";
-import { ChatSettings, ContextSettings } from "@/appComponents/chat/types";
-import { providerMap } from "@/appComponents/chat/data";
+import { ContextSettings } from "@/appComponents/chat/types";
 
 export function sortedModels(chats: ChatMessagesProps) {
   const list = Object.keys(chats) as (keyof ChatMessagesProps)[];
@@ -86,25 +84,24 @@ export async function attachmentSubmit(
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
   message?: string
 ) {
+  const newMessage = {
+    id: newId,
+    sender: "You",
+    content: {
+      response: message ?? `File: ${attachment.name}`,
+      success: true,
+    },
+    timestamp: Date.now(),
+    attachment,
+  } as MessageProps;
   setChats((prev) => ({
     ...prev,
-    [model.id]: [
-      ...prev[model.id],
-      {
-        id: newId,
-        sender: "You",
-        content: {
-          response: message ?? `File: ${attachment.name}`,
-          success: true,
-        },
-        timestamp: Date.now(),
-        attachment,
-      },
-    ],
+    [model.id]: [...prev[model.id], newMessage],
   }));
+  return newMessage;
 }
 
-function mergeMessages(
+export function mergeMessages(
   message: string,
   settings: ContextSettings,
   chats: MessageProps[]
@@ -120,36 +117,6 @@ function mergeMessages(
   const user = { role: "user", content: message.trim() } as MessageContext;
 
   return system.concat(context, user);
-}
-
-export async function messageResponse(
-  message: string,
-  newId: string,
-  model: ModelProps,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  settings: ChatSettings,
-  chats: MessageProps[]
-) {
-  const messages = mergeMessages(message, settings.context, chats);
-
-  const response = await fetchChatRequest(
-    providerMap[model.providerId].provider,
-    model.model,
-    messages,
-    { ...settings.general, ...settings.tools }
-  );
-  const newIdString = `${newId}:r`;
-  const newMessage = {
-    id: newIdString,
-    sender: model,
-    content: response,
-    timestamp: Date.now(),
-  };
-  setChats((prev) => ({
-    ...prev,
-    [model.id]: [...prev[model.id], newMessage],
-  }));
-  return newMessage;
 }
 
 /**

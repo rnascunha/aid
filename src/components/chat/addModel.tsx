@@ -13,7 +13,7 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { ModelProps, ProviderProps } from "./types";
+import { ModelProps, ProviderProps } from "../../libs/chat/types";
 
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";

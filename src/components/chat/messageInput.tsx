@@ -9,7 +9,7 @@ export type MessageInputProps = {
   isPending: boolean;
 };
 
-export default function MessageInput(props: MessageInputProps) {
+export function MessageInput(props: MessageInputProps) {
   const [text, setText] = useState("");
   const { onSubmit, isPending } = props;
   const handleClick = () => {

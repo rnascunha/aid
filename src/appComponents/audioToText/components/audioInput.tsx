@@ -2,14 +2,14 @@ import { Stack, TextField } from "@mui/material";
 
 import { AudioFileUploadButton } from "./fileUpload";
 import { MicInput } from "./micInput";
-import { Attachment } from "@/components/chat/types";
-import { AudioToTextOptions } from "../data";
+import { Attachment } from "@/libs/chat/types";
+import { AudioToTextSettings } from "../types";
 import { Dispatch, SetStateAction, useMemo } from "react";
 import { debounce } from "@/libs/debounce";
 
 interface AudioInputProps {
-  opts: AudioToTextOptions;
-  setOpts: Dispatch<SetStateAction<AudioToTextOptions>>;
+  settings: AudioToTextSettings;
+  setSettings: Dispatch<SetStateAction<AudioToTextSettings>>;
   onSubmit: (file: Attachment | null) => void;
   isPending: boolean;
 }
@@ -17,16 +17,16 @@ interface AudioInputProps {
 export function AudioInput({
   onSubmit,
   isPending,
-  opts,
-  setOpts,
+  settings,
+  setSettings,
 }: AudioInputProps) {
   const updatePrompt = useMemo(
     () =>
       debounce(
-        (value: string) => setOpts((prev) => ({ ...prev, prompt: value })),
+        (value: string) => setSettings((prev) => ({ ...prev, prompt: value })),
         500
       ),
-    [setOpts]
+    [setSettings]
   );
 
   return (
@@ -48,7 +48,7 @@ export function AudioInput({
         sx={{ pl: 1 }}
         variant="standard"
         fullWidth
-        defaultValue={opts.prompt}
+        defaultValue={settings.prompt}
         onChange={(ev) => updatePrompt(ev.target.value)}
       />
       <Stack direction="row" gap={1}>

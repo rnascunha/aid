@@ -1,9 +1,9 @@
-import { ModelProps } from "./types";
+import { ModelProps } from "../../libs/chat/types";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { StaticAvatar } from "./staticAvatar";
 
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import { toggleMessagesPane } from "./utils";
+import { toggleMessagesPane } from "../../libs/chat/utils";
 import { providerMap } from "@/appComponents/chat/data";
 import { ReactNode } from "react";
 
@@ -12,10 +12,7 @@ type MessagesPaneHeaderProps = {
   options?: ReactNode;
 };
 
-export default function MessagesHeader({
-  model,
-  options,
-}: MessagesPaneHeaderProps) {
+export function MessagesHeader({ model, options }: MessagesPaneHeaderProps) {
   return (
     <Stack
       direction="row"

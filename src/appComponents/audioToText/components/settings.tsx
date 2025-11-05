@@ -1,6 +1,7 @@
 import { ArrayPanel, PanelConfig } from "@/components/panels";
 import {
   Container,
+  Divider,
   Stack,
   SxProps,
   TextField,
@@ -8,10 +9,11 @@ import {
 } from "@mui/material";
 
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
-import { AudioToTextOptions } from "../data";
+import { AudioToTextSettings } from "../types";
 import { debounce } from "@/libs/debounce";
 
 import CircleIcon from "@mui/icons-material/Circle";
+import { DeleteAllMessagesButton } from "@/components/chat/deleteMessagesButton";
 
 const defaultSx: SxProps = {
   p: 3,
@@ -20,12 +22,14 @@ const defaultSx: SxProps = {
 function GeneralOptionsContainer({
   general,
   setSettings,
+  onDeleteMessages,
 }: {
-  general: AudioToTextOptions;
-  setSettings: (v: Partial<AudioToTextOptions>) => void;
+  general: AudioToTextSettings;
+  setSettings: (v: Partial<AudioToTextSettings>) => void;
+  onDeleteMessages: () => Promise<void>;
 }) {
   return (
-    <Stack sx={defaultSx}>
+    <Stack sx={defaultSx} gap={1}>
       <TextField
         label="Temperature"
         type="number"
@@ -35,6 +39,8 @@ function GeneralOptionsContainer({
           htmlInput: { min: 0, step: 0.05 },
         }}
       />
+      <Divider />
+      <DeleteAllMessagesButton onDelete={onDeleteMessages} />
     </Stack>
   );
 }
@@ -58,26 +64,28 @@ function SavedIndicator({ isSaved }: { isSaved: boolean }) {
   );
 }
 
-export function Options({
-  opts,
-  setOpts,
+export function Settings({
+  settings,
+  setSettings,
+  onDeleteMessages,
 }: {
-  opts: AudioToTextOptions;
-  setOpts: Dispatch<SetStateAction<AudioToTextOptions>>;
+  settings: AudioToTextSettings;
+  setSettings: Dispatch<SetStateAction<AudioToTextSettings>>;
+  onDeleteMessages: () => Promise<void>;
 }) {
   const [isSaved, setIsSaved] = useState(true);
 
   const saveDataDebounce = useMemo(() => {
-    return debounce((data: Partial<AudioToTextOptions>) => {
-      setOpts((prev) => ({
+    return debounce((data: Partial<AudioToTextSettings>) => {
+      setSettings((prev) => ({
         ...prev,
         ...data,
       }));
       setIsSaved(true);
     }, 300);
-  }, [setOpts]);
+  }, [setSettings]);
 
-  const saveData = (data: Partial<AudioToTextOptions>) => {
+  const saveData = (data: Partial<AudioToTextSettings>) => {
     setIsSaved(false);
     saveDataDebounce(data);
   };
@@ -87,8 +95,9 @@ export function Options({
       label: "General",
       panel: (
         <GeneralOptionsContainer
-          general={opts}
+          general={settings}
           setSettings={(v) => saveData(v)}
+          onDeleteMessages={onDeleteMessages}
         />
       ),
     },
