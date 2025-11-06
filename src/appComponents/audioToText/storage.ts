@@ -10,13 +10,11 @@ import Dexie, { type Table } from "dexie";
 
 export const audioToTextDB = new Dexie("AudioToTextStorage") as Dexie & {
   audioToTextMessages: Table<MessageDB, [string, string]>;
-  models: Table<ModelProps, string>;
   settings: Table<ChatSettings, string>;
 };
 
 audioToTextDB.version(1).stores({
   audioToTextMessages: "[id+contactId], contactId",
-  // models: "id",
   settings: "",
 });
 

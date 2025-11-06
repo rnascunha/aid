@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { Session } from "next-auth";
 import { SideMenuButton } from "../sideMenu";
 import Link from "next/link";
+import { SettingsDropMenu } from "./settingsDropMenu";
 
 export default async function NavBar() {
   const session = await auth();
@@ -36,6 +37,7 @@ export default async function NavBar() {
         </Typography>
       </Stack>
       <Stack direction="row" gap={1}>
+        <SettingsDropMenu session={session as Session} />
         <UserHeader session={session as Session} />
         <ModeSwitch />
       </Stack>

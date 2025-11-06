@@ -61,9 +61,6 @@ export default function ModeSwitch({ sx }: { sx?: SxProps }) {
             sx={{
               color: "var(--App-color)",
               outline: "none",
-              // ".MuiSelect-icon": {
-              // display: "none",
-              // },
               ".MuiSelect-select": {
                 border: "none",
                 display: "flex",

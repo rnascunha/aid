@@ -1,11 +1,39 @@
-import { Table } from "dexie";
+import Dexie, { Table } from "dexie";
 import {
   Attachment,
   ChatMessage,
   ChatMessagesProps,
   MessageProps,
   ModelProps,
+  ProviderAuth,
 } from "./types";
+
+export interface ProviderAuthDB {
+  id: string;
+  auth: ProviderAuth;
+}
+
+/**
+ * AI Settings
+ */
+export const aISettings = new Dexie("AISettings") as Dexie & {
+  providers: Table<ProviderAuthDB, string>;
+};
+
+aISettings.version(1).stores({
+  providers: "id",
+});
+
+export async function getProviders() {
+  return (await aISettings.providers.toArray()).reduce((acc, p) => {
+    acc[p.id] = p;
+    return acc;
+  }, {} as Record<string, ProviderAuthDB>);
+}
+
+export async function updateProvider(provider: ProviderAuthDB) {
+  aISettings.providers.put(provider);
+}
 
 /**
  * Messages
