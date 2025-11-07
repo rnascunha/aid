@@ -56,11 +56,12 @@ function TextMessage({
         {
           p: 1.25,
           borderRadius: "10px",
+          color: "white",
         },
         isSent
           ? {
               backgroundColor: "rgba(50, 50, 200, 0.7)",
-              color: "white",
+              
               borderTopLeftRadius: "10px",
               borderTopRightRadius: 0,
             }
@@ -69,7 +70,7 @@ function TextMessage({
                 "success" in message.content
                   ? "rgba(200, 200, 200, 0.7)"
                   : "rgba(200, 5, 5, 0.5)",
-              color: "black",
+              // color: "black",
               borderTopLeftRadius: 0,
               borderTopRightRadius: "10px",
             },

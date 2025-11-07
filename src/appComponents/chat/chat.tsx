@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useContext, useEffect, useState, useTransition } from "react";
 import { Stack } from "@mui/material";
 
 import { SettingsDialog } from "./components/settingsDialog";
@@ -18,7 +18,10 @@ import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { ChatList, EmptyChatList } from "@/components/chat/chatList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
-import { MessageInput } from "@/components/chat/messageInput";
+import {
+  MessageInput,
+  MessageInputCheck,
+} from "@/components/chat/messageInput";
 import { MessagesHeader } from "@/components/chat/messagesHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messageList";
@@ -26,6 +29,7 @@ import { ChatHeader } from "@/components/chat/chatHeader";
 import { DeleteMessagesButton } from "@/components/chat/deleteMessagesButton";
 import { AddModel } from "@/components/chat/addModel";
 import { messageResponse } from "./functions";
+import { aIContext } from "@/components/chat/context";
 
 export interface ChatProps {
   models: ModelProps[];
@@ -56,6 +60,11 @@ export function Chat({
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [isPending, startTransition] = useTransition();
   const [settings, setSettings] = useState(initSettings);
+  const { providers } = useContext(aIContext);
+
+  const selectedProvider = selectedModel?.providerId
+    ? providers[selectedModel.providerId]
+    : undefined;
 
   useEffect(() => {
     onSettingsChange?.(settings);
@@ -63,6 +72,7 @@ export function Chat({
 
   const onMessageHandler = async (message: string) => {
     const newId = generateUUID();
+    const providerAuth = providers[selectedModel!.providerId].auth;
     const newMessage = messageSubmit(message, newId, selectedModel!, setChats);
     await onMessage?.(newMessage, selectedModel!.id);
     startTransition(async () => {
@@ -72,7 +82,8 @@ export function Chat({
         selectedModel!,
         setChats,
         settings,
-        chats[selectedModel!.id]
+        chats[selectedModel!.id],
+        providerAuth
       );
       await onMessage?.(response, selectedModel!.id);
     });
@@ -149,7 +160,15 @@ export function Chat({
             loader={isPending && <BouncingLoader />}
             messages={<MessageList messages={chats[selectedModel.id]} />}
             input={
-              <MessageInput onSubmit={onMessageHandler} isPending={isPending} />
+              <MessageInputCheck
+                provider={selectedProvider!}
+                input={
+                  <MessageInput
+                    onSubmit={onMessageHandler}
+                    isPending={isPending}
+                  />
+                }
+              />
             }
           />
         )

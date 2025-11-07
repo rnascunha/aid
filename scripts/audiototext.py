@@ -1,12 +1,9 @@
 import sys
 import json
-from dotenv import load_dotenv
 import aisuite as ai
 
 from pydantic import BaseModel, Field
 from typing import Literal
-
-load_dotenv("./scripts/.env")
 
 
 class SettingsValidate(BaseModel):
@@ -52,44 +49,3 @@ def runAudioToText(provider: str, model: str, file: str, settings: dict):
     )
 
     return result.text
-
-
-def runAppAudioToText(file: str, input):
-    check = check_arguments(input)
-    if "error" in check:
-        return check
-
-    try:
-        provider = check["provider"]
-        model = check["model"]
-        settings = check["settings"]
-
-        response = runAudioToText(provider, model, file, settings)
-        return {"success": True, "response": response}
-    except Exception as e:
-        return {
-            "code": 5,
-            "error": "Error running chat request",
-            "detail": str(e),
-        }
-
-
-if __name__ == "__main__":
-    if len(sys.argv) == 5:
-        response = {
-            "code": 1,
-            "error": "Wrong number of arguments",
-            "detail": "Argument must be: <provider> <model> <file_path> <settings>",
-        }
-        json_out = json.dumps(response)
-        print(json_out, end=None)
-        sys.exit(1)
-
-    response = runAppAudioToText(
-        sys.argv[3],
-        {"provider": sys.argv[1], "model": sys.argv[2], "settings": sys.argv[4]},
-    )
-    json_out = json.dumps(response)
-    print(json_out, end=None)
-    if "error" in response:
-        sys.exit(response["code"])

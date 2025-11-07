@@ -12,16 +12,17 @@ import ListItemText from "@mui/material/ListItemText";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
 
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useContext, useState } from "react";
 import { UserHeader } from "./userHeader";
 
 import { Session } from "next-auth";
 import { SettingsDialog } from "./settings";
+import { aIContext } from "../chat/context";
 
 export function SettingsDropMenu({ session }: { session: Session }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const [openSettings, setOpenSettings] = useState(false);
+  const {openSettings, setOpenSettings} = useContext(aIContext);
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -33,7 +34,7 @@ export function SettingsDropMenu({ session }: { session: Session }) {
     <>
       <IconButton
         onClick={handleClick}
-        aria-controls={open ? "basic-menu" : undefined}
+        aria-controls={open ? "settings-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
       >
@@ -54,8 +55,11 @@ export function SettingsDropMenu({ session }: { session: Session }) {
             },
           },
           list: {
-            "aria-labelledby": "basic-button",
+            "aria-labelledby": "settings-button",
           },
+        }}
+        sx={{
+          zIndex: 20000,
         }}
       >
         <MenuItem

@@ -24,8 +24,8 @@ export const providers: ProviderProps[] = [
     logo: openai,
     url: "https://platform.openai.com/",
     type: ["chat", "audioToText"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -36,8 +36,8 @@ export const providers: ProviderProps[] = [
     logo: anthropic,
     url: "https://www.anthropic.com/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -48,8 +48,8 @@ export const providers: ProviderProps[] = [
     logo: cerebras,
     url: "https://www.cerebras.ai/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -60,8 +60,8 @@ export const providers: ProviderProps[] = [
     logo: cohere,
     url: "https://cohere.com/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -72,8 +72,8 @@ export const providers: ProviderProps[] = [
     logo: deepseek,
     url: "https://www.deepseek.com/en",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -84,8 +84,8 @@ export const providers: ProviderProps[] = [
     logo: groq,
     url: "https://groq.com/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -96,11 +96,11 @@ export const providers: ProviderProps[] = [
     logo: watson,
     url: "https://www.ibm.com/products/watsonx",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_IBM_WATSONX,
     auth: {
-      type: ProviderAuthType.AUTH_IBM_WATSONX,
       key: "",
-      projectId: "",
-      serviceURL: "",
+      project_id: "",
+      service_url: "",
     },
   },
   {
@@ -110,8 +110,8 @@ export const providers: ProviderProps[] = [
     logo: inception,
     url: "https://www.inceptionlabs.ai/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -122,8 +122,8 @@ export const providers: ProviderProps[] = [
     logo: mistral,
     url: "https://mistral.ai/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -134,8 +134,8 @@ export const providers: ProviderProps[] = [
     logo: nebius,
     url: "https://nebius.com/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -146,8 +146,8 @@ export const providers: ProviderProps[] = [
     logo: sambanova,
     url: "https://sambanova.ai/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -158,11 +158,11 @@ export const providers: ProviderProps[] = [
     logo: vertex,
     url: "https://cloud.google.com/vertex-ai",
     type: ["chat", "audioToText"],
+    authType: ProviderAuthType.AUTH_GOOGLE,
     auth: {
-      type: ProviderAuthType.AUTH_GOOGLE,
-      projectId: "",
+      project_id: "",
       region: "",
-      appCredentials: "",
+      application_credentials: "",
     },
   },
   {
@@ -172,8 +172,8 @@ export const providers: ProviderProps[] = [
     logo: xai,
     url: "https://x.ai/",
     type: ["chat"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -184,8 +184,8 @@ export const providers: ProviderProps[] = [
     provider: "huggingface",
     url: "https://huggingface.co/",
     type: ["audioToText"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },
@@ -196,8 +196,8 @@ export const providers: ProviderProps[] = [
     logo: deepgram,
     url: "https://deepgram.com/",
     type: ["audioToText"],
+    authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
-      type: ProviderAuthType.AUTH_API_KEY,
       key: "",
     },
   },

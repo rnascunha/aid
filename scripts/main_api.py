@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from chat import runChat, ChatInputValidate
+from provider import setProviderAuth
 from audiototext import runAudioToText, AudioToTextFileValidate
 from lib import base64_to_bytesio
 
@@ -10,6 +11,16 @@ app = FastAPI()
 def chatRequest(input: ChatInputValidate):
     try:
         data = input.model_dump()
+
+        try:
+            setProviderAuth(data["provider"], data["auth"])
+        except Exception as e:
+            return {
+                "code": 13,
+                "error": "Provider Auth Error",
+                "detail": str(e),
+            }
+
         response = runChat(
             data["provider"], data["model"], data["messages"], data["settings"]
         )

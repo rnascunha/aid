@@ -1,18 +1,18 @@
 import { ChatMessage, MessageProps, ModelProps } from "../../libs/chat/types";
 import {
-  Divider,
   ListItem,
   ListItemButton,
   ListItemButtonProps,
   Stack,
   Typography,
 } from "@mui/material";
-import { Fragment } from "react/jsx-runtime";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StaticAvatar } from "./staticAvatar";
 import { toggleMessagesPane } from "@/libs/chat/utils";
 import { providerMap } from "@/libs/chat/data";
+import { aIContext } from "./context";
+import { checkProviderAvaiable } from "@/libs/chat/functions";
 
 type ChatListItemProps = ListItemButtonProps & {
   model: ModelProps;
@@ -44,7 +44,10 @@ export default function ChatListItem({
   const [formatTimestamp, setFormatTimestamp] = useState(
     getFormatedTimestamp(messages)
   );
+  const { providers } = useContext(aIContext);
+
   const selected = selectedModel?.id === model.id;
+  const hasProviderAuth = checkProviderAvaiable(providers[model.providerId]);
 
   useEffect(() => {
     const handle = setInterval(
@@ -57,69 +60,73 @@ export default function ChatListItem({
   const message = messages.at(-1)?.content;
 
   return (
-    <Fragment>
-      <ListItem sx={{ p: 0 }}>
-        <ListItemButton
-          onClick={() => {
-            setSelectedModel(model);
-            toggleMessagesPane();
-          }}
-          selected={selected}
-          color="neutral"
+    <ListItem
+      sx={{
+        p: 0,
+        borderBottom: "1px solid",
+        borderColor: "lightgray",
+        bgcolor: hasProviderAuth ? "inherit" : "background.paper",
+      }}
+    >
+      <ListItemButton
+        onClick={() => {
+          setSelectedModel(model);
+          toggleMessagesPane();
+        }}
+        selected={selected}
+        color="neutral"
+        sx={{
+          flexDirection: "column",
+          alignItems: "initial",
+          gap: 1,
+          p: 1.25,
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <StaticAvatar
+              src={providerMap[sender.providerId].logo}
+              alt={sender.name}
+            />
+            <Stack>
+              <Typography>{sender.name}</Typography>
+              <Typography
+                fontSize="small"
+                color="textSecondary"
+                sx={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: "1",
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {sender.model}
+              </Typography>
+            </Stack>
+          </Stack>
+          <Typography color="textSecondary" fontSize="small" noWrap>
+            {formatTimestamp}
+          </Typography>
+        </Stack>
+        <Typography
+          color={message && "success" in message ? "textSecondary" : "error"}
+          fontSize="small"
           sx={{
-            flexDirection: "column",
-            alignItems: "initial",
-            gap: 1,
-            p: 1.25,
+            display: "-webkit-box",
+            WebkitLineClamp: "1",
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <StaticAvatar
-                src={providerMap[sender.providerId].logo}
-                alt={sender.name}
-              />
-              <Stack>
-                <Typography>{sender.name}</Typography>
-                <Typography
-                  fontSize="small"
-                  color="textSecondary"
-                  sx={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: "1",
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {sender.model}
-                </Typography>
-              </Stack>
-            </Stack>
-            <Typography color="textSecondary" fontSize="small" noWrap>
-              {formatTimestamp}
-            </Typography>
-          </Stack>
-          <Typography
-            color={message && "success" in message ? "textSecondary" : "error"}
-            fontSize="small"
-            sx={{
-              display: "-webkit-box",
-              WebkitLineClamp: "1",
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {getDetailMessage(message)}
-          </Typography>
-        </ListItemButton>
-      </ListItem>
-      <Divider sx={{ margin: 0 }} />
-    </Fragment>
+          {getDetailMessage(message)}
+        </Typography>
+      </ListItemButton>
+    </ListItem>
   );
 }

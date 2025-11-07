@@ -5,29 +5,26 @@ const providerType = ["chat", "audioToText"] as const;
 type ProviderType = (typeof providerType)[number];
 
 export enum ProviderAuthType {
-  NONE = 0,
-  AUTH_API_KEY = 1,
-  AUTH_GOOGLE = 2,
-  AUTH_IBM_WATSONX = 3,
+  NONE = "none",
+  AUTH_API_KEY = "api_key",
+  AUTH_GOOGLE = "google",
+  AUTH_IBM_WATSONX = "watsonx",
 }
 
 export interface ProviderAuthAPIKey {
-  readonly type: ProviderAuthType.AUTH_API_KEY;
   key: string;
 }
 
 export interface ProviderAuthGoogle {
-  readonly type: ProviderAuthType.AUTH_GOOGLE;
-  projectId: string;
+  project_id: string;
   region: string;
-  appCredentials: string;
+  application_credentials: string;
 }
 
 export interface ProviderAuthIBMWatsonX {
-  readonly type: ProviderAuthType.AUTH_IBM_WATSONX;
   key: string;
-  serviceURL: string;
-  projectId: string;
+  service_url: string;
+  project_id: string;
 }
 
 export type ProviderAuth =
@@ -42,6 +39,7 @@ export interface ProviderProps {
   url: string;
   provider: string;
   type: ProviderType[];
+  authType: ProviderAuthType;
   auth: ProviderAuth;
 }
 

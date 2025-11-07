@@ -16,18 +16,22 @@ import {
 import { ModelProps, ProviderProps } from "../../libs/chat/types";
 
 import AddIcon from "@mui/icons-material/Add";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { StaticAvatar } from "./staticAvatar";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { SelectProvider } from "./selectProvider";
 import { generateUUID } from "@/libs/uuid";
 import { providerMap, providers } from "@/libs/chat/data";
+import { aIContext } from "./context";
+import { checkProviderAvaiable } from "@/libs/chat/functions";
 
 function ModelItem({
   model,
   addRemoveModel,
+  provider,
 }: {
   model: ModelProps;
+  provider: ProviderProps;
   addRemoveModel: (model: string | ModelProps) => Promise<void>;
 }) {
   return (
@@ -35,6 +39,10 @@ function ModelItem({
       sx={{
         display: "flex",
         gap: 1,
+        borderRadius: "5px",
+        bgcolor: checkProviderAvaiable(provider)
+          ? "inherit"
+          : "var(--mui-palette-background-default)",
       }}
       secondaryAction={
         <IconButton onClick={async () => await addRemoveModel(model.id)}>
@@ -124,6 +132,7 @@ function AddModelDialog({
   open: boolean;
   onClose: () => void;
 }) {
+  const { providers } = useContext(aIContext);
   return (
     <Dialog
       open={open}
@@ -144,7 +153,12 @@ function AddModelDialog({
         <Divider sx={{ my: 1 }} />
         <List>
           {models.map((m) => (
-            <ModelItem key={m.id} model={m} addRemoveModel={addRemoveModel} />
+            <ModelItem
+              key={m.id}
+              model={m}
+              addRemoveModel={addRemoveModel}
+              provider={providers[m.providerId]}
+            />
           ))}
         </List>
       </DialogContent>

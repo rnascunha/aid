@@ -17,7 +17,6 @@ import { defaultSettings } from "@/appComponents/chat/data";
 import { Chat } from "@/appComponents/chat/chat";
 // import { chats, models } from "./data";
 
-
 export default function ChatPage() {
   const [dbData, setDbData] = useState<null | {
     chats: ChatMessagesProps;

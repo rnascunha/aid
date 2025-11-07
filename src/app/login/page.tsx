@@ -3,7 +3,7 @@ import LoginGoogleButton from "@/components/loginButtonGoogle";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { loginPath, restrictedPath } from "@/constants";
-import ModeSwitch from "@/components/modeSwitch";
+import ModeSwitch from "@/components/navbar/modeSwitch";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

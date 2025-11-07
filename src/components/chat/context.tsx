@@ -15,11 +15,15 @@ import {
 interface AIContext {
   providers: Record<string, ProviderProps>;
   setProviders: Dispatch<SetStateAction<Record<string, ProviderProps>>>;
+  openSettings: boolean;
+  setOpenSettings: Dispatch<SetStateAction<boolean>>;
 }
 
-const defaultAIContext = {
+const defaultAIContext: AIContext = {
   providers: providerMap,
   setProviders: () => {},
+  openSettings: false,
+  setOpenSettings: () => {},
 };
 
 export const aIContext = createContext<AIContext>(defaultAIContext);
@@ -27,6 +31,9 @@ export const aIContext = createContext<AIContext>(defaultAIContext);
 export function AIContextProvider({ children }: { children: ReactNode }) {
   const [providers, setProviders] = useState<Record<string, ProviderProps>>(
     defaultAIContext.providers
+  );
+  const [openSettings, setOpenSettings] = useState(
+    defaultAIContext.openSettings
   );
 
   useEffect(() => {
@@ -53,6 +60,8 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
       value={{
         providers,
         setProviders,
+        openSettings,
+        setOpenSettings,
       }}
     >
       {children}

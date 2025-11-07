@@ -1,4 +1,9 @@
-import { ChatMessagesProps, MessageProps, ModelProps } from "@/libs/chat/types";
+import {
+  ChatMessagesProps,
+  MessageProps,
+  ModelProps,
+  ProviderAuth,
+} from "@/libs/chat/types";
 import { Dispatch, SetStateAction } from "react";
 import { ChatSettings } from "./types";
 import { mergeMessages } from "@/libs/chat/functions";
@@ -11,7 +16,8 @@ export async function messageResponse(
   model: ModelProps,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
   settings: ChatSettings,
-  chats: MessageProps[]
+  chats: MessageProps[],
+  providerAuth: ProviderAuth
 ) {
   const messages = mergeMessages(message, settings.context, chats);
 
@@ -19,7 +25,8 @@ export async function messageResponse(
     providerMap[model.providerId].provider,
     model.model,
     messages,
-    { ...settings.general, ...settings.tools }
+    { ...settings.general, ...settings.tools },
+    providerAuth
   );
   const newIdString = `${newId}:r`;
   const newMessage = {

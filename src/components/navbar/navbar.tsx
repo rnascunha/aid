@@ -1,6 +1,5 @@
 import { AppBar, Stack, Typography } from "@mui/material";
-import ModeSwitch from "../modeSwitch";
-import { UserHeader } from "./userHeader";
+import ModeSwitch from "./modeSwitch";
 import { auth } from "@/auth";
 import { Session } from "next-auth";
 import { SideMenuButton } from "../sideMenu";
@@ -38,8 +37,7 @@ export default async function NavBar() {
       </Stack>
       <Stack direction="row" gap={1}>
         <SettingsDropMenu session={session as Session} />
-        <UserHeader session={session as Session} />
-        <ModeSwitch />
+        <ModeSwitch color="white" />
       </Stack>
     </AppBar>
   );

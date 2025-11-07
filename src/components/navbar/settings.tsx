@@ -63,8 +63,10 @@ function GoogleConfig({
         label="Project ID"
         fullWidth
         size="small"
-        defaultValue={(provider.auth as ProviderAuthGoogle).projectId}
-        onBlur={(ev) => updateAuthProvider(ev.target.value.trim(), "projectId")}
+        defaultValue={(provider.auth as ProviderAuthGoogle).project_id}
+        onBlur={(ev) =>
+          updateAuthProvider(ev.target.value.trim(), "project_id")
+        }
       />
       <TextField
         label="Region"
@@ -77,9 +79,11 @@ function GoogleConfig({
         label="App Credenitals"
         fullWidth
         size="small"
-        defaultValue={(provider.auth as ProviderAuthGoogle).appCredentials}
+        defaultValue={
+          (provider.auth as ProviderAuthGoogle).application_credentials
+        }
         onBlur={(ev) =>
-          updateAuthProvider(ev.target.value.trim(), "appCredentials")
+          updateAuthProvider(ev.target.value.trim(), "application_credentials")
         }
       />
     </Stack>
@@ -102,16 +106,18 @@ function IBMWatsonXConfig({
         label="Project ID"
         fullWidth
         size="small"
-        defaultValue={(provider.auth as ProviderAuthIBMWatsonX).projectId}
-        onBlur={(ev) => updateAuthProvider(ev.target.value.trim(), "projectId")}
+        defaultValue={(provider.auth as ProviderAuthIBMWatsonX).project_id}
+        onBlur={(ev) =>
+          updateAuthProvider(ev.target.value.trim(), "project_id")
+        }
       />
       <TextField
         label="Region"
         fullWidth
         size="small"
-        defaultValue={(provider.auth as ProviderAuthIBMWatsonX).serviceURL}
+        defaultValue={(provider.auth as ProviderAuthIBMWatsonX).service_url}
         onBlur={(ev) =>
-          updateAuthProvider(ev.target.value.trim(), "serviceURL")
+          updateAuthProvider(ev.target.value.trim(), "service_url")
         }
       />
       <TextField
@@ -135,7 +141,7 @@ function ProviderConfig({
     id: string
   ) => Promise<void> | void;
 }) {
-  switch (provider.auth.type) {
+  switch (provider.authType) {
     case ProviderAuthType.AUTH_API_KEY:
       return (
         <APIKeyConfig

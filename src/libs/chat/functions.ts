@@ -6,6 +6,7 @@ import {
   MessageContext,
   MessageProps,
   ModelProps,
+  ProviderProps,
 } from "./types";
 import { ContextSettings } from "@/appComponents/chat/types";
 
@@ -178,4 +179,8 @@ export async function addRemoveModel(
   setModels((prev) => [...prev, model]);
   setChats((prev) => ({ ...prev, [model.id]: [] }));
   if (models.length === 0) setSelectedModel(model);
+}
+
+export function checkProviderAvaiable(provider: ProviderProps) {
+  return Object.values(provider.auth).every((v) => v !== "");
 }

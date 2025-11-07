@@ -49,7 +49,11 @@ export function SelectProvider({
       }}
     >
       {providers.map((provider) => (
-        <MenuItem dense key={provider.id} value={provider.id}>
+        <MenuItem
+          dense
+          key={provider.id}
+          value={provider.id}
+        >
           <ProviderItem provider={provider} />
         </MenuItem>
       ))}

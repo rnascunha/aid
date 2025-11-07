@@ -13,7 +13,7 @@ import { Metadata } from "next";
 
 const description = "Test site for AI features";
 const name = "AId";
-const template = `%d | ${name}`;
+const template = `%s | ${name}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_BASE_URL as string),

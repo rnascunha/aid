@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, SxProps } from "@mui/material";
 import { CSSProperties, SVGProps } from "react";
 import Spinner from "./spinner";
 
@@ -11,6 +11,7 @@ export default function CenterSpinner({
   width?: number | string;
   height?: number | string;
   style?: CSSProperties;
+  sx?: SxProps;
   props?: SVGProps<SVGSVGElement>;
 }) {
   return (
