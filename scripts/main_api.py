@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from chat import runChat, ChatInputValidate
 from provider import setProviderAuth
-from audiototext import runAudioToText, AudioToTextFileValidate
+from audiototext import runAudioToText, AudioToTextValidate
 from lib import base64_to_bytesio
 
 app = FastAPI()
@@ -34,9 +34,19 @@ def chatRequest(input: ChatInputValidate):
 
 
 @app.post("/audiototext/")
-def audioToTextRequest(input: AudioToTextFileValidate):
+def audioToTextRequest(input: AudioToTextValidate):
     try:
         data = input.model_dump()
+
+        try:
+            setProviderAuth(data["provider"], data["auth"])
+        except Exception as e:
+            return {
+                "code": 13,
+                "error": "Provider Auth Error",
+                "detail": str(e),
+            }
+
         file = base64_to_bytesio(data["file"])
         response = runAudioToText(
             data["provider"], data["model"], file, data["settings"]

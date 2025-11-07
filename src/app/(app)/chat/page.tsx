@@ -15,7 +15,6 @@ import CenterSpinner from "@/components/spinner/centerSpinner";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { defaultSettings } from "@/appComponents/chat/data";
 import { Chat } from "@/appComponents/chat/chat";
-// import { chats, models } from "./data";
 
 export default function ChatPage() {
   const [dbData, setDbData] = useState<null | {
@@ -43,8 +42,6 @@ export default function ChatPage() {
       models={dbData.models}
       chats={dbData.chats}
       settings={dbData.settings ?? defaultSettings}
-      // models={models}
-      // chats={chats}
       onMessage={onChatMessage}
       onDeleteMessages={deleteChatMessages}
       onAddRemoveModel={onAddRemoveModel}

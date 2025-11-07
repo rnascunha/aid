@@ -1,4 +1,3 @@
-import { ChatSettings } from "@/appComponents/chat/types";
 import {
   deleteMessages,
   getAllMessages,
@@ -7,10 +6,12 @@ import {
 } from "@/libs/chat/storage";
 import { ChatMessagesProps, MessageProps, ModelProps } from "@/libs/chat/types";
 import Dexie, { type Table } from "dexie";
+import { AudioToTextSettings } from "./types";
+import { filePathToBase64 } from "@/libs/base64";
 
 export const audioToTextDB = new Dexie("AudioToTextStorage") as Dexie & {
   audioToTextMessages: Table<MessageDB, [string, string]>;
-  settings: Table<ChatSettings, string>;
+  settings: Table<AudioToTextSettings, string>;
 };
 
 audioToTextDB.version(1).stores({
@@ -26,7 +27,20 @@ export async function onAudioToTextMessage(
   message: MessageProps,
   contactId: string
 ) {
-  return await onMessage(audioToTextDB.audioToTextMessages, message, contactId);
+  const msg = !message.attachment
+    ? message
+    : {
+        ...message,
+        attachment: {
+          ...message.attachment,
+          data: await filePathToBase64(
+            message.attachment.data,
+            message.attachment.type,
+            true
+          ),
+        },
+      };
+  return await onMessage(audioToTextDB.audioToTextMessages, msg, contactId);
 }
 
 export async function getAllAudioToTextMessages(
@@ -71,6 +85,6 @@ export async function getSettings() {
   return await audioToTextDB.settings.get(defaultSettingsKey);
 }
 
-export async function updateSettings(s: ChatSettings) {
+export async function updateSettings(s: AudioToTextSettings) {
   await audioToTextDB.settings.put(s, defaultSettingsKey);
 }

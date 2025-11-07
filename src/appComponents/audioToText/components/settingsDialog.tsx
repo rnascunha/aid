@@ -42,7 +42,7 @@ export function SettingsDialog({
           },
         }}
       >
-        <DialogTitle>Options</DialogTitle>
+        <DialogTitle>Settings</DialogTitle>
         <DialogContent>
           <Settings
             settings={settings}

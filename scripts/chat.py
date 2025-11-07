@@ -5,7 +5,7 @@ from typing import List, Literal, Dict
 import aisuite as ai
 
 import ai_tools as tools
-from provider import providerChatIds, setProviderAuth
+from provider import providerChatIds
 
 
 class MessagesContext(BaseModel):
@@ -27,7 +27,7 @@ class ChatInputValidate(BaseModel):
     auth: Dict[str, str]
 
 
-def runChat(provider, model, messages, settings):
+def runChat(provider: str, model: str, messages, settings: dict):
     """Running chat request to provider"""
 
     importedTools = [getattr(tools, t) for t in settings["tools"]]
@@ -38,7 +38,7 @@ def runChat(provider, model, messages, settings):
         messages=messages,
         tools=importedTools,
         temperature=settings["temperature"],
-        max_turns=2,
+        max_turns=settings["maxTurns"],
     )
 
     return response.choices[0].message.content

@@ -13,10 +13,9 @@ import {
   MessageProps,
   ModelProps,
 } from "@/libs/chat/types";
-import { useEffect, useState, useTransition } from "react";
+import { useContext, useEffect, useState, useTransition } from "react";
 import { AudioInput } from "./components/audioInput";
 import { attachmentSubmit, onDeleteModelMessages } from "@/libs/chat/functions";
-import { initAudioSettings } from "./data";
 import { generateUUID } from "@/libs/uuid";
 import { AudioToTextSettings } from "./types";
 import { attachmentResponse } from "./functions";
@@ -25,10 +24,13 @@ import { ChatHeader } from "@/components/chat/chatHeader";
 import { Stack } from "@mui/material";
 import { SettingsDialog } from "./components/settingsDialog";
 import { SelectLanguage } from "./components/selectLanguage";
+import { MessageInputCheck } from "@/components/chat/messageInput";
+import { aIContext } from "@/components/chat/context";
 
 interface AudioToTextPros {
   models: ModelProps[];
   chats: ChatMessagesProps;
+  settings: AudioToTextSettings;
   onMessage?: (
     message: MessageProps,
     contactId: string
@@ -40,6 +42,7 @@ interface AudioToTextPros {
 export function AudioToText({
   models,
   chats: allChats,
+  settings: initSettings,
   onMessage,
   onDeleteMessages,
   onSettingsChange,
@@ -48,9 +51,14 @@ export function AudioToText({
     undefined
   );
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
-  const [settings, setSettings] =
-    useState<AudioToTextSettings>(initAudioSettings);
+  const [settings, setSettings] = useState<AudioToTextSettings>(initSettings);
   const [isPending, startTransition] = useTransition();
+
+  const { providers } = useContext(aIContext);
+
+  const selectedProvider = selectedModel?.providerId
+    ? providers[selectedModel.providerId]
+    : undefined;
 
   useEffect(() => {
     onSettingsChange?.(settings);
@@ -63,7 +71,8 @@ export function AudioToText({
       file,
       newId,
       selectedModel!,
-      setChats
+      setChats,
+      settings.prompt ? settings.prompt : undefined
     );
     await onMessage?.(newMessage, selectedModel!.id);
     startTransition(async () => {
@@ -72,7 +81,8 @@ export function AudioToText({
         newId,
         selectedModel!,
         setChats,
-        settings
+        settings,
+        selectedProvider!.auth
       );
       await onMessage?.(response, selectedModel!.id);
     });
@@ -147,11 +157,16 @@ export function AudioToText({
             loader={isPending && <BouncingLoader />}
             messages={<MessageList messages={chats[selectedModel.id]} />}
             input={
-              <AudioInput
-                settings={settings}
-                setSettings={setSettings}
-                onSubmit={onMessageHandler}
-                isPending={isPending}
+              <MessageInputCheck
+                provider={selectedProvider!}
+                input={
+                  <AudioInput
+                    settings={settings}
+                    setSettings={setSettings}
+                    onSubmit={onMessageHandler}
+                    isPending={isPending}
+                  />
+                }
               />
             }
           />
