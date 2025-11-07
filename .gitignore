@@ -41,6 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 /scripts/.venv
-/tmp/
+/scripts/__pycache__
+
 certificates
 /container/keys
