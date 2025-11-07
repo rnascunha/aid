@@ -1,0 +1,17 @@
+services:
+  aid:
+    image: rafaelnascunha/aid:1.0
+    container_name: aid
+    restart: always
+  nginx:
+    image: rafaelnascunha/aid-nginx:1.0
+    container_name: aid-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt/live/aid.ia.br/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+      - /etc/letsencrypt/live/aid.ia.br/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+    restart: always
+    depends_on:
+      - aid
