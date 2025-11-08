@@ -6,7 +6,9 @@ import aisuite as ai
 
 import ai_tools as tools
 from provider import providerChatIds, setProviderAuth
-from exception import RunClientAIException
+from exception import RunClientAIException, ProviderAuthException
+
+import tempfile
 
 
 class MessagesContext(BaseModel):
@@ -48,8 +50,31 @@ def runChat(provider: str, model: str, messages, settings: dict):
         raise RunClientAIException(str(e))
 
 
+def runChatAppGoogle(input):
+    provider = input["provider"]
+    auth = input["auth"]
+    if "application_credentials" not in auth:
+        raise ProviderAuthException(f"Missing 'application_credentials' auth field")
+
+    data = auth["application_credentials"]
+    with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
+        auth["application_credentials"] = temp_file.name
+        temp_file.write(data)
+        temp_file.seek(0)
+
+        setProviderAuth(provider, auth)
+
+        model = input["model"]
+        messages = input["messages"]
+        settings = input["settings"]
+        response = runChat(provider, model, messages, settings)
+        return {"success": True, "response": response}
+
+
 def runChatApp(input):
     provider = input["provider"]
+    if provider == "google":
+        return runChatAppGoogle(input)
     auth = input["auth"]
     setProviderAuth(provider, auth)
 

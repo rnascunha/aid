@@ -7,6 +7,8 @@ class ProviderAuthType(Enum):
     AUTH_API_KEY = "key"
     AUTH_GOOGLE = "google"
     AUTH_IBM_WATSONX = "watsonx"
+    AUTH_AWS = "aws"
+    AUTH_AZURE = "azure"
 
 
 providerList = [
@@ -110,9 +112,29 @@ providerList = [
         "auth": {
             "project_id": "GOOGLE_PROJECT_ID",
             "region": "GOOGLE_REGION",
-            "application_credendials": "GOOGLE_APPLICATION_CREDENTIALS",
+            "application_credentials": "GOOGLE_APPLICATION_CREDENTIALS",
         },
         "type": ["chat", "audioToText"],
+    },
+    {
+        "id": "aws",
+        "auth_type": ProviderAuthType.AUTH_AWS,
+        "auth": {
+            "access_key": "AWS_ACCESS_KEY",
+            "secret_key": "AWS_SECRET_KEY",
+            "region": "AWS_REGION",
+        },
+        "type": ["chat"],
+    },
+    {
+        "id": "azure",
+        "auth_type": ProviderAuthType.AUTH_AZURE,
+        "auth": {
+            "key": "AZURE_API_KEY",
+            "base_url": "AZURE_BASE_URL",
+            "api_version": "AZURE_API_VERSION",
+        },
+        "type": ["chat"],
     },
 ]
 

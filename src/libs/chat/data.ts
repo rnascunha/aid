@@ -13,6 +13,8 @@ import vertex from "@/images/ai/vertex-ai.svg";
 import xai from "@/images/ai/xai.svg";
 import deepgram from "@/images/ai/deepgram.jpeg";
 import huggingface from "@/images/ai/hugging-face.svg";
+import aws from "@/images/ai/aws.png";
+import azure from "@/images/ai/azure.svg";
 
 import { ProviderAuthType, ProviderProps } from "./types";
 
@@ -199,6 +201,34 @@ export const providers: ProviderProps[] = [
     authType: ProviderAuthType.AUTH_API_KEY,
     auth: {
       key: "",
+    },
+  },
+  {
+    name: "AWS",
+    id: "aws",
+    provider: "aws",
+    logo: aws,
+    url: "https://console.aws.amazon.com/bedrock/home/",
+    type: ["chat"],
+    authType: ProviderAuthType.AUTH_AWS,
+    auth: {
+      access_key: "",
+      secret_key: "",
+      region: "",
+    },
+  },
+    {
+    name: "Azure",
+    id: "azure",
+    provider: "azure",
+    logo: azure,
+    url: "https://portal.azure.com/",
+    type: ["chat"],
+    authType: ProviderAuthType.AUTH_AZURE,
+    auth: {
+      key: "",
+      base_url: "",
+      api_version: "",
     },
   },
 ] as const;

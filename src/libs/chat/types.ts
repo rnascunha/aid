@@ -9,6 +9,8 @@ export enum ProviderAuthType {
   AUTH_API_KEY = "api_key",
   AUTH_GOOGLE = "google",
   AUTH_IBM_WATSONX = "watsonx",
+  AUTH_AWS = "aws",
+  AUTH_AZURE = "azure",
 }
 
 export interface ProviderAuthAPIKey {
@@ -27,10 +29,24 @@ export interface ProviderAuthIBMWatsonX {
   project_id: string;
 }
 
+export interface ProviderAuthAWS {
+  access_key: string;
+  secret_key: string;
+  region: string;
+}
+
+export interface ProviderAuthAzure {
+  key: string;
+  base_url: string;
+  api_version: string;
+}
+
 export type ProviderAuth =
   | ProviderAuthAPIKey
   | ProviderAuthGoogle
-  | ProviderAuthIBMWatsonX;
+  | ProviderAuthIBMWatsonX
+  | ProviderAuthAWS
+  | ProviderAuthAzure;
 
 export interface ProviderProps {
   id: string;

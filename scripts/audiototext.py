@@ -3,8 +3,9 @@ from typing import Literal, Dict
 from provider import providerAudioToTextIds, setProviderAuth
 
 import aisuite as ai
-from exception import RunClientAIException
+from exception import RunClientAIException, ProviderAuthException
 from lib import base64_to_bytesio
+import tempfile
 
 
 class SettingsValidate(BaseModel):
@@ -37,6 +38,27 @@ def runAudioToText(provider: str, model: str, file: str, settings: dict):
         return result.text
     except Exception as e:
         raise RunClientAIException(str(e))
+
+
+def runAudioToTextAppGoogle(input):
+    provider = input["provider"]
+    auth = input["auth"]
+    if "application_credentials" not in auth:
+        raise ProviderAuthException(f"Missing 'application_credentials' auth field")
+
+    data = auth["application_credentials"]
+    with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
+        auth["application_credentials"] = temp_file.name
+        temp_file.write(data)
+        temp_file.seek(0)
+        
+        setProviderAuth(provider, auth)
+
+        model = input["model"]
+        settings = input["settings"]
+        file = base64_to_bytesio(input["file"])
+        response = runAudioToText(provider, model, file, settings)
+        return {"success": True, "response": response}
 
 
 def runAudioToTextApp(input):

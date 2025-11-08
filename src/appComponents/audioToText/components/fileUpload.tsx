@@ -1,21 +1,9 @@
-import styled from "@emotion/styled";
 import { IconButton, Stack, Tooltip } from "@mui/material";
 
 import { useRef } from "react";
 import { Attachment } from "@/libs/chat/types";
 import AudioFileIcon from "@mui/icons-material/AudioFile";
-
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
+import { VisuallyHiddenInput } from "@/components/fileUpload";
 
 export function AudioFileUploadButton({
   isPending,
