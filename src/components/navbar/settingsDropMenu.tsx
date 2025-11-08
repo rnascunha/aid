@@ -16,7 +16,7 @@ import { MouseEvent, useContext, useState } from "react";
 import { UserHeader } from "./userHeader";
 
 import { Session } from "next-auth";
-import { SettingsDialog } from "./settings";
+import { SettingsDialog } from "../chat/settingsProvider";
 import { aIContext } from "../chat/context";
 
 export function SettingsDropMenu({ session }: { session: Session }) {

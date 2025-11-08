@@ -35,7 +35,7 @@ def runAudioToText(provider: str, model: str, file: str, settings: dict):
             temperature=settings["temperature"],
         )
 
-        return result.text
+        return result
     except Exception as e:
         raise RunClientAIException(str(e))
 
@@ -51,14 +51,14 @@ def runAudioToTextAppGoogle(input):
         auth["application_credentials"] = temp_file.name
         temp_file.write(data)
         temp_file.seek(0)
-        
+
         setProviderAuth(provider, auth)
 
         model = input["model"]
         settings = input["settings"]
         file = base64_to_bytesio(input["file"])
         response = runAudioToText(provider, model, file, settings)
-        return {"success": True, "response": response}
+        return {"success": True, "data": response}
 
 
 def runAudioToTextApp(input):
@@ -70,4 +70,4 @@ def runAudioToTextApp(input):
     settings = input["settings"]
     file = base64_to_bytesio(input["file"])
     response = runAudioToText(provider, model, file, settings)
-    return {"success": True, "response": response}
+    return {"success": True, "data": response}

@@ -34,7 +34,13 @@ export async function fetchAudioToText(
       },
       body: JSON.stringify({ provider, model, file, settings, auth }),
     });
-    return await response.json();
+    const raw = await response.json();
+    if ("error" in raw) return raw;
+    return {
+      ...raw,
+      response: raw.data.text,
+      data: raw.data,
+    };
   } catch (e) {
     return {
       code: 9,

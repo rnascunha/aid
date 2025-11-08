@@ -24,12 +24,12 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { StaticAvatar } from "../chat/staticAvatar";
+import { StaticAvatar } from "./staticAvatar";
 import Link from "next/link";
 
 import LaunchIcon from "@mui/icons-material/Launch";
 import { useContext, useRef, useState } from "react";
-import { aIContext } from "../chat/context";
+import { aIContext } from "./context";
 import { updateProvider } from "@/libs/chat/storage";
 import { VisuallyHiddenInput } from "@/components/fileUpload";
 

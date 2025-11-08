@@ -75,6 +75,7 @@ interface ChatErrorMessage {
 export interface ChatSuccessMessage {
   success: true;
   response: string;
+  data: object;
 }
 
 export type ChatMessage = ChatErrorMessage | ChatSuccessMessage;

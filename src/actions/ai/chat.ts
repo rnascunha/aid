@@ -22,7 +22,13 @@ export async function fetchChatRequest(
       },
       body: JSON.stringify({ provider, model, messages, settings, auth }),
     });
-    return await response.json();
+    const raw = await response.json();
+    if ("error" in raw) return raw;
+    return {
+      ...raw,
+      response: raw.data.choices[0].message.content,
+      data: raw.data,
+    };
   } catch (e) {
     return {
       code: 9,

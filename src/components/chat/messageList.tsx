@@ -1,16 +1,79 @@
-import { Box, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+} from "@mui/material";
 import { StaticAvatar } from "./staticAvatar";
 import { MessageProps } from "../../libs/chat/types";
 import { MessageBubble } from "./messageBubble";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { providerMap } from "@/libs/chat/data";
+import JSONOutput from "../JSONOutput";
 
 interface MessageListProps {
   messages: MessageProps[];
 }
 
+function MessageDetail({ message }: { message: MessageProps }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { sender, attachment, ...rest } = message;
+  const msg =
+    "error" in rest
+      ? rest
+      : {
+          ...rest,
+          attachment: attachment
+            ? {
+                name: attachment.name,
+                size: attachment.size,
+                type: attachment.type,
+              }
+            : null,
+        };
+  return <JSONOutput src={msg} name={null} />;
+}
+
+function MessageDetailDialog({
+  message,
+  onClose,
+}: {
+  message: MessageProps | null;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog
+      onClose={onClose}
+      open={message !== null}
+      aria-hidden="false"
+      sx={{
+        "& .MuiDialog-container": {
+          "& .MuiPaper-root": {
+            width: "100%",
+            maxWidth: "500px",
+            // height: "450px",
+            maxHeight: "80%",
+          },
+        },
+      }}
+    >
+      <DialogTitle>Message Details</DialogTitle>
+      <DialogContent>
+        {message && <MessageDetail message={message} />}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export function MessageList({ messages }: MessageListProps) {
   const el = useRef<HTMLDivElement>(null);
+  const [message, setMessage] = useState<MessageProps | null>(null);
 
   useEffect(() => {
     const elem = el.current;
@@ -62,11 +125,13 @@ export function MessageList({ messages }: MessageListProps) {
               <MessageBubble
                 variant={isYou ? "sent" : "received"}
                 message={message}
+                onClick={() => setMessage(message)}
               />
             </Stack>
           );
         })}
       </Stack>
+      <MessageDetailDialog message={message} onClose={() => setMessage(null)} />
     </Box>
   );
 }

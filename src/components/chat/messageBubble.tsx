@@ -38,11 +38,6 @@ function getContentData(content: ChatMessage) {
   );
 }
 
-interface MessageBubbleProps {
-  variant: "sent" | "received";
-  message: MessageProps;
-}
-
 function TextMessage({
   message,
   isSent,
@@ -129,14 +124,24 @@ function AttachmentMessage({
         )}
         {"success" in message.content &&
           !message.content.response.startsWith("File: ") && (
-            <Typography sx={{pt: 0.5}}>{message.content.response}</Typography>
+            <Typography sx={{ pt: 0.5 }}>{message.content.response}</Typography>
           )}
       </Stack>
     </Container>
   );
 }
 
-export function MessageBubble({ variant, message }: MessageBubbleProps) {
+interface MessageBubbleProps {
+  variant: "sent" | "received";
+  message: MessageProps;
+  onClick?: () => void;
+}
+
+export function MessageBubble({
+  variant,
+  message,
+  onClick,
+}: MessageBubbleProps) {
   const { timestamp, attachment = undefined } = message;
   const isSent = variant === "sent";
   const [formatTimestamp, setFormatTimestamp] = useState(dayjs().to(timestamp));
@@ -150,7 +155,14 @@ export function MessageBubble({ variant, message }: MessageBubbleProps) {
   }, [timestamp]);
 
   return (
-    <Box sx={{ maxWidth: { sm: "60%", xs: "80%" }, minWidth: "auto" }}>
+    <Box
+      sx={{
+        maxWidth: { sm: "60%", xs: "80%" },
+        minWidth: "auto",
+        cursor: onClick ? "pointer" : "default",
+      }}
+      onClick={onClick}
+    >
       <Stack
         direction="row"
         spacing={2}

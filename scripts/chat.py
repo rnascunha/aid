@@ -45,7 +45,7 @@ def runChat(provider: str, model: str, messages, settings: dict):
             max_turns=settings["maxTurns"],
         )
 
-        return response.choices[0].message.content
+        return response
     except Exception as e:
         raise RunClientAIException(str(e))
 
@@ -68,7 +68,10 @@ def runChatAppGoogle(input):
         messages = input["messages"]
         settings = input["settings"]
         response = runChat(provider, model, messages, settings)
-        return {"success": True, "response": response}
+        return {
+            "success": True,
+            "data": response,
+        }
 
 
 def runChatApp(input):
@@ -82,4 +85,7 @@ def runChatApp(input):
     messages = input["messages"]
     settings = input["settings"]
     response = runChat(provider, model, messages, settings)
-    return {"success": True, "response": response}
+    return {
+        "success": True,
+        "data": response,
+    }
