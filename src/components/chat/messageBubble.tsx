@@ -1,10 +1,19 @@
-import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
-import { ChatMessage, MessageProps } from "../../libs/chat/types";
-import { Avatar, Box, Container, Stack, Typography } from "@mui/material";
+import { ChatMessage, MessageProps } from "@/libs/chat/types";
+import {
+  Avatar,
+  Box,
+  Container,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import dayjs from "@/libs/dayjs";
 import { useEffect, useState } from "react";
 import { createHiperlinks } from "@/libs/links";
 import { formatBytes } from "@/libs/formatData";
+
+import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 
 function getContentData(content: ChatMessage) {
   if ("success" in content)
@@ -157,12 +166,30 @@ export function MessageBubble({
   return (
     <Box
       sx={{
-        maxWidth: { sm: "60%", xs: "80%" },
+        maxWidth: { sm: "60%", xs: "70%" },
         minWidth: "auto",
-        cursor: onClick ? "pointer" : "default",
+        position: "relative",
+        "&:hover .detail-message-icon": {
+          opacity: 1,
+        },
       }}
-      onClick={onClick}
     >
+      <IconButton
+        className="detail-message-icon"
+        sx={[
+          {
+            position: "absolute",
+            top: "calc(50% + 10px)",
+            transform: "translateY(-50%)",
+            opacity: 0,
+            transition: "opacity 0.3s",
+          },
+          message.sender === "You" ? { left: "-35px" } : { right: "-35px" },
+        ]}
+        onClick={onClick}
+      >
+        <InfoOutlineIcon />
+      </IconButton>
       <Stack
         direction="row"
         spacing={2}

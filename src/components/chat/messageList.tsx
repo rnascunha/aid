@@ -53,8 +53,7 @@ function MessageDetailDialog({
         "& .MuiDialog-container": {
           "& .MuiPaper-root": {
             width: "100%",
-            maxWidth: "500px",
-            // height: "450px",
+            maxWidth: "600px",
             maxHeight: "80%",
           },
         },
