@@ -6,6 +6,7 @@ import {
   MessageProps,
   ModelProps,
   ProviderAuth,
+  ToolsProps,
 } from "./types";
 
 export interface ProviderAuthDB {
@@ -13,16 +14,24 @@ export interface ProviderAuthDB {
   auth: ProviderAuth;
 }
 
+export type ToolsDB = Omit<ToolsProps, "ip">;
+
 /**
  * AI Settings
  */
 export const aISettings = new Dexie("AISettings") as Dexie & {
   providers: Table<ProviderAuthDB, string>;
+  tools: Table<ToolsDB, string>;
 };
 
 aISettings.version(1).stores({
   providers: "id",
+  tools: "",
 });
+
+/**
+ * Providers
+ */
 
 export async function getProviders() {
   return (await aISettings.providers.toArray()).reduce((acc, p) => {
@@ -33,6 +42,21 @@ export async function getProviders() {
 
 export async function updateProvider(provider: ProviderAuthDB) {
   aISettings.providers.put(provider);
+}
+
+/**
+ * Tools
+ */
+const defaultToolKey = "defaultKeyTool";
+
+export async function getTools() {
+  return await aISettings.tools.get(defaultToolKey);
+}
+
+export async function updateTools(tools: ToolsProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { ip, ...others } = tools;
+  await aISettings.tools.put(others, defaultToolKey);
 }
 
 /**

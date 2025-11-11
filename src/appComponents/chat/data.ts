@@ -1,6 +1,6 @@
 import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
 
-import { ChatSettings, Tool } from "./types";
+import { ChatSettings, ToolNode } from "./types";
 
 export const models: ModelProps[] = [
   {
@@ -88,14 +88,43 @@ export const chats: ChatMessagesProps = models.reduce((acc, u) => {
   return acc;
 }, {} as ChatMessagesProps);
 
-export const toolsList: Tool[] = [
+export const toolsList: ToolNode[] = [
   { id: "get_current_datetime", label: "Current date/time" },
-];
+  {
+    id: "get_user_ip",
+    label: "Get user IP",
+    validade: (id, toolInfo) => {
+      const allowed = toolInfo.ip !== "";
+      return { allowed, error: allowed ? undefined : "Error getting IP" };
+    },
+  },
+  {
+    id: "get_user_location",
+    label: "Get location",
+    validade: (id, toolInfo, tools) => {
+      const requiredTools = tools.includes("get_user_ip");
+      const allowed =
+        toolInfo.ip !== "" &&
+        toolInfo.geoLocationApiKey !== "" &&
+        requiredTools;
+      return {
+        allowed,
+        error: allowed
+          ? undefined
+          : !requiredTools
+          ? "Must allow IP tool"
+          : toolInfo.geoLocationApiKey === ""
+          ? "Must configure Geolocation tool"
+          : "Error getting IP",
+      };
+    },
+  },
+] as const;
 
 export const toolsMap = toolsList.reduce((acc, t) => {
   acc[t.id] = t;
   return acc;
-}, {} as Record<string, Tool>);
+}, {} as Record<string, ToolNode>);
 
 export const defaultSettings: ChatSettings = {
   general: { temperature: 0.75 },

@@ -102,3 +102,11 @@ export interface MessageContext {
   role: MessageRoleType;
   content: string;
 }
+
+/**
+ *
+ */
+export interface ToolsProps {
+  ip: string;
+  geoLocationApiKey: string;
+}

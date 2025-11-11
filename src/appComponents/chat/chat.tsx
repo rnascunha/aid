@@ -60,7 +60,7 @@ export function Chat({
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [isPending, startTransition] = useTransition();
   const [settings, setSettings] = useState(initSettings);
-  const { providers } = useContext(aIContext);
+  const { providers, tools } = useContext(aIContext);
 
   const selectedProvider = selectedModel?.providerId
     ? providers[selectedModel.providerId]
@@ -83,7 +83,8 @@ export function Chat({
         setChats,
         settings,
         chats[selectedModel!.id],
-        providerAuth
+        providerAuth,
+        tools
       );
       await onMessage?.(response, selectedModel!.id);
     });

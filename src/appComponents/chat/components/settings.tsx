@@ -9,21 +9,24 @@ import {
   Stack,
   SxProps,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import {
   ChatSettings,
   ContextSettings,
   GeneralSettings,
-  Tool,
   ToolsSettings,
 } from "../types";
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
-import { toolsList, toolsMap } from "../data";
+import { Dispatch, SetStateAction, useContext, useMemo, useState } from "react";
+import { toolsList } from "../data";
 import { debounce } from "@/libs/debounce";
 
 import CircleIcon from "@mui/icons-material/Circle";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
+
 import { DeleteAllMessagesButton } from "@/components/chat/deleteMessagesButton";
+import { aIContext } from "@/components/chat/context";
 
 const defaultSx: SxProps = {
   p: 3,
@@ -103,6 +106,46 @@ function ContextSettingsContainer({
   );
 }
 
+function ToolOption({
+  checked,
+  id,
+  label,
+  updateTool,
+  disabled,
+  error,
+}: {
+  checked: boolean;
+  id: string;
+  label: string;
+  updateTool: (checked: boolean) => void;
+  disabled?: boolean;
+  error?: string;
+}) {
+  const component = (
+    <FormControlLabel
+      disabled={disabled}
+      key={id}
+      control={
+        <Checkbox
+          checked={checked}
+          onChange={(ev) => updateTool(ev.target.checked)}
+        />
+      }
+      label={label}
+    />
+  );
+  return !error ? (
+    component
+  ) : (
+    <Stack direction="row" alignItems="center">
+      {component}
+      <Tooltip title={error}>
+        <InfoOutlineIcon />
+      </Tooltip>
+    </Stack>
+  );
+}
+
 function ToolsSettingsContainer({
   tools,
   setSettings,
@@ -110,6 +153,7 @@ function ToolsSettingsContainer({
   tools: ToolsSettings;
   setSettings: (v: Partial<ToolsSettings>) => void;
 }) {
+  const { tools: toolInfo } = useContext(aIContext);
   return (
     <Stack sx={defaultSx} gap={2}>
       <TextField
@@ -126,24 +170,29 @@ function ToolsSettingsContainer({
           Tools list
         </Typography>
         <FormGroup>
-          {toolsList.map((t) => (
-            <FormControlLabel
-              key={t.id}
-              control={
-                <Checkbox
-                  checked={tools.tools.includes(t.id)}
-                  onChange={(ev) =>
-                    setSettings({
-                      tools: ev.target.checked
-                        ? [...tools.tools, t.id]
-                        : tools.tools.filter((i) => i !== t.id),
-                    })
-                  }
-                />
-              }
-              label={(toolsMap[t.id] as Tool).label}
-            />
-          ))}
+          {toolsList.map((t) => {
+            const valide = t.validade?.(t.id, toolInfo, tools.tools) ?? {
+              allowed: true,
+              error: undefined,
+            };
+            return (
+              <ToolOption
+                key={t.id}
+                id={t.id}
+                disabled={!valide.allowed}
+                error={valide.error}
+                checked={tools.tools.includes(t.id)}
+                label={t.label}
+                updateTool={(checked) =>
+                  setSettings({
+                    tools: checked
+                      ? [...tools.tools, t.id]
+                      : tools.tools.filter((i) => i !== t.id),
+                  })
+                }
+              />
+            );
+          })}
         </FormGroup>
       </Stack>
     </Stack>

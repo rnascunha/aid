@@ -48,7 +48,7 @@ export function MessageInput(props: MessageInputProps) {
   const { onSubmit, isPending } = props;
   const handleClick = () => {
     if (text.trim() !== "") {
-      onSubmit(text);
+      onSubmit(text.trim());
       setText("");
     }
   };

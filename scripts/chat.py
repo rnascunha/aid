@@ -4,7 +4,7 @@ from typing import List, Literal, Dict
 
 import aisuite as ai
 
-import ai_tools as tools
+from ai_tools import toolList, toolMap
 from provider import providerChatIds, setProviderAuth
 from exception import RunClientAIException, ProviderAuthException
 
@@ -18,8 +18,17 @@ class MessagesContext(BaseModel):
 
 class SettingsValidate(BaseModel):
     temperature: float
-    tools: List[Literal["get_current_datetime"]]
+    tools: List[Literal[*toolList]]  # type: ignore
     maxTurns: PositiveInt
+
+
+class ToolInfoValidate(BaseModel):
+    ip: str
+    geoLocationApiKey: str
+
+
+class ChatInfo(BaseModel):
+    tool: ToolInfoValidate
 
 
 class ChatInputValidate(BaseModel):
@@ -28,13 +37,14 @@ class ChatInputValidate(BaseModel):
     messages: List[MessagesContext]
     settings: SettingsValidate
     auth: Dict[str, str]
+    info: ChatInfo
 
 
-def runChat(provider: str, model: str, messages, settings: dict):
+def runChat(provider: str, model: str, messages, settings: dict, info: dict[str, any]):
     """Running chat request to provider"""
 
     try:
-        importedTools = [getattr(tools, t) for t in settings["tools"]]
+        importedTools = [toolMap[t](info["tool"]) for t in settings["tools"]]
 
         client = ai.Client()
         response = client.chat.completions.create(
@@ -67,7 +77,8 @@ def runChatAppGoogle(input):
         model = input["model"]
         messages = input["messages"]
         settings = input["settings"]
-        response = runChat(provider, model, messages, settings)
+        info = input["info"]
+        response = runChat(provider, model, messages, settings, info)
         return {
             "success": True,
             "data": response,
@@ -84,7 +95,9 @@ def runChatApp(input):
     model = input["model"]
     messages = input["messages"]
     settings = input["settings"]
-    response = runChat(provider, model, messages, settings)
+    info = input["info"]
+    response = runChat(provider, model, messages, settings, info)
+    # response = {"choices": [{"message": {"content": "This is a test message"}}]}
     return {
         "success": True,
         "data": response,

@@ -1,3 +1,5 @@
+import { ToolsProps } from "@/libs/chat/types";
+
 export interface GeneralSettings {
   temperature: number;
 }
@@ -8,9 +10,14 @@ export interface ContextSettings {
   maxElapsedTimeMessages: number;
 }
 
-export interface Tool {
+export interface ToolNode {
   id: string;
   label: string;
+  validade?: (
+    id: string,
+    toolInfo: ToolsProps,
+    tools: string[]
+  ) => { allowed: boolean; error: string | undefined };
 }
 
 export interface ToolsSettings {

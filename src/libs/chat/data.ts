@@ -16,7 +16,7 @@ import huggingface from "@/images/ai/hugging-face.svg";
 import aws from "@/images/ai/aws.png";
 import azure from "@/images/ai/azure.svg";
 
-import { ProviderAuthType, ProviderProps } from "./types";
+import { ProviderAuthType, ProviderProps, ToolsProps } from "./types";
 
 export const providers: ProviderProps[] = [
   {
@@ -217,7 +217,7 @@ export const providers: ProviderProps[] = [
       region: "",
     },
   },
-    {
+  {
     name: "Azure",
     id: "azure",
     provider: "azure",
@@ -237,3 +237,8 @@ export const providerMap = providers.reduce((acc, p) => {
   acc[p.id] = p;
   return acc;
 }, {} as Record<ProviderProps["id"], ProviderProps>);
+
+export const initTools: ToolsProps = {
+  ip: "",
+  geoLocationApiKey: "",
+};

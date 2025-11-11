@@ -9,11 +9,6 @@ import {
   ProviderProps,
 } from "@/libs/chat/types";
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   IconButton,
   InputAdornment,
   List,
@@ -24,18 +19,17 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { StaticAvatar } from "./staticAvatar";
+import { StaticAvatar } from "../staticAvatar";
 import Link from "next/link";
 
-import LaunchIcon from "@mui/icons-material/Launch";
 import { useContext, useRef, useState } from "react";
-import { aIContext } from "./context";
-import { updateProvider } from "@/libs/chat/storage";
 import { VisuallyHiddenInput } from "@/components/fileUpload";
+import { readFileText } from "@/libs/fileBrowser";
 
+import LaunchIcon from "@mui/icons-material/Launch";
 import UploadFileSharpIcon from "@mui/icons-material/UploadFileSharp";
 import CloseIcon from "@mui/icons-material/Close";
-import { readFileText } from "@/libs/fileBrowser";
+import { aIContext } from "../context";
 
 function APIKeyConfig({
   provider,
@@ -323,7 +317,7 @@ type UpdateProviderAuthCallback = (
 
 interface ProviderAuthDataConfig {
   provider: ProviderProps;
-  updateAuthProvider: UpdateProviderAuthCallback;
+  updateProvider: UpdateProviderAuthCallback;
 }
 
 const providerAuthMap = {
@@ -390,38 +384,45 @@ const providerAuthMap = {
   ) => undefined,
 };
 
-function ProviderConfig({
-  provider,
-  updateAuthProvider,
-}: ProviderAuthDataConfig) {
-  return providerAuthMap[provider.authType]?.(provider, updateAuthProvider);
+function ProviderConfig({ provider, updateProvider }: ProviderAuthDataConfig) {
+  return providerAuthMap[provider.authType]?.(provider, updateProvider);
 }
 
-interface SettingsProps {
-  providers: ProviderProps[];
-  updateAuthProvider: (
-    auth: Partial<ProviderAuth>,
-    id: string
-  ) => Promise<void> | void;
+interface SettingsProvidersProps {
+  updateProvider?: (auth: ProviderAuth, id: string) => Promise<void> | void;
 }
 
-export function Settings({ providers, updateAuthProvider }: SettingsProps) {
+export function SettingsProviders({
+  updateProvider: updateAuthProvider,
+}: SettingsProvidersProps) {
+  const { providers, setProviders } = useContext(aIContext);
+
+  const updateProviders = async (auth: Partial<ProviderAuth>, id: string) => {
+    setProviders((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        auth: {
+          ...prev[id].auth,
+          ...auth,
+        } as ProviderAuth,
+      },
+    }));
+    await updateAuthProvider?.(
+      { ...providers[id].auth, ...auth } as ProviderAuth,
+      id
+    );
+  };
+
   return (
     <List>
-      {providers.map((p) => (
+      {Object.values(providers).map((p) => (
         <ListItem
           sx={{
             borderBottom: "1px solid",
             borderColor: "text.secondary",
           }}
           key={p.id}
-          secondaryAction={
-            <Tooltip title="Site">
-              <IconButton LinkComponent={Link} href={p.url} target={"_blank"}>
-                <LaunchIcon />
-              </IconButton>
-            </Tooltip>
-          }
         >
           <Stack
             sx={{
@@ -433,67 +434,16 @@ export function Settings({ providers, updateAuthProvider }: SettingsProps) {
                 <StaticAvatar alt={p.name} src={p.logo} />
               </ListItemIcon>
               <ListItemText primary={p.name} secondary={p.type.join(" | ")} />
+              <Tooltip title="Site">
+                <IconButton LinkComponent={Link} href={p.url} target={"_blank"}>
+                  <LaunchIcon />
+                </IconButton>
+              </Tooltip>
             </Stack>
-            <ProviderConfig
-              provider={p}
-              updateAuthProvider={updateAuthProvider}
-            />
+            <ProviderConfig provider={p} updateProvider={updateProviders} />
           </Stack>
         </ListItem>
       ))}
     </List>
-  );
-}
-
-interface SettingsDialogProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
-  const { providers, setProviders } = useContext(aIContext);
-
-  return (
-    <Dialog
-      onClose={onClose}
-      open={open}
-      aria-hidden="false"
-      sx={{
-        "& .MuiDialog-container": {
-          "& .MuiPaper-root": {
-            width: "100%",
-            maxWidth: "500px",
-            // height: "450px",
-            maxHeight: "80%",
-          },
-        },
-      }}
-    >
-      <DialogTitle>Settings</DialogTitle>
-      <DialogContent>
-        <Settings
-          providers={Object.values(providers)}
-          updateAuthProvider={async (auth, id) => {
-            setProviders((prev) => ({
-              ...prev,
-              [id]: {
-                ...prev[id],
-                auth: {
-                  ...prev[id].auth,
-                  ...auth,
-                } as ProviderAuth,
-              },
-            }));
-            await updateProvider({
-              id,
-              auth: { ...providers[id].auth, ...auth } as ProviderAuth,
-            });
-          }}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Close</Button>
-      </DialogActions>
-    </Dialog>
   );
 }

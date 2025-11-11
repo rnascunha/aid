@@ -16,13 +16,14 @@ import { MouseEvent, useContext, useState } from "react";
 import { UserHeader } from "./userHeader";
 
 import { Session } from "next-auth";
-import { SettingsDialog } from "../chat/settingsProvider";
+import { SettingsDialog } from "../chat/settings";
 import { aIContext } from "../chat/context";
+import { updateProvider, updateTools } from "@/libs/chat/storage";
 
 export function SettingsDropMenu({ session }: { session: Session }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const {openSettings, setOpenSettings} = useContext(aIContext);
+  const { openSettings, setOpenSettings } = useContext(aIContext);
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -86,6 +87,8 @@ export function SettingsDropMenu({ session }: { session: Session }) {
       <SettingsDialog
         open={openSettings}
         onClose={() => setOpenSettings(false)}
+        updateProvider={(auth, id) => updateProvider({ id, auth })}
+        updateTool={updateTools}
       />
     </>
   );

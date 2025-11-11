@@ -25,3 +25,9 @@ class RunClientAIException(AIdException):
     def __init__(self, message="Error running API"):
         self.message = message
         super().__init__(32, "API Run Error", self.message)
+
+
+class ToolParameterException(AIdException):
+    def __init__(self, message="Error receiving tool parameter"):
+        self.message = message
+        super().__init__(42, "Tool Parameter error", self.message)

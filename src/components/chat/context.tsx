@@ -1,8 +1,9 @@
 "use client";
 
-import { providerMap } from "@/libs/chat/data";
-import { getProviders } from "@/libs/chat/storage";
-import { ProviderAuth, ProviderProps } from "@/libs/chat/types";
+import { getIpiFyIP } from "@/libs/apis/ipify";
+import { initTools, providerMap } from "@/libs/chat/data";
+import { getProviders, getTools } from "@/libs/chat/storage";
+import { ProviderAuth, ProviderProps, ToolsProps } from "@/libs/chat/types";
 import {
   createContext,
   Dispatch,
@@ -17,6 +18,8 @@ interface AIContext {
   setProviders: Dispatch<SetStateAction<Record<string, ProviderProps>>>;
   openSettings: boolean;
   setOpenSettings: Dispatch<SetStateAction<boolean>>;
+  tools: ToolsProps;
+  setTools: Dispatch<SetStateAction<ToolsProps>>;
 }
 
 const defaultAIContext: AIContext = {
@@ -24,7 +27,38 @@ const defaultAIContext: AIContext = {
   setProviders: () => {},
   openSettings: false,
   setOpenSettings: () => {},
+  tools: initTools,
+  setTools: () => {},
 };
+
+async function getUserTools(setTools: Dispatch<SetStateAction<ToolsProps>>) {
+  const [ip, tools] = await Promise.all([
+    getIpiFyIP().catch(() => ""),
+    getTools(),
+  ]);
+
+  setTools({ ...initTools, ip, ...(tools ?? {}) });
+}
+
+async function getUserProviders(
+  setProviders: Dispatch<SetStateAction<Record<string, ProviderProps>>>
+) {
+  const ps = await getProviders();
+  Object.values(ps).reduce((acc, { id, auth }) => {
+    acc[id] = auth;
+    setProviders((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        auth: {
+          ...prev[id].auth,
+          ...auth,
+        },
+      },
+    }));
+    return acc;
+  }, {} as Record<string, ProviderAuth>);
+}
 
 export const aIContext = createContext<AIContext>(defaultAIContext);
 
@@ -35,24 +69,10 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
   const [openSettings, setOpenSettings] = useState(
     defaultAIContext.openSettings
   );
+  const [tools, setTools] = useState<ToolsProps>(initTools);
 
   useEffect(() => {
-    getProviders().then((ps) => {
-      Object.values(ps).reduce((acc, { id, auth }) => {
-        acc[id] = auth;
-        setProviders((prev) => ({
-          ...prev,
-          [id]: {
-            ...prev[id],
-            auth: {
-              ...prev[id].auth,
-              ...auth,
-            },
-          },
-        }));
-        return acc;
-      }, {} as Record<string, ProviderAuth>);
-    });
+    Promise.all([getUserProviders(setProviders), getUserTools(setTools)]);
   }, []);
 
   return (
@@ -62,6 +82,8 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
         setProviders,
         openSettings,
         setOpenSettings,
+        tools,
+        setTools,
       }}
     >
       {children}
