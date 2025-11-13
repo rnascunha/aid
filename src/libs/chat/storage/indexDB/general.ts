@@ -48,3 +48,20 @@ export async function updateTools(tools: ToolsProps) {
   const { ip, ...others } = tools;
   await aISettings.tools.put(others, defaultToolKey);
 }
+
+/**
+ * Load/Save/Clear
+ */
+export async function clearData() {
+  await aISettings.delete();
+  await aISettings.open();
+}
+
+export async function exportData() {
+  return await aISettings.export();
+}
+
+export async function importData(blob: Blob) {
+  await clearData();
+  await aISettings.import(blob);
+}

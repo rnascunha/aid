@@ -9,6 +9,7 @@ import { SettingsProviders } from "./settings/settingsProvider";
 import { ProviderProps, ToolsProps } from "@/libs/chat/types";
 import { ArrayPanel, PanelConfig } from "../panels";
 import { SettingsTools } from "./settings/settigsTools";
+import { SettingStorage } from "./settings/settingsStorage";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -33,6 +34,11 @@ export function SettingsDialog({
       id: "tools",
       label: "Tools",
       panel: <SettingsTools updateTool={updateTool} />,
+    },
+    {
+      id: "storage",
+      label: "Storage",
+      panel: <SettingStorage />,
     },
   ];
 

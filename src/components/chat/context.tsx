@@ -59,8 +59,19 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
   const [tools, setTools] = useState<ToolsProps>(initTools);
 
   useEffect(() => {
-    Promise.all([getUserProviders(setProviders), getUserTools(setTools)]);
+    Promise.all([
+      getUserProviders(setProviders),
+      getUserTools(setTools),
+      import("dexie-export-import"),
+    ]);
   }, []);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     await import("dexie-export-import");
+  //     setMount(true);
+  //   })();
+  // }, []);
 
   return (
     <aIContext.Provider

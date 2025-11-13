@@ -12,3 +12,4 @@ export function readFileText(file: File, encoding: string = "UTF-8") {
     reader.readAsText(file, encoding);
   });
 }
+
