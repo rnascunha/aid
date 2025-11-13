@@ -24,11 +24,11 @@ export async function messageResponse(
 ) {
   const messages = mergeMessages(message, settings.context, chats);
 
-  const response = await fetchChatRequest(
-    providerBaseMap[model.providerId].provider,
-    model.model,
+  const response = await fetchChatRequest({
+    provider: providerBaseMap[provider.providerBaseId].provider,
+    model: model.model,
     messages,
-    {
+    settings: {
       ...settings.general,
       ...{
         ...settings.tools,
@@ -39,9 +39,10 @@ export async function messageResponse(
         ),
       },
     },
-    { tool: toolInfo },
-    provider.auth
-  );
+    info: { tool: toolInfo },
+    auth: provider.auth,
+    config: provider.config,
+  });
   const newIdString = `${newId}:r`;
   const newMessage = {
     id: newIdString,

@@ -11,22 +11,30 @@ import { filePathToBase64 } from "@/libs/base64";
 import { fetchAudioToText } from "@/actions/ai/audiototext";
 import { providerBaseMap } from "@/libs/chat/data";
 
-export async function attachmentResponse(
-  file: Attachment,
-  newId: string,
-  model: ModelProps,
-  provider: ProviderProps,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  settings: AudioToTextSettings
-) {
+export async function attachmentResponse({
+  file,
+  newId,
+  model,
+  provider,
+  setChats,
+  settings,
+}: {
+  file: Attachment;
+  newId: string;
+  model: ModelProps;
+  provider: ProviderProps;
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>;
+  settings: AudioToTextSettings;
+}) {
   const base64 = await filePathToBase64(file.data, file.type);
-  const response = await fetchAudioToText(
-    providerBaseMap[provider.providerBaseId].provider,
-    model.model,
-    base64,
+  const response = await fetchAudioToText({
+    provider: providerBaseMap[provider.providerBaseId].provider,
+    model: model.model,
+    file: base64,
     settings,
-    provider.auth
-  );
+    auth: provider.auth,
+    config: provider.config,
+  });
   const responseMessage = {
     id: `${newId}:r`,
     sender: model,

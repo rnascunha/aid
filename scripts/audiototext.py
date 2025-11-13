@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Literal, Dict
+from typing import Literal, Dict, Optional, Union
 from provider import providerAudioToTextIds, setProviderAuth
 
 import aisuite as ai
@@ -20,13 +20,20 @@ class AudioToTextValidate(BaseModel):
     settings: SettingsValidate
     file: str
     auth: Dict[str, str]
+    config: Optional[Dict[str, Union[str, int]]] = dict()
 
 
-def runAudioToText(provider: str, model: str, file: str, settings: dict):
+def runAudioToText(input):
     """Convert audio file to text"""
 
     try:
-        client = ai.Client()
+        provider = input["provider"]
+        model = input["model"]
+        settings = input["settings"]
+        file = base64_to_bytesio(input["file"])
+        config = {provider: input["config"]} if input["config"] else dict()
+
+        client = ai.Client(config)
         result = client.audio.transcriptions.create(
             model=f"{provider}:{model}",
             file=file,
@@ -54,10 +61,7 @@ def runAudioToTextAppGoogle(input):
 
         setProviderAuth(provider, auth)
 
-        model = input["model"]
-        settings = input["settings"]
-        file = base64_to_bytesio(input["file"])
-        response = runAudioToText(provider, model, file, settings)
+        response = runAudioToText(input)
         return {"success": True, "data": response}
 
 
@@ -66,8 +70,5 @@ def runAudioToTextApp(input):
     auth = input["auth"]
     setProviderAuth(provider, auth)
 
-    model = input["model"]
-    settings = input["settings"]
-    file = base64_to_bytesio(input["file"])
-    response = runAudioToText(provider, model, file, settings)
+    response = runAudioToText(input)
     return {"success": True, "data": response}

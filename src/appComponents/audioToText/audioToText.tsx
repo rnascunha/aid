@@ -12,6 +12,7 @@ import {
   ChatMessagesProps,
   MessageProps,
   ModelProps,
+  ProviderProps,
 } from "@/libs/chat/types";
 import { useContext, useEffect, useMemo, useState, useTransition } from "react";
 import { AudioInput } from "./components/audioInput";
@@ -103,14 +104,14 @@ export function AudioToText({
     );
     await onMessage?.(newMessage, selectedModel!.id);
     startTransition(async () => {
-      const response = await attachmentResponse(
+      const response = await attachmentResponse({
         file,
         newId,
-        selectedModel!,
-        selectedProvider!,
+        model: selectedModel as ModelProps,
+        provider: selectedProvider as ProviderProps,
         setChats,
-        settings
-      );
+        settings,
+      });
       await onMessage?.(response, selectedModel!.id);
     });
   };
@@ -201,7 +202,12 @@ export function AudioToText({
               />
             }
             loader={isPending && <BouncingLoader />}
-            messages={<MessageList messages={chats[selectedModel.id]} />}
+            messages={
+              <MessageList
+                messages={chats[selectedModel.id]}
+                providers={audioToTextProviders}
+              />
+            }
             input={
               <MessageInputCheck
                 provider={selectedProvider!}

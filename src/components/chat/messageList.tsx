@@ -8,15 +8,12 @@ import {
   Stack,
 } from "@mui/material";
 import { StaticAvatar } from "./staticAvatar";
-import { MessageProps } from "../../libs/chat/types";
+import { MessageProps, ProviderProps } from "../../libs/chat/types";
 import { MessageBubble } from "./messageBubble";
 import { useEffect, useRef, useState } from "react";
 import { providerBaseMap } from "@/libs/chat/data";
 import JSONOutput from "../JSONOutput";
-
-interface MessageListProps {
-  messages: MessageProps[];
-}
+import { getProviderBase } from "@/libs/chat/functions";
 
 function MessageDetail({ message }: { message: MessageProps }) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -70,7 +67,12 @@ function MessageDetailDialog({
   );
 }
 
-export function MessageList({ messages }: MessageListProps) {
+interface MessageListProps {
+  messages: MessageProps[];
+  providers: ProviderProps[];
+}
+
+export function MessageList({ messages, providers }: MessageListProps) {
   const el = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState<MessageProps | null>(null);
 
@@ -117,7 +119,10 @@ export function MessageList({ messages }: MessageListProps) {
             >
               {message.sender !== "You" && (
                 <StaticAvatar
-                  src={providerBaseMap[message.sender.providerId].logo}
+                  src={
+                    getProviderBase(message.sender, providers, providerBaseMap)
+                      ?.logo
+                  }
                   alt={message.sender.name}
                 />
               )}

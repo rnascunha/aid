@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from pydantic.types import PositiveInt
-from typing import List, Literal, Dict
+from typing import List, Literal, Dict, Optional, Union
 
 import aisuite as ai
 
@@ -36,17 +36,25 @@ class ChatInputValidate(BaseModel):
     model: str = Field(min_length=1)
     messages: List[MessagesContext]
     settings: SettingsValidate
-    auth: Dict[str, str]
+    config: Optional[Dict[str, Union[str, int]]] = None
+    auth: Optional[Dict[str, str]] = None
     info: ChatInfo
 
 
-def runChat(provider: str, model: str, messages, settings: dict, info: dict[str, any]):
+def runChat(input):
     """Running chat request to provider"""
 
     try:
+        provider = input["provider"]
+        model = input["model"]
+        messages = input["messages"]
+        settings = input["settings"]
+        info = input["info"]
+        config = {provider: input["config"]} if input["config"] else dict()
+
         importedTools = [toolMap[t](info["tool"]) for t in settings["tools"]]
 
-        client = ai.Client()
+        client = ai.Client(config)
         response = client.chat.completions.create(
             model=f"{provider}:{model}",
             messages=messages,
@@ -73,12 +81,7 @@ def runChatAppGoogle(input):
         temp_file.seek(0)
 
         setProviderAuth(provider, auth)
-
-        model = input["model"]
-        messages = input["messages"]
-        settings = input["settings"]
-        info = input["info"]
-        response = runChat(provider, model, messages, settings, info)
+        response = runChat(input)
         return {
             "success": True,
             "data": response,
@@ -92,11 +95,7 @@ def runChatApp(input):
     auth = input["auth"]
     setProviderAuth(provider, auth)
 
-    model = input["model"]
-    messages = input["messages"]
-    settings = input["settings"]
-    info = input["info"]
-    response = runChat(provider, model, messages, settings, info)
+    response = runChat(input)
     # response = {"choices": [{"message": {"content": "This is a test message"}}]}
     return {
         "success": True,

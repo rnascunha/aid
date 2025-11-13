@@ -7,26 +7,30 @@ import CenterSpinner from "@/components/spinner/centerSpinner";
 import {
   deleteAudioToTextMessages,
   getAllAudioToTextMessages,
+  getAllAudioToTextModels,
   getAudioToTextSettings,
+  onAddAudioToTextRemoveModel,
   onAudioToTextMessage,
   updateAudioToTextSettings,
 } from "@/libs/chat/storage/indexDB/audioToText";
-import { ChatMessagesProps } from "@/libs/chat/types";
+import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
 import { useEffect, useState } from "react";
 
 export default function AudioToTextPage() {
   const [dbData, setDbData] = useState<null | {
+    models: ModelProps[];
     chats: ChatMessagesProps;
     settings?: AudioToTextSettings;
   }>(null);
 
   useEffect(() => {
     async function getData() {
-      const [settings, chats] = await Promise.all([
+      const [settings, models] = await Promise.all([
         getAudioToTextSettings(),
-        getAllAudioToTextMessages([]),
+        getAllAudioToTextModels(),
       ]);
-      return { chats, settings };
+      const chats = await getAllAudioToTextMessages(models);
+      return { chats, settings, models };
     }
     getData().then((d) => setDbData(d));
   }, []);
@@ -35,12 +39,13 @@ export default function AudioToTextPage() {
     <CenterSpinner />
   ) : (
     <AudioToText
-      models={[]}
+      models={dbData.models}
       chats={dbData.chats}
       settings={dbData.settings ?? initAudioSettings}
       onMessage={onAudioToTextMessage}
       onDeleteMessages={deleteAudioToTextMessages}
       onSettingsChange={updateAudioToTextSettings}
+      onAddRemoveModel={onAddAudioToTextRemoveModel}
     />
   );
 }

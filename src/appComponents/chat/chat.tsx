@@ -185,7 +185,7 @@ export function Chat({
               />
             }
             loader={isPending && <BouncingLoader />}
-            messages={<MessageList messages={chats[selectedModel.id]} />}
+            messages={<MessageList messages={chats[selectedModel.id]} providers={chatProviders} />}
             input={
               <MessageInputCheck
                 provider={selectedProvider!}
