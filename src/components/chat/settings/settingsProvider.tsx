@@ -228,7 +228,7 @@ function IBMWatsonXConfig({
         }
       />
       <TextField
-        label="Region"
+        label="Service URL"
         fullWidth
         size="small"
         defaultValue={(provider.auth as ProviderAuthIBMWatsonX).service_url}
