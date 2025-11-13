@@ -1,4 +1,5 @@
 import {
+  ProviderAPIUrlConfig,
   ProviderAuth,
   ProviderAuthAPIKey,
   ProviderAuthAWS,
@@ -6,9 +7,14 @@ import {
   ProviderAuthGoogle,
   ProviderAuthIBMWatsonX,
   ProviderAuthType,
+  ProviderBaseProps,
+  ProviderConfig,
+  ProviderConfigType,
   ProviderProps,
 } from "@/libs/chat/types";
 import {
+  Button,
+  Divider,
   IconButton,
   InputAdornment,
   List,
@@ -26,10 +32,21 @@ import { useContext, useRef, useState } from "react";
 import { VisuallyHiddenInput } from "@/components/fileUpload";
 import { readFileText } from "@/libs/fileBrowser";
 
+import { aIContext } from "../context";
+import {
+  providerBaseMap,
+  providerAuthTemplate,
+  providerConfigTemplate,
+  providersBase,
+} from "@/libs/chat/data";
+import { SelectBaseProvider } from "../selectProvider";
+import { generateUUID } from "@/libs/uuid";
+
 import LaunchIcon from "@mui/icons-material/Launch";
 import UploadFileSharpIcon from "@mui/icons-material/UploadFileSharp";
 import CloseIcon from "@mui/icons-material/Close";
-import { aIContext } from "../context";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { DeleteDialog } from "@/components/dialogs/deleteDialog";
 
 function APIKeyConfig({
   provider,
@@ -80,7 +97,7 @@ async function readAppCredentialsFile(file: File) {
 function getAppCredentialsName(provider: ProviderProps) {
   try {
     if (
-      !("application_credentials" in provider.auth) ||
+      !("application_credentials" in provider.auth!) ||
       provider.auth.application_credentials === ""
     )
       return "";
@@ -100,7 +117,7 @@ function GoogleConfig({
   provider: ProviderProps;
   updateAuthProvider: (
     k: string,
-    field: keyof Omit<ProviderAuthGoogle, "type">
+    field: keyof ProviderAuthGoogle
   ) => Promise<void> | void;
 }) {
   const [file, setFile] = useState(getAppCredentialsName(provider));
@@ -196,7 +213,7 @@ function IBMWatsonXConfig({
   provider: ProviderProps;
   updateAuthProvider: (
     k: string,
-    field: keyof Omit<ProviderAuthIBMWatsonX, "type">
+    field: keyof ProviderAuthIBMWatsonX
   ) => Promise<void> | void;
 }) {
   return (
@@ -237,7 +254,7 @@ function AWSProviderConfig({
   provider: ProviderProps;
   updateAuthProvider: (
     k: string,
-    field: keyof Omit<ProviderAuthAWS, "type">
+    field: keyof ProviderAuthAWS
   ) => Promise<void> | void;
 }) {
   return (
@@ -278,7 +295,7 @@ function AzureProviderConfig({
   provider: ProviderProps;
   updateAuthProvider: (
     k: string,
-    field: keyof Omit<ProviderAuthAzure, "type">
+    field: keyof ProviderAuthAzure
   ) => Promise<void> | void;
 }) {
   return (
@@ -384,66 +401,286 @@ const providerAuthMap = {
   ) => undefined,
 };
 
-function ProviderConfig({ provider, updateProvider }: ProviderAuthDataConfig) {
-  return providerAuthMap[provider.authType]?.(provider, updateProvider);
+function ProviderAuthConfig({
+  provider,
+  updateProvider,
+}: ProviderAuthDataConfig) {
+  const auth = providerBaseMap[provider.providerBaseId].authType;
+  return providerAuthMap[auth]?.(provider, updateProvider);
+}
+
+/**
+ *
+ */
+
+function ProviderConfigAPIUrl({
+  provider,
+  updateConfigProvider,
+}: {
+  provider: ProviderProps;
+  updateConfigProvider: (
+    k: string | number,
+    field: keyof ProviderConfig
+  ) => Promise<void> | void;
+}) {
+  return (
+    <Stack gap={1}>
+      <TextField
+        label="API Url"
+        fullWidth
+        size="small"
+        defaultValue={(provider.config as ProviderAPIUrlConfig).api_url}
+        onBlur={(ev) => updateConfigProvider(ev.target.value.trim(), "api_url")}
+      />
+      <TextField
+        label="Timeout"
+        fullWidth
+        size="small"
+        type="number"
+        defaultValue={(provider.config as ProviderAPIUrlConfig).timeout}
+        onBlur={(ev) =>
+          updateConfigProvider(+ev.target.value.trim(), "timeout")
+        }
+        slotProps={{
+          htmlInput: {
+            min: 0,
+            step: 1,
+          },
+        }}
+      />
+    </Stack>
+  );
+}
+
+type UpdateProviderConfigCallback = (
+  auth: Partial<ProviderConfig>,
+  id: string
+) => Promise<void> | void;
+
+interface ProviderConfigDataConfig {
+  provider: ProviderProps;
+  updateProvider: UpdateProviderConfigCallback;
+}
+
+const providerConfigMap = {
+  [ProviderConfigType.CONFIG_API_URL]: (
+    provider: ProviderProps,
+    updateConfigProvider: UpdateProviderConfigCallback
+  ) => (
+    <ProviderConfigAPIUrl
+      provider={provider}
+      updateConfigProvider={async (k, field) => {
+        await updateConfigProvider({ [field]: k }, provider.id);
+      }}
+    />
+  ),
+  [ProviderConfigType.CONFIG_NONE]: (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    provider: ProviderProps,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    updateConfigProvider: UpdateProviderConfigCallback
+  ) => undefined,
+} as const;
+
+function ProviderConfigConfig({
+  provider,
+  updateProvider,
+}: ProviderConfigDataConfig) {
+  const config = providerBaseMap[provider.providerBaseId].configType;
+  return providerConfigMap[config]?.(provider, updateProvider);
+}
+
+/**
+ *
+ */
+interface AddProviderHeaderProps {
+  addProvider: (p: ProviderProps) => void;
+}
+
+function AddProviderHeader({ addProvider }: AddProviderHeaderProps) {
+  const [selectedBaseProvider, setSelectedBaseProvider] =
+    useState<ProviderBaseProps>(providersBase[0]);
+
+  return (
+    <Stack
+      sx={{
+        gap: 1,
+        mt: 1,
+      }}
+    >
+      <SelectBaseProvider
+        provider={selectedBaseProvider}
+        setProvider={setSelectedBaseProvider}
+      />
+      <Button
+        variant="contained"
+        onClick={() =>
+          addProvider({
+            id: generateUUID(),
+            name: selectedBaseProvider.name,
+            providerBaseId: selectedBaseProvider.id,
+            createdDate: Date.now(),
+            auth: providerAuthTemplate[selectedBaseProvider.authType],
+            config: providerConfigTemplate[selectedBaseProvider.configType],
+          })
+        }
+      >
+        Add
+      </Button>
+    </Stack>
+  );
 }
 
 interface SettingsProvidersProps {
-  updateProvider?: (auth: ProviderAuth, id: string) => Promise<void> | void;
+  updateProvider?: (provider: ProviderProps | string) => Promise<void> | void;
 }
 
-export function SettingsProviders({
-  updateProvider: updateAuthProvider,
-}: SettingsProvidersProps) {
+export function SettingsProviders({ updateProvider }: SettingsProvidersProps) {
   const { providers, setProviders } = useContext(aIContext);
+  const [deleteProvider, setDeleteProvider] = useState<ProviderProps | null>(
+    null
+  );
 
-  const updateProviders = async (auth: Partial<ProviderAuth>, id: string) => {
-    setProviders((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        auth: {
-          ...prev[id].auth,
-          ...auth,
-        } as ProviderAuth,
-      },
-    }));
-    await updateAuthProvider?.(
-      { ...providers[id].auth, ...auth } as ProviderAuth,
-      id
-    );
+  const updateName = async (name: string, id: string) => {
+    const provider = providers.find((p) => p.id === id);
+    if (!provider) return;
+    const updated = {
+      ...provider,
+      name,
+    };
+    setProviders((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    await updateProvider?.(updated);
   };
 
+  const updateProvidersAuthAll = async (
+    auth: Partial<ProviderAuth>,
+    id: string
+  ) => {
+    const provider = providers.find((p) => p.id === id);
+    if (!provider) return;
+    const updated = {
+      ...provider,
+      auth: { ...provider.auth, ...auth },
+    } as ProviderProps;
+    setProviders((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    await updateProvider?.(updated);
+  };
+
+  const updateProvidersConfigAll = async (
+    config: Partial<ProviderConfig>,
+    id: string
+  ) => {
+    const provider = providers.find((p) => p.id === id);
+    if (!provider) return;
+    const updated = {
+      ...provider,
+      config: { ...provider.config, ...config },
+    } as ProviderProps;
+    setProviders((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    await updateProvider?.(updated);
+  };
+
+  const deleteProviderD = async () => {
+    if (!deleteProvider) return;
+    setProviders((prev) => prev.filter((p) => p.id !== deleteProvider.id));
+    await updateProvider?.(deleteProvider.id);
+    setDeleteProvider(null);
+  };
   return (
-    <List>
-      {Object.values(providers).map((p) => (
-        <ListItem
-          sx={{
-            borderBottom: "1px solid",
-            borderColor: "text.secondary",
-          }}
-          key={p.id}
-        >
-          <Stack
-            sx={{
-              width: "100%",
-            }}
-          >
-            <Stack direction="row" alignItems="center">
-              <ListItemIcon>
-                <StaticAvatar alt={p.name} src={p.logo} />
-              </ListItemIcon>
-              <ListItemText primary={p.name} secondary={p.type.join(" | ")} />
-              <Tooltip title="Site">
-                <IconButton LinkComponent={Link} href={p.url} target={"_blank"}>
-                  <LaunchIcon />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-            <ProviderConfig provider={p} updateProvider={updateProviders} />
-          </Stack>
-        </ListItem>
-      ))}
-    </List>
+    <Stack gap={1}>
+      <AddProviderHeader
+        addProvider={async (p) => {
+          setProviders((prev) => [...prev, p]);
+          await updateProvider?.(p);
+        }}
+      />
+      <List>
+        {Object.values(providers).map((p) => {
+          const pBase = providerBaseMap[p.providerBaseId];
+          return (
+            <ListItem
+              sx={{
+                borderBottom: "1px solid",
+                borderColor: "text.secondary",
+              }}
+              key={p.id}
+            >
+              <Stack
+                sx={{
+                  width: "100%",
+                }}
+              >
+                <Stack direction="row" alignItems="center">
+                  <ListItemIcon>
+                    <StaticAvatar alt={p.name} src={pBase.logo} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={p.name}
+                    secondary={pBase.type.join(" | ")}
+                  />
+                  <Tooltip title="Site">
+                    <IconButton
+                      LinkComponent={Link}
+                      href={pBase.url}
+                      target={"_blank"}
+                    >
+                      <LaunchIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete">
+                    <IconButton onClick={() => setDeleteProvider(p)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
+                <TextField
+                  label="Name"
+                  size="small"
+                  defaultValue={p.name}
+                  onBlur={(ev) => updateName(ev.target.value, p.id)}
+                />
+                {pBase.configType !== ProviderConfigType.CONFIG_NONE && (
+                  <Divider
+                    sx={{
+                      color: "var(--mui-palette-text-secondary)",
+                    }}
+                  >
+                    Configuration
+                  </Divider>
+                )}
+                <ProviderConfigConfig
+                  provider={p}
+                  updateProvider={updateProvidersConfigAll}
+                />
+                {pBase.authType !== ProviderAuthType.NONE && (
+                  <Divider
+                    sx={{
+                      color: "var(--mui-palette-text-secondary)",
+                    }}
+                  >
+                    Authentication
+                  </Divider>
+                )}
+                <ProviderAuthConfig
+                  provider={p}
+                  updateProvider={updateProvidersAuthAll}
+                />
+              </Stack>
+            </ListItem>
+          );
+        })}
+      </List>
+      <DeleteDialog
+        open={deleteProvider !== null}
+        handleClose={() => setDeleteProvider(null)}
+        title="Delete Provider"
+        description={
+          deleteProvider
+            ? `Do you want to delete "${deleteProvider.name}"?`
+            : ""
+        }
+        action={deleteProviderD}
+      />
+    </Stack>
   );
 }

@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import { StaticAvatar } from "./staticAvatar";
 import { toggleMessagesPane } from "@/libs/chat/utils";
-import { providerMap } from "@/libs/chat/data";
+import { providerBaseMap } from "@/libs/chat/data";
 import { aIContext } from "./context";
 import { checkProviderAvaiable } from "@/libs/chat/functions";
 
@@ -47,7 +47,8 @@ export default function ChatListItem({
   const { providers } = useContext(aIContext);
 
   const selected = selectedModel?.id === model.id;
-  const hasProviderAuth = checkProviderAvaiable(providers[model.providerId]);
+  const provider = providers.find((p) => p.id === model.providerId);
+  const hasProviderAuth = provider ? checkProviderAvaiable(provider) : false;
 
   useEffect(() => {
     const handle = setInterval(
@@ -89,7 +90,11 @@ export default function ChatListItem({
         >
           <Stack direction="row" spacing={1.5} alignItems="center">
             <StaticAvatar
-              src={providerMap[sender.providerId].logo}
+              src={
+                provider
+                  ? providerBaseMap?.[provider.providerBaseId].logo
+                  : undefined
+              }
               alt={sender.name}
             />
             <Stack>

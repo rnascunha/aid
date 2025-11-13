@@ -48,7 +48,19 @@ export type ProviderAuth =
   | ProviderAuthAWS
   | ProviderAuthAzure;
 
-export interface ProviderProps {
+export enum ProviderConfigType {
+  CONFIG_NONE = "none",
+  CONFIG_API_URL = "api_url",
+}
+
+export interface ProviderAPIUrlConfig {
+  api_url: string;
+  timeout: number;
+}
+
+export type ProviderConfig = ProviderAPIUrlConfig;
+
+export interface ProviderBaseProps {
   id: string;
   name: string;
   logo: StaticImageData;
@@ -56,7 +68,16 @@ export interface ProviderProps {
   provider: string;
   type: ProviderType[];
   authType: ProviderAuthType;
-  auth: ProviderAuth;
+  configType: ProviderConfigType;
+}
+
+export interface ProviderProps {
+  id: string;
+  name: string;
+  providerBaseId: string;
+  createdDate: number;
+  config?: ProviderConfig;
+  auth?: ProviderAuth;
 }
 
 export interface ModelProps {

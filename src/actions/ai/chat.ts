@@ -15,8 +15,8 @@ export async function fetchChatRequest(
   model: string,
   messages: MessageContext[],
   settings: ChatSettingsPython,
-  auth: ProviderAuth,
-  info: ChatInfo
+  info: ChatInfo,
+  auth?: ProviderAuth
 ): Promise<ChatMessage> {
   try {
     const response = await fetch(`${serverAPIhost}/chat/`, {
@@ -28,7 +28,6 @@ export async function fetchChatRequest(
     });
     const raw = await response.json();
     if ("error" in raw) return raw;
-    console.log(raw)
     return {
       ...raw,
       response: raw.data.choices[0].message.content,

@@ -3,29 +3,29 @@ import {
   ChatMessagesProps,
   MessageProps,
   ModelProps,
-  ProviderAuth,
+  ProviderProps,
 } from "@/libs/chat/types";
 import { Dispatch, SetStateAction } from "react";
 import { AudioToTextSettings } from "./types";
 import { filePathToBase64 } from "@/libs/base64";
 import { fetchAudioToText } from "@/actions/ai/audiototext";
-import { providerMap } from "@/libs/chat/data";
+import { providerBaseMap } from "@/libs/chat/data";
 
 export async function attachmentResponse(
   file: Attachment,
   newId: string,
   model: ModelProps,
+  provider: ProviderProps,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  settings: AudioToTextSettings,
-  providerAuth: ProviderAuth
+  settings: AudioToTextSettings
 ) {
   const base64 = await filePathToBase64(file.data, file.type);
   const response = await fetchAudioToText(
-    providerMap[model.providerId].provider,
+    providerBaseMap[provider.providerBaseId].provider,
     model.model,
     base64,
     settings,
-    providerAuth
+    provider.auth
   );
   const responseMessage = {
     id: `${newId}:r`,

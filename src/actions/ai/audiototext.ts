@@ -24,7 +24,7 @@ export async function fetchAudioToText(
   model: string,
   file: string,
   settings: AudioToTextSettings,
-  auth: ProviderAuth
+  auth?: ProviderAuth
 ) {
   try {
     const response = await fetch(`${serverAPIhost}/audiototext/`, {

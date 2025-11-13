@@ -1,18 +1,18 @@
 import { List, Stack } from "@mui/material";
-import { ChatMessagesProps, ModelProps } from "../../libs/chat/types";
-import { Dispatch, SetStateAction } from "react";
+import {
+  ChatMessagesProps,
+  ModelProps,
+} from "@/libs/chat/types";
+import { Dispatch, ReactNode, SetStateAction } from "react";
 import ChatListItem from "./chatItemList";
-import { sortedModels } from "../../libs/chat/functions";
-import { AddModelButton } from "./addModel";
+import { sortedModels } from "@/libs/chat/functions";
 
 import HubIcon from "@mui/icons-material/Hub";
 
 export function EmptyChatList({
-  models,
-  onAddModel,
+  addModelButton,
 }: {
-  models: ModelProps[];
-  onAddModel: (model: string | ModelProps) => Promise<void>;
+  addModelButton: ReactNode;
 }) {
   return (
     <Stack
@@ -24,7 +24,7 @@ export function EmptyChatList({
       gap={5}
     >
       <HubIcon fontSize="large" />
-      <AddModelButton models={models} addRemoveModel={onAddModel} />
+      {addModelButton}
     </Stack>
   );
 }

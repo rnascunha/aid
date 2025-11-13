@@ -1,9 +1,9 @@
 "use client";
 
 import { getIpiFyIP } from "@/libs/apis/ipify";
-import { initTools, providerMap } from "@/libs/chat/data";
-import { getProviders, getTools } from "@/libs/chat/storage";
-import { ProviderAuth, ProviderProps, ToolsProps } from "@/libs/chat/types";
+import { initTools } from "@/libs/chat/data";
+import { getProviders, getTools } from "@/libs/chat/storage/indexDB/general";
+import { ProviderProps, ToolsProps } from "@/libs/chat/types";
 import {
   createContext,
   Dispatch,
@@ -14,8 +14,8 @@ import {
 } from "react";
 
 interface AIContext {
-  providers: Record<string, ProviderProps>;
-  setProviders: Dispatch<SetStateAction<Record<string, ProviderProps>>>;
+  providers: ProviderProps[];
+  setProviders: Dispatch<SetStateAction<ProviderProps[]>>;
   openSettings: boolean;
   setOpenSettings: Dispatch<SetStateAction<boolean>>;
   tools: ToolsProps;
@@ -23,7 +23,7 @@ interface AIContext {
 }
 
 const defaultAIContext: AIContext = {
-  providers: providerMap,
+  providers: [],
   setProviders: () => {},
   openSettings: false,
   setOpenSettings: () => {},
@@ -41,29 +41,16 @@ async function getUserTools(setTools: Dispatch<SetStateAction<ToolsProps>>) {
 }
 
 async function getUserProviders(
-  setProviders: Dispatch<SetStateAction<Record<string, ProviderProps>>>
+  setProviders: Dispatch<SetStateAction<ProviderProps[]>>
 ) {
   const ps = await getProviders();
-  Object.values(ps).reduce((acc, { id, auth }) => {
-    acc[id] = auth;
-    setProviders((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        auth: {
-          ...prev[id].auth,
-          ...auth,
-        },
-      },
-    }));
-    return acc;
-  }, {} as Record<string, ProviderAuth>);
+  setProviders(ps);
 }
 
 export const aIContext = createContext<AIContext>(defaultAIContext);
 
 export function AIContextProvider({ children }: { children: ReactNode }) {
-  const [providers, setProviders] = useState<Record<string, ProviderProps>>(
+  const [providers, setProviders] = useState<ProviderProps[]>(
     defaultAIContext.providers
   );
   const [openSettings, setOpenSettings] = useState(

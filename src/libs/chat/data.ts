@@ -15,10 +15,18 @@ import deepgram from "@/images/ai/deepgram.jpeg";
 import huggingface from "@/images/ai/hugging-face.svg";
 import aws from "@/images/ai/aws.png";
 import azure from "@/images/ai/azure.svg";
+import ollama from "@/images/ai/ollama.svg";
+import lmstudio from "@/images/ai/lm-studio.svg";
 
-import { ProviderAuthType, ProviderProps, ToolsProps } from "./types";
+import {
+  ProviderAuthType,
+  ProviderBaseProps,
+  ProviderConfigType,
+  ProviderProps,
+  ToolsProps,
+} from "./types";
 
-export const providers: ProviderProps[] = [
+export const providersBase: ProviderBaseProps[] = [
   {
     name: "Open AI",
     id: "openai",
@@ -27,9 +35,7 @@ export const providers: ProviderProps[] = [
     url: "https://platform.openai.com/",
     type: ["chat", "audioToText"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Anthropic",
@@ -39,9 +45,7 @@ export const providers: ProviderProps[] = [
     url: "https://www.anthropic.com/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Cerebras",
@@ -51,9 +55,7 @@ export const providers: ProviderProps[] = [
     url: "https://www.cerebras.ai/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Cohere",
@@ -63,9 +65,7 @@ export const providers: ProviderProps[] = [
     url: "https://cohere.com/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Deepseek",
@@ -75,9 +75,7 @@ export const providers: ProviderProps[] = [
     url: "https://www.deepseek.com/en",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Groq",
@@ -87,9 +85,7 @@ export const providers: ProviderProps[] = [
     url: "https://groq.com/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "IBM Watson",
@@ -99,11 +95,7 @@ export const providers: ProviderProps[] = [
     url: "https://www.ibm.com/products/watsonx",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_IBM_WATSONX,
-    auth: {
-      key: "",
-      project_id: "",
-      service_url: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Inception Labs",
@@ -113,9 +105,7 @@ export const providers: ProviderProps[] = [
     url: "https://www.inceptionlabs.ai/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Mistral AI",
@@ -125,9 +115,7 @@ export const providers: ProviderProps[] = [
     url: "https://mistral.ai/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Nebius",
@@ -137,9 +125,7 @@ export const providers: ProviderProps[] = [
     url: "https://nebius.com/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Sambanova",
@@ -149,9 +135,7 @@ export const providers: ProviderProps[] = [
     url: "https://sambanova.ai/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Vertex AI",
@@ -161,11 +145,7 @@ export const providers: ProviderProps[] = [
     url: "https://cloud.google.com/vertex-ai",
     type: ["chat", "audioToText"],
     authType: ProviderAuthType.AUTH_GOOGLE,
-    auth: {
-      project_id: "",
-      region: "",
-      application_credentials: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Xai",
@@ -175,9 +155,7 @@ export const providers: ProviderProps[] = [
     url: "https://x.ai/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Hugging Face",
@@ -187,9 +165,7 @@ export const providers: ProviderProps[] = [
     url: "https://huggingface.co/",
     type: ["audioToText"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Deepgram",
@@ -199,9 +175,7 @@ export const providers: ProviderProps[] = [
     url: "https://deepgram.com/",
     type: ["audioToText"],
     authType: ProviderAuthType.AUTH_API_KEY,
-    auth: {
-      key: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "AWS",
@@ -211,11 +185,7 @@ export const providers: ProviderProps[] = [
     url: "https://console.aws.amazon.com/bedrock/home/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_AWS,
-    auth: {
-      access_key: "",
-      secret_key: "",
-      region: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
   },
   {
     name: "Azure",
@@ -225,18 +195,69 @@ export const providers: ProviderProps[] = [
     url: "https://portal.azure.com/",
     type: ["chat"],
     authType: ProviderAuthType.AUTH_AZURE,
-    auth: {
-      key: "",
-      base_url: "",
-      api_version: "",
-    },
+    configType: ProviderConfigType.CONFIG_NONE,
+  },
+  {
+    name: "Ollama",
+    id: "ollama",
+    provider: "ollama",
+    logo: ollama,
+    url: "https://ollama.com/",
+    type: ["chat"],
+    authType: ProviderAuthType.NONE,
+    configType: ProviderConfigType.CONFIG_API_URL,
+  },
+  {
+    name: "LM Studio",
+    id: "lmstudio",
+    provider: "lmstudio",
+    logo: lmstudio,
+    url: "https://lmstudio.ai/",
+    type: ["chat"],
+    authType: ProviderAuthType.NONE,
+    configType: ProviderConfigType.CONFIG_API_URL,
   },
 ] as const;
 
-export const providerMap = providers.reduce((acc, p) => {
+export const providerAuthTemplate = {
+  [ProviderAuthType.NONE]: undefined,
+  [ProviderAuthType.AUTH_API_KEY]: {
+    key: "",
+  },
+  [ProviderAuthType.AUTH_AWS]: {
+    access_key: "",
+    secret_key: "",
+    region: "",
+  },
+  [ProviderAuthType.AUTH_AZURE]: {
+    key: "",
+    base_url: "",
+    api_version: "",
+  },
+  [ProviderAuthType.AUTH_GOOGLE]: {
+    project_id: "",
+    region: "",
+    application_credentials: "",
+  },
+  [ProviderAuthType.AUTH_IBM_WATSONX]: {
+    key: "",
+    project_id: "",
+    service_url: "",
+  },
+};
+
+export const providerConfigTemplate = {
+  [ProviderConfigType.CONFIG_NONE]: undefined,
+  [ProviderConfigType.CONFIG_API_URL]: {
+    api_url: "",
+    timeout: 300,
+  },
+};
+
+export const providerBaseMap = providersBase.reduce((acc, p) => {
   acc[p.id] = p;
   return acc;
-}, {} as Record<ProviderProps["id"], ProviderProps>);
+}, {} as Record<ProviderProps["id"], ProviderBaseProps>);
 
 export const initTools: ToolsProps = {
   ip: "",

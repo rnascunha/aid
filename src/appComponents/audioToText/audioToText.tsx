@@ -2,7 +2,7 @@
 
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatContainer } from "@/components/chat/chatContainer";
-import { ChatList } from "@/components/chat/chatList";
+import { ChatList, EmptyChatList } from "@/components/chat/chatList";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { MessageList } from "@/components/chat/messageList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
@@ -13,9 +13,14 @@ import {
   MessageProps,
   ModelProps,
 } from "@/libs/chat/types";
-import { useContext, useEffect, useState, useTransition } from "react";
+import { useContext, useEffect, useMemo, useState, useTransition } from "react";
 import { AudioInput } from "./components/audioInput";
-import { attachmentSubmit, onDeleteModelMessages } from "@/libs/chat/functions";
+import {
+  addRemoveModel,
+  attachmentSubmit,
+  onDeleteModelMessages,
+  removeModelsFromRemovedProviders,
+} from "@/libs/chat/functions";
 import { generateUUID } from "@/libs/uuid";
 import { AudioToTextSettings } from "./types";
 import { attachmentResponse } from "./functions";
@@ -26,6 +31,8 @@ import { SettingsDialog } from "./components/settingsDialog";
 import { SelectLanguage } from "./components/selectLanguage";
 import { MessageInputCheck } from "@/components/chat/messageInput";
 import { aIContext } from "@/components/chat/context";
+import { AddModel, AddModelButton } from "./components/addModel";
+import { providerBaseMap } from "@/libs/chat/data";
 
 interface AudioToTextPros {
   models: ModelProps[];
@@ -37,28 +44,48 @@ interface AudioToTextPros {
   ) => Promise<void> | void;
   onDeleteMessages?: (modelId?: string) => Promise<void> | void;
   onSettingsChange?: (settings: AudioToTextSettings) => Promise<void> | void;
+  onAddRemoveModel?: (model: string | ModelProps) => Promise<void> | void;
 }
 
 export function AudioToText({
-  models,
+  models: allModel,
   chats: allChats,
   settings: initSettings,
   onMessage,
   onDeleteMessages,
   onSettingsChange,
+  onAddRemoveModel,
 }: AudioToTextPros) {
   const [selectedModel, setSelectedModel] = useState<ModelProps | undefined>(
     undefined
   );
+  const [models, setModels] = useState<ModelProps[]>(allModel);
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [settings, setSettings] = useState<AudioToTextSettings>(initSettings);
   const [isPending, startTransition] = useTransition();
 
   const { providers } = useContext(aIContext);
+  const audioToTextProviders = useMemo(() => {
+    const cp = providers.filter((p) =>
+      providerBaseMap[p.providerBaseId].type.includes("audioToText")
+    );
+    // Remove models from removed providers
+    removeModelsFromRemovedProviders(cp, setModels);
+    return cp;
+  }, [providers, setModels]);
 
-  const selectedProvider = selectedModel?.providerId
-    ? providers[selectedModel.providerId]
-    : undefined;
+  // Get provider from selected model
+  const selectedProvider = !selectedModel
+    ? undefined
+    : audioToTextProviders.find((p) => p.id === selectedModel?.providerId);
+
+  // Check if selected model still exist
+  if (
+    selectedModel &&
+    !audioToTextProviders.find((p) => p.id === selectedModel?.providerId)
+  ) {
+    setSelectedModel(undefined);
+  }
 
   useEffect(() => {
     onSettingsChange?.(settings);
@@ -80,12 +107,17 @@ export function AudioToText({
         file,
         newId,
         selectedModel!,
+        selectedProvider!,
         setChats,
-        settings,
-        selectedProvider!.auth
+        settings
       );
       await onMessage?.(response, selectedModel!.id);
     });
+  };
+
+  const onAddRemoveModelHandler = async (model: string | ModelProps) => {
+    addRemoveModel(models, setModels, setChats, setSelectedModel, model);
+    await onAddRemoveModel?.(model);
   };
 
   const onDeleteAllMessagesHandler = async () => {
@@ -103,6 +135,11 @@ export function AudioToText({
         <ChatHeader
           chatOptions={
             <Stack direction="row" gap={0.5}>
+              <AddModel
+                models={models}
+                providers={audioToTextProviders}
+                addRemoveModel={onAddRemoveModelHandler}
+              />
               <SelectLanguage
                 language={settings.language}
                 setLanguage={(ln) =>
@@ -125,7 +162,15 @@ export function AudioToText({
         <ChatsPane
           modelsList={
             models.length === 0 ? (
-              <EmptyMessagesPane />
+              <EmptyChatList
+                addModelButton={
+                  <AddModelButton
+                    models={models}
+                    addRemoveModel={onAddRemoveModelHandler}
+                    providers={audioToTextProviders}
+                  />
+                }
+              />
             ) : (
               <ChatList
                 models={models}
@@ -138,13 +183,14 @@ export function AudioToText({
         />
       }
       MessagePane={
-        !selectedModel ? (
+        !selectedModel || !selectedProvider ? (
           <EmptyMessagesPane />
         ) : (
           <MessagesPane
             header={
               <MessagesHeader
                 model={selectedModel}
+                provider={selectedProvider}
                 options={
                   <DeleteMessagesButton
                     onDelete={async () =>

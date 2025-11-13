@@ -1,18 +1,23 @@
-import { ModelProps } from "../../libs/chat/types";
+import { ModelProps, ProviderProps } from "../../libs/chat/types";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { StaticAvatar } from "./staticAvatar";
 
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import { toggleMessagesPane } from "../../libs/chat/utils";
+import { toggleMessagesPane } from "@/libs/chat/utils";
 import { ReactNode } from "react";
-import { providerMap } from "@/libs/chat/data";
+import { providerBaseMap } from "@/libs/chat/data";
 
 type MessagesPaneHeaderProps = {
   model: ModelProps;
+  provider: ProviderProps;
   options?: ReactNode;
 };
 
-export function MessagesHeader({ model, options }: MessagesPaneHeaderProps) {
+export function MessagesHeader({
+  model,
+  provider,
+  options,
+}: MessagesPaneHeaderProps) {
   return (
     <Stack
       direction="row"
@@ -45,7 +50,7 @@ export function MessagesHeader({ model, options }: MessagesPaneHeaderProps) {
             <ArrowBackIosNewRoundedIcon />
           </IconButton>
           <StaticAvatar
-            src={providerMap[model.providerId].logo}
+            src={providerBaseMap?.[provider.providerBaseId].logo}
             alt={model.name}
           />
           <Stack>

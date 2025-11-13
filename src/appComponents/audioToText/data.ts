@@ -1,84 +1,18 @@
-import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
+import { ChatMessagesProps } from "@/libs/chat/types";
 
-export const models: ModelProps[] = [
-  {
-    name: "Open AI Whisper 1",
-    id: "openai:0",
-    providerId: "openai",
-    model: "whisper-1",
-  },
-  {
-    name: "Deepgram",
-    id: "deepgram:1",
-    providerId: "deepgram",
-    model: "nova-2",
-  },
-  {
-    name: "Deepgram",
-    id: "deepgram:2",
-    providerId: "deepgram",
-    model: "nova",
-  },
-  {
-    name: "Deepgram",
-    id: "deepgram:3",
-    providerId: "deepgram",
-    model: "enhanced",
-  },
-  {
-    name: "Deepgram",
-    id: "deepgram:4",
-    providerId: "deepgram",
-    model: "base",
-  },
-  {
-    name: "Google",
-    id: "google:1",
-    providerId: "google",
-    model: "default",
-  },
-  {
-    name: "Google",
-    id: "google:2",
-    providerId: "google",
-    model: "latest_long",
-  },
-  {
-    name: "Google",
-    id: "google:3",
-    providerId: "google",
-    model: "latest_short",
-  },
-  {
-    name: "Hugging Face",
-    id: "huggingface:0",
-    providerId: "huggingface",
-    model: "openai/whisper-large-v3",
-  },
-  {
-    name: "Hugging Face",
-    id: "huggingface:1",
-    providerId: "huggingface",
-    model: "openai/whisper-tiny",
-  },
-  {
-    name: "Hugging Face",
-    id: "huggingface:2",
-    providerId: "huggingface",
-    model: "facebook/wav2vec2-base-960h",
-  },
-  {
-    name: "Hugging Face",
-    id: "huggingface:3",
-    providerId: "huggingface",
-    model: "facebook/wav2vec2-large-xlsr-53",
-  },
-];
+export const audioToTextProviderModel: Record<string, string[]> = {
+  openai: ["whisper-1"],
+  deepgram: ["nova", "nova-2", "enhanced", "base"],
+  google: ["default", "latest_long", "latest_short"],
+  huggingface: [
+    "openai/whisper-large-v3",
+    "openai/whisper-tiny",
+    "facebook/wav2vec2-base-960h",
+    "facebook/wav2vec2-large-xlsr-53",
+  ],
+} as const;
 
-export const chats: ChatMessagesProps = models.reduce((acc, u) => {
-  acc[u.id] = [];
-  return acc;
-}, {} as ChatMessagesProps);
+export const chats: ChatMessagesProps = {};
 
 export interface AudioToTextLanguage {
   value: string;

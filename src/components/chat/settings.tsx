@@ -6,14 +6,14 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { SettingsProviders } from "./settings/settingsProvider";
-import { ProviderAuth, ToolsProps } from "@/libs/chat/types";
+import { ProviderProps, ToolsProps } from "@/libs/chat/types";
 import { ArrayPanel, PanelConfig } from "../panels";
 import { SettingsTools } from "./settings/settigsTools";
 
 interface SettingsDialogProps {
   open: boolean;
   onClose: () => void;
-  updateProvider?: (auth: ProviderAuth, id: string) => Promise<void> | void;
+  updateProvider?: (provider: ProviderProps | string) => Promise<void> | void;
   updateTool?: (tool: ToolsProps) => Promise<void> | void;
 }
 

@@ -1,16 +1,16 @@
 "use client";
 
 import { AudioToText } from "@/appComponents/audioToText/audioToText";
-import { initAudioSettings, models } from "@/appComponents/audioToText/data";
+import { initAudioSettings } from "@/appComponents/audioToText/data";
+import { AudioToTextSettings } from "@/appComponents/audioToText/types";
+import CenterSpinner from "@/components/spinner/centerSpinner";
 import {
   deleteAudioToTextMessages,
   getAllAudioToTextMessages,
-  getSettings,
+  getAudioToTextSettings,
   onAudioToTextMessage,
-  updateSettings,
-} from "@/appComponents/audioToText/storage";
-import { AudioToTextSettings } from "@/appComponents/audioToText/types";
-import CenterSpinner from "@/components/spinner/centerSpinner";
+  updateAudioToTextSettings,
+} from "@/libs/chat/storage/indexDB/audioToText";
 import { ChatMessagesProps } from "@/libs/chat/types";
 import { useEffect, useState } from "react";
 
@@ -23,8 +23,8 @@ export default function AudioToTextPage() {
   useEffect(() => {
     async function getData() {
       const [settings, chats] = await Promise.all([
-        getSettings(),
-        getAllAudioToTextMessages(models),
+        getAudioToTextSettings(),
+        getAllAudioToTextMessages([]),
       ]);
       return { chats, settings };
     }
@@ -35,12 +35,12 @@ export default function AudioToTextPage() {
     <CenterSpinner />
   ) : (
     <AudioToText
-      models={models}
+      models={[]}
       chats={dbData.chats}
       settings={dbData.settings ?? initAudioSettings}
       onMessage={onAudioToTextMessage}
       onDeleteMessages={deleteAudioToTextMessages}
-      onSettingsChange={updateSettings}
+      onSettingsChange={updateAudioToTextSettings}
     />
   );
 }

@@ -11,7 +11,7 @@ import { StaticAvatar } from "./staticAvatar";
 import { MessageProps } from "../../libs/chat/types";
 import { MessageBubble } from "./messageBubble";
 import { useEffect, useRef, useState } from "react";
-import { providerMap } from "@/libs/chat/data";
+import { providerBaseMap } from "@/libs/chat/data";
 import JSONOutput from "../JSONOutput";
 
 interface MessageListProps {
@@ -117,7 +117,7 @@ export function MessageList({ messages }: MessageListProps) {
             >
               {message.sender !== "You" && (
                 <StaticAvatar
-                  src={providerMap[message.sender.providerId].logo}
+                  src={providerBaseMap[message.sender.providerId].logo}
                   alt={message.sender.name}
                 />
               )}

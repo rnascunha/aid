@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState, useTransition } from "react";
+import { useContext, useEffect, useMemo, useState, useTransition } from "react";
 import { Stack } from "@mui/material";
 
 import { SettingsDialog } from "./components/settingsDialog";
@@ -12,6 +12,7 @@ import {
   addRemoveModel,
   messageSubmit,
   onDeleteModelMessages,
+  removeModelsFromRemovedProviders,
 } from "@/libs/chat/functions";
 
 import { ChatContainer } from "@/components/chat/chatContainer";
@@ -27,9 +28,10 @@ import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messageList";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { DeleteMessagesButton } from "@/components/chat/deleteMessagesButton";
-import { AddModel } from "@/components/chat/addModel";
+import { AddModel, AddModelButton } from "@/components/chat/addModel";
 import { messageResponse } from "./functions";
 import { aIContext } from "@/components/chat/context";
+import { providerBaseMap } from "@/libs/chat/data";
 
 export interface ChatProps {
   models: ModelProps[];
@@ -60,11 +62,29 @@ export function Chat({
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [isPending, startTransition] = useTransition();
   const [settings, setSettings] = useState(initSettings);
-  const { providers, tools } = useContext(aIContext);
 
-  const selectedProvider = selectedModel?.providerId
-    ? providers[selectedModel.providerId]
-    : undefined;
+  const { providers, tools } = useContext(aIContext);
+  const chatProviders = useMemo(() => {
+    const cp = providers.filter((p) =>
+      providerBaseMap[p.providerBaseId].type.includes("chat")
+    );
+    // Remove models from removed providers
+    removeModelsFromRemovedProviders(cp, setModels);
+    return cp;
+  }, [providers, setModels]);
+
+  // Get provider from selected model
+  const selectedProvider = !selectedModel
+    ? undefined
+    : chatProviders.find((p) => p.id === selectedModel?.providerId);
+
+  // Check if selected model still exist
+  if (
+    selectedModel &&
+    !chatProviders.find((p) => p.id === selectedModel?.providerId)
+  ) {
+    setSelectedModel(undefined);
+  }
 
   useEffect(() => {
     onSettingsChange?.(settings);
@@ -72,7 +92,6 @@ export function Chat({
 
   const onMessageHandler = async (message: string) => {
     const newId = generateUUID();
-    const providerAuth = providers[selectedModel!.providerId].auth;
     const newMessage = messageSubmit(message, newId, selectedModel!, setChats);
     await onMessage?.(newMessage, selectedModel!.id);
     startTransition(async () => {
@@ -80,10 +99,10 @@ export function Chat({
         message,
         newId,
         selectedModel!,
+        selectedProvider!,
         setChats,
         settings,
         chats[selectedModel!.id],
-        providerAuth,
         tools
       );
       await onMessage?.(response, selectedModel!.id);
@@ -112,6 +131,7 @@ export function Chat({
               <AddModel
                 models={models}
                 addRemoveModel={onAddRemoveModelHandler}
+                providers={chatProviders}
               />
               <SettingsDialog
                 settings={settings}
@@ -127,8 +147,13 @@ export function Chat({
           modelsList={
             models.length === 0 ? (
               <EmptyChatList
-                models={models}
-                onAddModel={onAddRemoveModelHandler}
+                addModelButton={
+                  <AddModelButton
+                    models={models}
+                    addRemoveModel={onAddRemoveModelHandler}
+                    providers={chatProviders}
+                  />
+                }
               />
             ) : (
               <ChatList
@@ -142,13 +167,14 @@ export function Chat({
         />
       }
       MessagePane={
-        !selectedModel ? (
+        !selectedModel || !selectedProvider ? (
           <EmptyMessagesPane />
         ) : (
           <MessagesPane
             header={
               <MessagesHeader
                 model={selectedModel}
+                provider={selectedProvider}
                 options={
                   <DeleteMessagesButton
                     onDelete={async () =>

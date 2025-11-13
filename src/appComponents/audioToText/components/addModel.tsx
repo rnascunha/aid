@@ -12,35 +12,20 @@ import {
   Stack,
   TextField,
   Tooltip,
-  Typography,
 } from "@mui/material";
-
 import { ModelProps, ProviderProps } from "@/libs/chat/types";
-import { checkProviderAvaiable } from "@/libs/chat/functions";
-import { providerBaseMap } from "@/libs/chat/data";
 
 import AddIcon from "@mui/icons-material/Add";
-import { useContext, useState } from "react";
-import { StaticAvatar } from "./staticAvatar";
+import { useState } from "react";
+import { StaticAvatar } from "@/components/chat/staticAvatar";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { SelectProvider } from "./selectProvider";
+import { SelectProvider } from "@/components/chat/selectProvider";
 import { generateUUID } from "@/libs/uuid";
-import { aIContext } from "./context";
-
-export function NoProvidersHeader({ text }: { text?: string }) {
-  const { setOpenSettings } = useContext(aIContext);
-
-  return (
-    <Stack justifyContent="center" alignItems="center" gap={1}>
-      <Typography color="warning" fontWeight="bold">
-        {text ?? "No provider configured"}
-      </Typography>
-      <Button variant="contained" onClick={() => setOpenSettings(true)}>
-        Open settings
-      </Button>
-    </Stack>
-  );
-}
+import { checkProviderAvaiable } from "@/libs/chat/functions";
+import { providerBaseMap } from "@/libs/chat/data";
+import { audioToTextProviderModel } from "../data";
+import { SelectModel } from "./selectetModel";
+import { NoProvidersHeader } from "@/components/chat/addModel";
 
 function ModelItem({
   model,
@@ -86,11 +71,11 @@ function AddModelHeader({
   const [newModel, setNewModel] = useState<ModelProps>({
     id: generateUUID(),
     name: "",
-    model: "",
+    model: audioToTextProviderModel[providers[0].providerBaseId][0],
     providerId: providers[0].id,
   });
   const provider = providers.find(
-    (p) => newModel.providerId === p.id
+    (p) => p.id === newModel.providerId
   ) as ProviderProps;
   return (
     <Stack
@@ -101,9 +86,15 @@ function AddModelHeader({
     >
       <SelectProvider
         provider={provider}
-        setProvider={(p: ProviderProps) =>
-          setNewModel((prev) => ({ ...prev, providerId: p.id }))
-        }
+        setProvider={(p: ProviderProps) => {
+          if (provider.id !== p.id) {
+            setNewModel((prev) => ({
+              ...prev,
+              providerId: p.id,
+              model: audioToTextProviderModel[p.providerBaseId][0],
+            }));
+          }
+        }}
         providers={providers}
       />
       <TextField
@@ -115,17 +106,12 @@ function AddModelHeader({
         }
         error={newModel.name.trim() === ""}
       />
-      <TextField
-        label="Model"
-        size="small"
+      <SelectModel
+        models={audioToTextProviderModel[provider.providerBaseId]}
         value={newModel.model}
         onChange={(ev) =>
-          setNewModel((prev) => ({
-            ...prev,
-            model: ev.target.value.replaceAll(/[\n\t ]/g, ""),
-          }))
+          setNewModel((prev) => ({ ...prev, model: ev.target.value }))
         }
-        error={newModel.model === ""}
       />
       <Button
         onClick={() => {
@@ -148,16 +134,16 @@ function AddModelHeader({
 
 function AddModelDialog({
   models,
+  providers,
   addRemoveModel,
   open,
   onClose,
-  providers,
 }: {
   models: ModelProps[];
+  providers: ProviderProps[];
   addRemoveModel: (model: string | ModelProps) => Promise<void>;
   open: boolean;
   onClose: () => void;
-  providers: ProviderProps[];
 }) {
   return (
     <Dialog
@@ -175,8 +161,8 @@ function AddModelDialog({
     >
       <DialogTitle>Add Model</DialogTitle>
       <DialogContent>
-        {providers?.length === 0 ? (
-          <NoProvidersHeader text="No provider with 'chat' support configured " />
+        {providers.length === 0 ? (
+          <NoProvidersHeader text="No provider with 'Audio to Text' support configured" />
         ) : (
           <AddModelHeader
             addRemoveModel={addRemoveModel}

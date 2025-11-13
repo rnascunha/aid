@@ -1,20 +1,20 @@
 "use client";
 
-import {
-  onChatMessage,
-  deleteChatMessages,
-  getAllChatMessages,
-  getAllModels,
-  getSettings,
-  onAddRemoveModel,
-  updateSettings,
-} from "@/appComponents/chat/storage";
 import { useEffect, useState } from "react";
 import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
 import CenterSpinner from "@/components/spinner/centerSpinner";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { defaultSettings } from "@/appComponents/chat/data";
 import { Chat } from "@/appComponents/chat/chat";
+import {
+  deleteChatMessages,
+  getAllChatMessages,
+  getAllChatModels,
+  getChatSettings,
+  onAddRemoveChatModel,
+  onChatMessage,
+  updateChatSettings,
+} from "@/libs/chat/storage/indexDB/chat";
 
 export default function ChatPage() {
   const [dbData, setDbData] = useState<null | {
@@ -22,12 +22,11 @@ export default function ChatPage() {
     models: ModelProps[];
     settings?: ChatSettings;
   }>(null);
-
   useEffect(() => {
     async function getData() {
       const [models, settings] = await Promise.all([
-        getAllModels(),
-        getSettings(),
+        getAllChatModels(),
+        getChatSettings(),
       ]);
       const chats = await getAllChatMessages(models);
       return { models, chats, settings };
@@ -44,8 +43,8 @@ export default function ChatPage() {
       settings={dbData.settings ?? defaultSettings}
       onMessage={onChatMessage}
       onDeleteMessages={deleteChatMessages}
-      onAddRemoveModel={onAddRemoveModel}
-      onSettingsChange={updateSettings}
+      onAddRemoveModel={onAddRemoveChatModel}
+      onSettingsChange={updateChatSettings}
     />
   );
 }

@@ -5,11 +5,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { ProviderProps } from "../../libs/chat/types";
+import { ProviderBaseProps, ProviderProps } from "../../libs/chat/types";
 import { StaticAvatar } from "./staticAvatar";
-import { providerMap } from "@/libs/chat/data";
+import { providerBaseMap, providersBase } from "@/libs/chat/data";
 
 function ProviderItem({ provider }: { provider: ProviderProps }) {
+  const pBase = providerBaseMap[provider.providerBaseId];
   return (
     <Stack
       direction="row"
@@ -17,7 +18,7 @@ function ProviderItem({ provider }: { provider: ProviderProps }) {
       alignItems="center"
       sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
     >
-      <StaticAvatar alt={provider.name} src={provider.logo} />
+      <StaticAvatar alt={provider.name} src={pBase.logo} />
       <Typography>{provider.name}</Typography>
     </Stack>
   );
@@ -33,7 +34,10 @@ export function SelectProvider({
   providers: ProviderProps[];
 }) {
   const handleChange = (event: SelectChangeEvent) => {
-    setProvider(providerMap[event.target.value as string]);
+    setProvider(
+      providers.find((p) => p.id === event.target.value) as ProviderProps
+    );
+    // setProvider(providers[event.target.value as string]);
   };
 
   return (
@@ -49,12 +53,59 @@ export function SelectProvider({
       }}
     >
       {providers.map((provider) => (
-        <MenuItem
-          dense
-          key={provider.id}
-          value={provider.id}
-        >
+        <MenuItem dense key={provider.id} value={provider.id}>
           <ProviderItem provider={provider} />
+        </MenuItem>
+      ))}
+    </Select>
+  );
+}
+
+function ProviderBaseItem({ provider }: { provider: ProviderBaseProps }) {
+  return (
+    <Stack
+      direction="row"
+      gap={1}
+      alignItems="center"
+      sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
+    >
+      <StaticAvatar alt={provider.name} src={provider.logo} />
+      <Stack>
+        <Typography>{provider.name}</Typography>
+        <Typography fontSize="small" color="textSecondary">
+          {provider.type.join(" | ")}
+        </Typography>
+      </Stack>
+    </Stack>
+  );
+}
+
+export function SelectBaseProvider({
+  provider,
+  setProvider,
+}: {
+  provider: ProviderBaseProps;
+  setProvider: (p: ProviderBaseProps) => void;
+}) {
+  const handleChange = (event: SelectChangeEvent) => {
+    setProvider(providerBaseMap[event.target.value]);
+  };
+
+  return (
+    <Select
+      labelId="provider-base-select-label"
+      id="provider-base-select"
+      value={provider.id}
+      onChange={handleChange}
+      size="small"
+      sx={{
+        boxShadow: "none",
+        // ".MuiOutlinedInput-notchedOutline": { border: 0 },
+      }}
+    >
+      {providersBase.map((provider) => (
+        <MenuItem dense key={provider.id} value={provider.id}>
+          <ProviderBaseItem provider={provider} />
         </MenuItem>
       ))}
     </Select>
