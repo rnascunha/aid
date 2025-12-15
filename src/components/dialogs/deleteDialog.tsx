@@ -9,12 +9,13 @@ import {
 } from "@mui/material";
 
 import DeleteIcon from "@mui/icons-material/Delete";
+import { ReactNode } from "react";
 
 interface DeleteDialogProps extends DialogProps {
   open: boolean;
   handleClose: () => void;
   title: string;
-  description: string;
+  description: ReactNode;
   action: () => void | Promise<void>;
 }
 
@@ -32,7 +33,7 @@ export function DeleteDialog({
       aria-labelledby="delete-dialog-title"
       aria-describedby="delete-dialog-description"
     >
-      <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
+      <DialogTitle id="delete-dialog-title">{title}</DialogTitle>
       <DialogContent>
         <DialogContentText id="delete-dialog-description">
           {description}

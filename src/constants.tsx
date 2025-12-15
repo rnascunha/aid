@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
 
 import ChatIcon from "@mui/icons-material/Chat";
-import MicIcon from '@mui/icons-material/Mic';
+import MicIcon from "@mui/icons-material/Mic";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 
 export const restrictedPath = "/";
 export const loginPath = "/login";
@@ -31,6 +32,12 @@ export const sections: Section[] = [
     name: "Audio To Text",
     icon: <MicIcon />,
     path: `${basePath}/audiototext`,
+  },
+  {
+    id: "chatbot",
+    name: "ChatBot",
+    icon: <SmartToyIcon />,
+    path: `${basePath}/chatbot`,
   },
 ];
 

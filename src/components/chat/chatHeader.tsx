@@ -4,8 +4,10 @@ import { ReactNode } from "react";
 
 export function ChatHeader({
   chatOptions = undefined,
+  chatTitle = "AIs",
 }: {
   chatOptions?: ReactNode;
+  chatTitle?: string;
 }) {
   return (
     <Stack
@@ -26,7 +28,7 @@ export function ChatHeader({
           mr: "auto",
         }}
       >
-        AIs
+        {chatTitle}
       </Typography>
       {chatOptions}
     </Stack>
