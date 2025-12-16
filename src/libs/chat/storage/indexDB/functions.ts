@@ -1,9 +1,13 @@
-import { ChatMessagesProps, MessageProps, ModelProps } from "../../types";
+import {
+  ChatMessagesModelProps,
+  MessageModelProps,
+  ModelProps,
+} from "@/components/chat/model/types";
 import { MessageDB, TableMessages, TableModels } from "./types";
 
 export async function onMessage(
   table: TableMessages,
-  message: MessageProps,
+  message: MessageModelProps,
   contactId: string
 ) {
   const msg: MessageDB = {
@@ -20,13 +24,13 @@ export async function onMessage(
 export async function getAllMessages(
   table: TableMessages,
   models: ModelProps[]
-): Promise<ChatMessagesProps> {
+): Promise<ChatMessagesModelProps> {
   const messages = await table.toArray();
 
   const baseChats = models.reduce((acc, m) => {
     acc[m.id] = [];
     return acc;
-  }, {} as ChatMessagesProps);
+  }, {} as ChatMessagesModelProps);
   const chats = messages.reduce((acc, m) => {
     const sender =
       m.type === "sent" ? "You" : models.find((o) => o.id === m.contactId);

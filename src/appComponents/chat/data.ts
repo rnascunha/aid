@@ -1,5 +1,7 @@
-import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
-
+import {
+  ChatMessagesModelProps,
+  ModelProps,
+} from "@/components/chat/model/types";
 import { ChatSettings, ToolNode } from "./types";
 
 export const models: ModelProps[] = [
@@ -83,10 +85,10 @@ export const models: ModelProps[] = [
   },
 ];
 
-export const chats: ChatMessagesProps = models.reduce((acc, u) => {
+export const chats: ChatMessagesModelProps = models.reduce((acc, u) => {
   acc[u.id] = [];
   return acc;
-}, {} as ChatMessagesProps);
+}, {} as ChatMessagesModelProps);
 
 export const toolsList: ToolNode[] = [
   { id: "get_current_datetime", label: "Current date/time" },

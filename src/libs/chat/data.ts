@@ -18,13 +18,13 @@ import azure from "@/images/ai/azure.svg";
 import ollama from "@/images/ai/ollama.svg";
 import lmstudio from "@/images/ai/lm-studio.svg";
 
+import { ToolsProps } from "./types";
 import {
   ProviderAuthType,
   ProviderBaseProps,
   ProviderConfigType,
   ProviderProps,
-  ToolsProps,
-} from "./types";
+} from "@/components/chat/model/types";
 
 export const providersBase: ProviderBaseProps[] = [
   {

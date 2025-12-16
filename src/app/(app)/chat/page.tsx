@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
 import CenterSpinner from "@/components/spinner/centerSpinner";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { defaultSettings } from "@/appComponents/chat/data";
@@ -15,10 +14,14 @@ import {
   onChatMessage,
   updateChatSettings,
 } from "@/libs/chat/storage/indexDB/chat";
+import {
+  ChatMessagesModelProps,
+  ModelProps,
+} from "@/components/chat/model/types";
 
 export default function ChatPage() {
   const [dbData, setDbData] = useState<null | {
-    chats: ChatMessagesProps;
+    chats: ChatMessagesModelProps;
     models: ModelProps[];
     settings?: ChatSettings;
   }>(null);

@@ -1,13 +1,10 @@
 import { List, Stack } from "@mui/material";
-import {
-  ChatMessagesProps,
-  ModelProps,
-} from "@/libs/chat/types";
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import ChatListItem from "./chatItemList";
 import { sortedModels } from "@/libs/chat/functions";
 
 import HubIcon from "@mui/icons-material/Hub";
+import { ChatMessagesModelProps, ModelProps } from "./types";
 
 export function EmptyChatList({
   addModelButton,
@@ -31,7 +28,7 @@ export function EmptyChatList({
 
 interface ChatListProps {
   models: ModelProps[];
-  chats: ChatMessagesProps;
+  chats: ChatMessagesModelProps;
   selectedModel: ModelProps | undefined;
   setSelectedModel: Dispatch<SetStateAction<ModelProps | undefined>>;
 }

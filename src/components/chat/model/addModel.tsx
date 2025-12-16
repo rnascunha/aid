@@ -15,17 +15,17 @@ import {
   Typography,
 } from "@mui/material";
 
-import { ModelProps, ProviderProps } from "@/libs/chat/types";
+import { ModelProps, ProviderProps } from "@/components/chat/model/types";
 import { checkProviderAvaiable } from "@/libs/chat/functions";
 import { providerBaseMap } from "@/libs/chat/data";
 
 import AddIcon from "@mui/icons-material/Add";
 import { useContext, useState } from "react";
-import { StaticAvatar } from "./staticAvatar";
+import { StaticAvatar } from "../staticAvatar";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { SelectProvider } from "./selectProvider";
 import { generateUUID } from "@/libs/uuid";
-import { aIContext } from "./context";
+import { aIContext } from "../context";
 
 export function NoProvidersHeader({ text }: { text?: string }) {
   const { setOpenSettings } = useContext(aIContext);

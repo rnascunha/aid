@@ -3,6 +3,10 @@
 import { AudioToText } from "@/appComponents/audioToText/audioToText";
 import { initAudioSettings } from "@/appComponents/audioToText/data";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
+import {
+  ChatMessagesModelProps,
+  ModelProps,
+} from "@/components/chat/model/types";
 import CenterSpinner from "@/components/spinner/centerSpinner";
 import {
   deleteAudioToTextMessages,
@@ -13,13 +17,13 @@ import {
   onAudioToTextMessage,
   updateAudioToTextSettings,
 } from "@/libs/chat/storage/indexDB/audioToText";
-import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
+// import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
 import { useEffect, useState } from "react";
 
 export default function AudioToTextPage() {
   const [dbData, setDbData] = useState<null | {
     models: ModelProps[];
-    chats: ChatMessagesProps;
+    chats: ChatMessagesModelProps;
     settings?: AudioToTextSettings;
   }>(null);
 

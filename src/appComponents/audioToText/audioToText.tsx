@@ -2,18 +2,12 @@
 
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatContainer } from "@/components/chat/chatContainer";
-import { ChatList, EmptyChatList } from "@/components/chat/chatList";
+import { ChatList, EmptyChatList } from "@/components/chat/model/chatList";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { MessageList } from "@/components/chat/messageList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
-import { MessagesHeader } from "@/components/chat/messagesHeader";
-import {
-  Attachment,
-  ChatMessagesProps,
-  MessageProps,
-  ModelProps,
-  ProviderProps,
-} from "@/libs/chat/types";
+import { MessagesHeader } from "@/components/chat/model/messagesHeader";
+import { Attachment } from "@/libs/chat/types";
 import { useContext, useEffect, useMemo, useState, useTransition } from "react";
 import { AudioInput } from "./components/audioInput";
 import {
@@ -30,17 +24,25 @@ import { ChatHeader } from "@/components/chat/chatHeader";
 import { Stack } from "@mui/material";
 import { SettingsDialog } from "./components/settingsDialog";
 import { SelectLanguage } from "./components/selectLanguage";
-import { MessageInputCheck } from "@/components/chat/messageInput";
 import { aIContext } from "@/components/chat/context";
 import { AddModel, AddModelButton } from "./components/addModel";
 import { providerBaseMap } from "@/libs/chat/data";
+import {
+  ChatMessagesModelProps,
+  MessageModelProps,
+  ModelProps,
+  ProviderProps,
+} from "@/components/chat/model/types";
+import ModelAvatar, {
+  MessageInputCheck,
+} from "@/components/chat/model/components";
 
 interface AudioToTextPros {
   models: ModelProps[];
-  chats: ChatMessagesProps;
+  chats: ChatMessagesModelProps;
   settings: AudioToTextSettings;
   onMessage?: (
-    message: MessageProps,
+    message: MessageModelProps,
     contactId: string
   ) => Promise<void> | void;
   onDeleteMessages?: (modelId?: string) => Promise<void> | void;
@@ -61,7 +63,7 @@ export function AudioToText({
     undefined
   );
   const [models, setModels] = useState<ModelProps[]>(allModel);
-  const [chats, setChats] = useState<ChatMessagesProps>(allChats);
+  const [chats, setChats] = useState<ChatMessagesModelProps>(allChats);
   const [settings, setSettings] = useState<AudioToTextSettings>(initSettings);
   const [isPending, startTransition] = useTransition();
 
@@ -205,7 +207,9 @@ export function AudioToText({
             messages={
               <MessageList
                 messages={chats[selectedModel.id]}
-                providers={audioToTextProviders}
+                avatar={
+                  <ModelAvatar providers={providers} sender={selectedModel} />
+                }
               />
             }
             input={

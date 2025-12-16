@@ -13,19 +13,19 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { ModelProps, ProviderProps } from "@/libs/chat/types";
 
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 import { StaticAvatar } from "@/components/chat/staticAvatar";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { SelectProvider } from "@/components/chat/selectProvider";
+import { SelectProvider } from "@/components/chat/model/selectProvider";
 import { generateUUID } from "@/libs/uuid";
 import { checkProviderAvaiable } from "@/libs/chat/functions";
 import { providerBaseMap } from "@/libs/chat/data";
 import { audioToTextProviderModel } from "../data";
 import { SelectModel } from "./selectetModel";
-import { NoProvidersHeader } from "@/components/chat/addModel";
+import { NoProvidersHeader } from "@/components/chat/model/addModel";
+import { ModelProps, ProviderProps } from "@/components/chat/model/types";
 
 function ModelItem({
   model,

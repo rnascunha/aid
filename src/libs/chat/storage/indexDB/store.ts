@@ -1,8 +1,8 @@
 import Dexie, { Table } from "dexie";
 import { TableMessages, TableModels, ToolsDB } from "./types";
-import { ProviderProps } from "../../types";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
+import { ProviderProps } from "@/components/chat/model/types";
 
 export const aISettings = new Dexie("AISettings") as Dexie & {
   // General

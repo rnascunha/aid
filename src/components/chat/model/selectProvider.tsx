@@ -5,9 +5,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { ProviderBaseProps, ProviderProps } from "../../libs/chat/types";
-import { StaticAvatar } from "./staticAvatar";
+
 import { providerBaseMap, providersBase } from "@/libs/chat/data";
+import { ProviderBaseProps, ProviderProps } from "./types";
+import { StaticAvatar } from "../staticAvatar";
 
 function ProviderItem({ provider }: { provider: ProviderProps }) {
   const pBase = providerBaseMap[provider.providerBaseId];
@@ -100,7 +101,6 @@ export function SelectBaseProvider({
       size="small"
       sx={{
         boxShadow: "none",
-        // ".MuiOutlinedInput-notchedOutline": { border: 0 },
       }}
     >
       {providersBase.map((provider) => (

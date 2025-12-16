@@ -3,7 +3,7 @@
 import { getIpiFyIP } from "@/libs/apis/ipify";
 import { initTools } from "@/libs/chat/data";
 import { getProviders, getTools } from "@/libs/chat/storage/indexDB/general";
-import { ProviderProps, ToolsProps } from "@/libs/chat/types";
+import { ToolsProps } from "@/libs/chat/types";
 import {
   createContext,
   Dispatch,
@@ -12,6 +12,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { ProviderProps } from "./model/types";
 
 interface AIContext {
   providers: ProviderProps[];

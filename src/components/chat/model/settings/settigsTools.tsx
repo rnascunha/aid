@@ -1,5 +1,4 @@
 import { useContext } from "react";
-import { aIContext } from "../context";
 import {
   Divider,
   IconButton,
@@ -14,6 +13,7 @@ import Link from "next/link";
 
 import LaunchIcon from "@mui/icons-material/Launch";
 import { ToolsProps } from "@/libs/chat/types";
+import { aIContext } from "../../context";
 
 export function GeoIpifyConfig({
   apiKey,

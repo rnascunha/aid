@@ -1,5 +1,4 @@
 import { ChatSettings } from "@/appComponents/chat/types";
-import { ChatMessagesProps, MessageProps, ModelProps } from "../../types";
 import {
   deleteMessages,
   getAllMessages,
@@ -8,17 +7,25 @@ import {
   onMessage,
 } from "./functions";
 import { aISettings } from "./store";
+import {
+  ChatMessagesModelProps,
+  MessageModelProps,
+  ModelProps,
+} from "@/components/chat/model/types";
 
 /**
  * Messages
  */
-export async function onChatMessage(message: MessageProps, contactId: string) {
+export async function onChatMessage(
+  message: MessageModelProps,
+  contactId: string
+) {
   await onMessage(aISettings.chatMessages, message, contactId);
 }
 
 export async function getAllChatMessages(
   models: ModelProps[]
-): Promise<ChatMessagesProps> {
+): Promise<ChatMessagesModelProps> {
   return await getAllMessages(aISettings.chatMessages, models);
 }
 

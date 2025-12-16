@@ -6,10 +6,11 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { SettingsProviders } from "./settings/settingsProvider";
-import { ProviderProps, ToolsProps } from "@/libs/chat/types";
-import { ArrayPanel, PanelConfig } from "../panels";
+import { ToolsProps } from "@/libs/chat/types";
+import { ArrayPanel, PanelConfig } from "@/components/panels";
 import { SettingsTools } from "./settings/settigsTools";
 import { SettingStorage } from "./settings/settingsStorage";
+import { ProviderProps } from "./types";
 
 interface SettingsDialogProps {
   open: boolean;

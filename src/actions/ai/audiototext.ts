@@ -1,6 +1,6 @@
 "use server";
 
-import { ProviderAuth, ProviderConfig } from "@/libs/chat/types";
+import { ProviderAuth, ProviderConfig } from "@/components/chat/model/types";
 import { serverAPIhost } from "./constants";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 

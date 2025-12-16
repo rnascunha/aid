@@ -1,11 +1,11 @@
-import { ModelProps, ProviderProps } from "../../libs/chat/types";
 import { IconButton, Stack, Typography } from "@mui/material";
-import { StaticAvatar } from "./staticAvatar";
+import { StaticAvatar } from "../staticAvatar";
 
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import { toggleMessagesPane } from "@/libs/chat/utils";
 import { ReactNode } from "react";
 import { providerBaseMap } from "@/libs/chat/data";
+import { ModelProps, ProviderProps } from "./types";
 
 type MessagesPaneHeaderProps = {
   model: ModelProps;

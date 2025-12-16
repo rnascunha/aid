@@ -1,4 +1,4 @@
-import { ChatMessagesProps } from "@/libs/chat/types";
+import { ChatMessagesModelProps } from "@/components/chat/model/types";
 
 export const audioToTextProviderModel: Record<string, string[]> = {
   openai: ["whisper-1"],
@@ -12,7 +12,7 @@ export const audioToTextProviderModel: Record<string, string[]> = {
   ],
 } as const;
 
-export const chats: ChatMessagesProps = {};
+export const chats: ChatMessagesModelProps = {};
 
 export interface AudioToTextLanguage {
   value: string;

@@ -7,15 +7,16 @@ import {
   DialogTitle,
   Stack,
 } from "@mui/material";
-import { StaticAvatar } from "./staticAvatar";
-import { MessageProps, ProviderProps } from "../../libs/chat/types";
+import { BaseSender, MessageProps } from "../../libs/chat/types";
 import { MessageBubble } from "./messageBubble";
-import { useEffect, useRef, useState } from "react";
-import { providerBaseMap } from "@/libs/chat/data";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import JSONOutput from "../JSONOutput";
-import { getProviderBase } from "@/libs/chat/functions";
 
-function MessageDetail({ message }: { message: MessageProps }) {
+function MessageDetail<T extends BaseSender>({
+  message,
+}: {
+  message: MessageProps<T>;
+}) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { sender, attachment, ...rest } = message;
   const msg =
@@ -34,11 +35,11 @@ function MessageDetail({ message }: { message: MessageProps }) {
   return <JSONOutput src={msg} name={null} />;
 }
 
-function MessageDetailDialog({
+function MessageDetailDialog<T extends BaseSender>({
   message,
   onClose,
 }: {
-  message: MessageProps | null;
+  message: MessageProps<T> | null;
   onClose: () => void;
 }) {
   return (
@@ -67,14 +68,17 @@ function MessageDetailDialog({
   );
 }
 
-interface MessageListProps {
-  messages: MessageProps[];
-  providers: ProviderProps[];
+interface MessageListProps<T extends BaseSender> {
+  messages: MessageProps<T>[];
+  avatar?: ReactNode;
 }
 
-export function MessageList({ messages, providers }: MessageListProps) {
+export function MessageList<T extends BaseSender>({
+  messages,
+  avatar,
+}: MessageListProps<T>) {
   const el = useRef<HTMLDivElement>(null);
-  const [message, setMessage] = useState<MessageProps | null>(null);
+  const [message, setMessage] = useState<MessageProps<T> | null>(null);
 
   useEffect(() => {
     const elem = el.current;
@@ -108,7 +112,7 @@ export function MessageList({ messages, providers }: MessageListProps) {
           overflowX: "hidden",
         }}
       >
-        {messages.map((message: MessageProps, index: number) => {
+        {messages.map((message: MessageProps<T>, index: number) => {
           const isYou = message.sender === "You";
           return (
             <Stack
@@ -117,15 +121,7 @@ export function MessageList({ messages, providers }: MessageListProps) {
               spacing={2}
               sx={{ flexDirection: isYou ? "row-reverse" : "row" }}
             >
-              {message.sender !== "You" && (
-                <StaticAvatar
-                  src={
-                    getProviderBase(message.sender, providers, providerBaseMap)
-                      ?.logo
-                  }
-                  alt={message.sender.name}
-                />
-              )}
+              {message.sender !== "You" && avatar && avatar}
               <MessageBubble
                 variant={isYou ? "sent" : "received"}
                 message={message}

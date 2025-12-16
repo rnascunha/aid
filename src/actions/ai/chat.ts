@@ -1,14 +1,10 @@
 "use server";
 
-import {
-  ChatMessage,
-  ProviderAuth,
-  ProviderConfig,
-  ToolsProps,
-} from "@/libs/chat/types";
+import { ChatMessage, ToolsProps } from "@/libs/chat/types";
 import { serverAPIhost } from "./constants";
 import { MessageContext } from "@/libs/chat/types";
 import { GeneralSettings, ToolsSettings } from "@/appComponents/chat/types";
+import { ProviderAuth, ProviderConfig } from "@/components/chat/model/types";
 
 type ChatSettingsPython = GeneralSettings & ToolsSettings;
 interface ChatInfo {

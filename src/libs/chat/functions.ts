@@ -1,18 +1,16 @@
 import { Dispatch, SetStateAction } from "react";
+import { Attachment, ChatSuccessMessage, MessageContext } from "./types";
+import { ContextSettings } from "@/appComponents/chat/types";
 import {
-  Attachment,
-  ChatMessagesProps,
-  ChatSuccessMessage,
-  MessageContext,
-  MessageProps,
+  ChatMessagesModelProps,
+  MessageModelProps,
   ModelProps,
   ProviderBaseProps,
   ProviderProps,
-} from "./types";
-import { ContextSettings } from "@/appComponents/chat/types";
+} from "@/components/chat/model/types";
 
-export function sortedModels(chats: ChatMessagesProps) {
-  const list = Object.keys(chats) as (keyof ChatMessagesProps)[];
+export function sortedModels(chats: ChatMessagesModelProps) {
+  const list = Object.keys(chats) as (keyof ChatMessagesModelProps)[];
   list.sort((c1, c2) => {
     const m1 = chats[c1].at(-1);
     const m2 = chats[c2].at(-1);
@@ -25,7 +23,7 @@ export function sortedModels(chats: ChatMessagesProps) {
 }
 
 function contextMessagesFilter(
-  messages: MessageProps[],
+  messages: MessageModelProps[],
   {
     max = 10,
     elapsedTimeMs = Number.MAX_SAFE_INTEGER,
@@ -39,7 +37,7 @@ function contextMessagesFilter(
   return m;
 }
 
-function formatContextMessages(messages: MessageProps[]) {
+function formatContextMessages(messages: MessageModelProps[]) {
   return messages
     .filter((m) => "success" in m.content)
     .map((m) => ({
@@ -49,7 +47,7 @@ function formatContextMessages(messages: MessageProps[]) {
 }
 
 export function contextMessages(
-  messages: MessageProps[],
+  messages: MessageModelProps[],
   {
     max = 10,
     elapsedTimeMs = Number.MAX_SAFE_INTEGER,
@@ -64,14 +62,14 @@ export function messageSubmit(
   message: string,
   newId: string,
   provider: ModelProps,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
+  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>
 ) {
   const newMessage = {
     id: newId,
     sender: "You",
     content: { response: message, success: true },
     timestamp: Date.now(),
-  } as MessageProps;
+  } as MessageModelProps;
   setChats((prev) => ({
     ...prev,
     [provider.id]: [...prev[provider.id], newMessage],
@@ -83,7 +81,7 @@ export async function attachmentSubmit(
   attachment: Attachment,
   newId: string,
   model: ModelProps,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
   message?: string
 ) {
   const newMessage = {
@@ -95,7 +93,7 @@ export async function attachmentSubmit(
     },
     timestamp: Date.now(),
     attachment,
-  } as MessageProps;
+  } as MessageModelProps;
   setChats((prev) => ({
     ...prev,
     [model.id]: [...prev[model.id], newMessage],
@@ -106,7 +104,7 @@ export async function attachmentSubmit(
 export function mergeMessages(
   message: string,
   settings: ContextSettings,
-  chats: MessageProps[]
+  chats: MessageModelProps[]
 ) {
   const trimed = settings.systemPrompt.trim();
   const system = (
@@ -126,7 +124,7 @@ export function mergeMessages(
  */
 
 export async function onDeleteModelMessages(
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
   modelId?: string
 ) {
   if (modelId) {
@@ -140,14 +138,14 @@ export async function onDeleteModelMessages(
     Object.keys(prev).reduce((acc, v) => {
       acc[v] = [];
       return acc;
-    }, {} as ChatMessagesProps)
+    }, {} as ChatMessagesModelProps)
   );
 }
 
 function removeModel(
   models: ModelProps[],
   setModels: Dispatch<SetStateAction<ModelProps[]>>,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
   setSelectedModel: Dispatch<SetStateAction<ModelProps | undefined>>,
   modelId: string
 ) {
@@ -169,7 +167,7 @@ function removeModel(
 export async function addRemoveModel(
   models: ModelProps[],
   setModels: Dispatch<SetStateAction<ModelProps[]>>,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
   setSelectedModel: Dispatch<SetStateAction<ModelProps | undefined>>,
   model: string | ModelProps
 ) {

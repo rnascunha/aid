@@ -1,5 +1,6 @@
 import { Table } from "dexie";
-import { Attachment, ChatMessage, ModelProps, ToolsProps } from "../../types";
+import { Attachment, ChatMessage, ToolsProps } from "../../types";
+import { ModelProps } from "@/components/chat/model/types";
 
 export interface MessageDB {
   id: string;

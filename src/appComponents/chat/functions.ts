@@ -1,25 +1,25 @@
-import {
-  ChatMessagesProps,
-  MessageProps,
-  ModelProps,
-  ProviderProps,
-  ToolsProps,
-} from "@/libs/chat/types";
+import { ToolsProps } from "@/libs/chat/types";
 import { Dispatch, SetStateAction } from "react";
 import { ChatSettings } from "./types";
 import { mergeMessages } from "@/libs/chat/functions";
 import { fetchChatRequest } from "@/actions/ai/chat";
 import { providerBaseMap } from "@/libs/chat/data";
 import { toolsMap } from "./data";
+import {
+  ChatMessagesModelProps,
+  MessageModelProps,
+  ModelProps,
+  ProviderProps,
+} from "@/components/chat/model/types";
 
 export async function messageResponse(
   message: string,
   newId: string,
   model: ModelProps,
   provider: ProviderProps,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
   settings: ChatSettings,
-  chats: MessageProps[],
+  chats: MessageModelProps[],
   toolInfo: ToolsProps
 ) {
   const messages = mergeMessages(message, settings.context, chats);

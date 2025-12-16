@@ -1,4 +1,4 @@
-import { ChatMessage, MessageProps, ModelProps } from "../../libs/chat/types";
+import { ChatMessage } from "../../../libs/chat/types";
 import {
   ListItem,
   ListItemButton,
@@ -8,21 +8,22 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
-import { StaticAvatar } from "./staticAvatar";
+import { StaticAvatar } from "../staticAvatar";
 import { toggleMessagesPane } from "@/libs/chat/utils";
 import { providerBaseMap } from "@/libs/chat/data";
-import { aIContext } from "./context";
+import { aIContext } from "../context";
 import { checkProviderAvaiable } from "@/libs/chat/functions";
+import { MessageModelProps, ModelProps } from "./types";
 
 type ChatListItemProps = ListItemButtonProps & {
   model: ModelProps;
   sender: ModelProps;
-  messages: MessageProps[];
+  messages: MessageModelProps[];
   selectedModel: ModelProps | undefined;
   setSelectedModel: (chat: ModelProps) => void;
 };
 
-function getFormatedTimestamp(messages: MessageProps[]) {
+function getFormatedTimestamp(messages: MessageModelProps[]) {
   return messages.at(-1)?.timestamp
     ? dayjs().to(messages.at(-1)?.timestamp)
     : "";

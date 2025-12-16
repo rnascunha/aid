@@ -1,4 +1,5 @@
-import { ProviderProps, ToolsProps } from "../../types";
+import { ProviderProps } from "@/components/chat/model/types";
+import { ToolsProps } from "../../types";
 import { deleteModelFromProviderId } from "./functions";
 import { aISettings } from "./store";
 

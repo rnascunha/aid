@@ -1,15 +1,15 @@
-import {
-  Attachment,
-  ChatMessagesProps,
-  MessageProps,
-  ModelProps,
-  ProviderProps,
-} from "@/libs/chat/types";
+import { Attachment } from "@/libs/chat/types";
 import { Dispatch, SetStateAction } from "react";
 import { AudioToTextSettings } from "./types";
 import { filePathToBase64 } from "@/libs/base64";
 import { fetchAudioToText } from "@/actions/ai/audiototext";
 import { providerBaseMap } from "@/libs/chat/data";
+import {
+  ChatMessagesModelProps,
+  MessageModelProps,
+  ModelProps,
+  ProviderProps,
+} from "@/components/chat/model/types";
 
 export async function attachmentResponse({
   file,
@@ -23,7 +23,7 @@ export async function attachmentResponse({
   newId: string;
   model: ModelProps;
   provider: ProviderProps;
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>;
+  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>;
   settings: AudioToTextSettings;
 }) {
   const base64 = await filePathToBase64(file.data, file.type);
@@ -40,7 +40,7 @@ export async function attachmentResponse({
     sender: model,
     content: response,
     timestamp: Date.now(),
-  } as MessageProps;
+  } as MessageModelProps;
   setChats((prev) => ({
     ...prev,
     [model.id]: [...prev[model.id], responseMessage],

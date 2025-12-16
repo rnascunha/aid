@@ -1,19 +1,18 @@
 "use client";
 
-import { Stack } from "@mui/material";
-
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
-import { EmptyChatList } from "@/components/chat/chatList";
+import { EmptyChatList } from "@/components/chat/model/chatList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { useState } from "react";
 import { AddSession, SessionList } from "./components/sessionList";
-import { SessionType } from "./types";
+import { MessageSessionProps, SessionType } from "./types";
 import { createNewSession } from "./functions";
 import { MessagesHeader } from "./components/messageHeader";
 import { MessageInput } from "@/components/chat/messageInput";
+import { MessageList } from "@/components/chat/messageList";
 
 interface ChatBotProps {
   sessions: SessionType[];
@@ -24,6 +23,7 @@ export default function ChatBot({ sessions: initSessions }: ChatBotProps) {
   const [selectedSession, setSelectedSession] = useState<SessionType | null>(
     null
   );
+  const [chats, setChats] = useState<MessageSessionProps[]>([]);
   const isPending = false;
 
   const onDeleteSession = (session: SessionType) => {
@@ -80,7 +80,7 @@ export default function ChatBot({ sessions: initSessions }: ChatBotProps) {
           <MessagesPane
             header={<MessagesHeader session={selectedSession} />}
             loader={isPending && <BouncingLoader />}
-            messages={<Stack>This is a message pane</Stack>}
+            messages={<MessageList messages={chats} />}
             input={<MessageInput onSubmit={() => {}} isPending={isPending} />}
           />
         )

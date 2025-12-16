@@ -1,4 +1,4 @@
-import { ChatMessage, MessageProps } from "@/libs/chat/types";
+import { BaseSender, ChatMessage, MessageProps } from "@/libs/chat/types";
 import {
   Avatar,
   Box,
@@ -47,11 +47,11 @@ function getContentData(content: ChatMessage) {
   );
 }
 
-function TextMessage({
+function TextMessage<T extends BaseSender>({
   message,
   isSent,
 }: {
-  message: MessageProps;
+  message: MessageProps<T>;
   isSent: boolean;
 }) {
   return (
@@ -84,11 +84,11 @@ function TextMessage({
   );
 }
 
-function AttachmentMessage({
+function AttachmentMessage<T extends BaseSender>({
   message,
   isSent,
 }: {
-  message: MessageProps;
+  message: MessageProps<T>;
   isSent: boolean;
 }) {
   const file = message.attachment!;
@@ -140,17 +140,17 @@ function AttachmentMessage({
   );
 }
 
-interface MessageBubbleProps {
+interface MessageBubbleProps<T extends BaseSender> {
   variant: "sent" | "received";
-  message: MessageProps;
+  message: MessageProps<T>;
   onClick?: () => void;
 }
 
-export function MessageBubble({
+export function MessageBubble<T extends BaseSender>({
   variant,
   message,
   onClick,
-}: MessageBubbleProps) {
+}: MessageBubbleProps<T>) {
   const { timestamp, attachment = undefined } = message;
   const isSent = variant === "sent";
   const [formatTimestamp, setFormatTimestamp] = useState(dayjs().to(timestamp));

@@ -3,7 +3,6 @@
  */
 
 import { filePathToBase64 } from "@/libs/base64";
-import { ChatMessagesProps, MessageProps, ModelProps } from "../../types";
 import {
   deleteMessages,
   getAllMessages,
@@ -12,9 +11,14 @@ import {
 } from "./functions";
 import { aISettings } from "./store";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
+import {
+  ChatMessagesModelProps,
+  MessageModelProps,
+  ModelProps,
+} from "@/components/chat/model/types";
 
 export async function onAudioToTextMessage(
-  message: MessageProps,
+  message: MessageModelProps,
   contactId: string
 ) {
   const msg = !message.attachment
@@ -35,7 +39,7 @@ export async function onAudioToTextMessage(
 
 export async function getAllAudioToTextMessages(
   models: ModelProps[]
-): Promise<ChatMessagesProps> {
+): Promise<ChatMessagesModelProps> {
   return await getAllMessages(aISettings.audioToTextMessages, models);
 }
 

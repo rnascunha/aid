@@ -11,7 +11,7 @@ import {
   ProviderConfig,
   ProviderConfigType,
   ProviderProps,
-} from "@/libs/chat/types";
+} from "../types";
 import {
   Button,
   Divider,
@@ -25,21 +25,18 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { StaticAvatar } from "../staticAvatar";
 import Link from "next/link";
 
 import { useContext, useRef, useState } from "react";
 import { VisuallyHiddenInput } from "@/components/fileUpload";
 import { readFileText } from "@/libs/fileBrowser";
 
-import { aIContext } from "../context";
 import {
   providerBaseMap,
   providerAuthTemplate,
   providerConfigTemplate,
   providersBase,
 } from "@/libs/chat/data";
-import { SelectBaseProvider } from "../selectProvider";
 import { generateUUID } from "@/libs/uuid";
 
 import LaunchIcon from "@mui/icons-material/Launch";
@@ -47,6 +44,9 @@ import UploadFileSharpIcon from "@mui/icons-material/UploadFileSharp";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DeleteDialog } from "@/components/dialogs/deleteDialog";
+import { SelectBaseProvider } from "../selectProvider";
+import { aIContext } from "../../context";
+import { StaticAvatar } from "../../staticAvatar";
 
 function APIKeyConfig({
   provider,
