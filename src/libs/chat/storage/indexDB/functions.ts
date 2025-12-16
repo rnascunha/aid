@@ -1,13 +1,10 @@
-import {
-  ChatMessagesModelProps,
-  MessageModelProps,
-  ModelProps,
-} from "@/components/chat/model/types";
+import { ModelProps } from "@/components/chat/model/types";
 import { MessageDB, TableMessages, TableModels } from "./types";
+import { BaseSender, ChatMessagesProps, MessageProps } from "../../types";
 
-export async function onMessage(
+export async function onMessage<T extends BaseSender>(
   table: TableMessages,
-  message: MessageModelProps,
+  message: MessageProps<T>,
   contactId: string
 ) {
   const msg: MessageDB = {
@@ -21,26 +18,26 @@ export async function onMessage(
   await table.add(msg);
 }
 
-export async function getAllMessages(
+export async function getAllMessages<T extends BaseSender>(
   table: TableMessages,
-  models: ModelProps[]
-): Promise<ChatMessagesModelProps> {
+  senders: BaseSender[]
+): Promise<ChatMessagesProps<T>> {
   const messages = await table.toArray();
 
-  const baseChats = models.reduce((acc, m) => {
+  const baseChats = senders.reduce((acc, m) => {
     acc[m.id] = [];
     return acc;
-  }, {} as ChatMessagesModelProps);
+  }, {} as ChatMessagesProps<T>);
   const chats = messages.reduce((acc, m) => {
     const sender =
-      m.type === "sent" ? "You" : models.find((o) => o.id === m.contactId);
+      m.type === "sent" ? "You" : senders.find((o) => o.id === m.contactId);
     if (!sender) return acc;
     if (!acc[m.contactId]) acc[m.contactId] = [];
     acc[m.contactId].push({
       id: m.id,
       content: m.content,
       attachment: m.attachment,
-      sender,
+      sender: sender as "You" | T,
       timestamp: m.timestamp,
     });
     return acc;

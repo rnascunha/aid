@@ -25,6 +25,7 @@ export default function ChatPage() {
     models: ModelProps[];
     settings?: ChatSettings;
   }>(null);
+  
   useEffect(() => {
     async function getData() {
       const [models, settings] = await Promise.all([

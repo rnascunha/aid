@@ -1,8 +1,10 @@
-import { MessageProps } from "@/libs/chat/types";
+import { ChatMessagesProps, MessageProps } from "@/libs/chat/types";
 
 export interface SessionType {
   id: string;
   name: string;
+  state: Record<string, unknown>;
 }
 
-export type MessageSessionProps = MessageProps<SessionType>;
+export type MessageChatbotProps = MessageProps<SessionType>;
+export type ChatMessagesChatbotProps = ChatMessagesProps<SessionType>;

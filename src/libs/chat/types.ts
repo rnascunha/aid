@@ -33,7 +33,7 @@ export interface MessageProps<T extends BaseSender> {
 }
 
 export type ChatMessagesProps<T extends BaseSender> = Record<
-  T["id"],
+  string,
   MessageProps<T>[]
 >;
 

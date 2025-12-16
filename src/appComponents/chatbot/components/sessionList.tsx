@@ -69,10 +69,10 @@ interface SessionListProps {
   selectedSession: SessionType | null;
   setSelectedSession: Dispatch<SetStateAction<SessionType | null>>;
   onDeleteSession: (sesssion: SessionType) => Awaited<void>;
-  onEditSession: (
+  onEditSession: <K extends keyof SessionType>(
     sesssion: SessionType,
-    key: keyof SessionType,
-    value: unknown
+    key: K,
+    value: SessionType[K]
   ) => Awaited<void>;
 }
 

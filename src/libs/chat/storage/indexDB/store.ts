@@ -1,5 +1,10 @@
 import Dexie, { Table } from "dexie";
-import { TableMessages, TableModels, ToolsDB } from "./types";
+import {
+  TableChatbotSessions,
+  TableMessages,
+  TableModels,
+  ToolsDB,
+} from "./types";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ProviderProps } from "@/components/chat/model/types";
@@ -16,6 +21,9 @@ export const aISettings = new Dexie("AISettings") as Dexie & {
   audioToTextMessages: TableMessages;
   audioToTextModels: TableModels;
   audioToTextSettings: Table<AudioToTextSettings, string>;
+  // Chatbot
+  chatbotMessages: TableMessages;
+  chatbotSessions: TableChatbotSessions;
 };
 
 aISettings.version(1).stores({
@@ -30,6 +38,9 @@ aISettings.version(1).stores({
   audioToTextMessages: "[id+contactId], contactId",
   audioToTextModels: "id, providerId",
   audioToTextSettings: "",
+  // Chatbot
+  chatbotMessages: "[id+contactId], contactId",
+  chatbotSessions: "id",
 });
 
 aISettings.open();
