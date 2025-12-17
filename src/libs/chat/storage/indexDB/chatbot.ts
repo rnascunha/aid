@@ -11,7 +11,7 @@ import { TableChatbotSessions, TableMessages } from "./types";
  * Messages
  */
 export async function onChatbotMessage(
-  message: MessageChatbotProps,
+  message: MessageChatbotProps | MessageChatbotProps[],
   contactId: string
 ) {
   await onMessage(aISettings.chatbotMessages, message, contactId);
@@ -36,9 +36,10 @@ export async function getAllSessions() {
 
 async function updateSession(
   table: TableChatbotSessions,
-  session: SessionType
+  session: SessionType | SessionType[]
 ) {
-  await table.put(session);
+  if (!Array.isArray(session)) session = [session];
+  await table.bulkPut(session);
 }
 
 async function removeSession(

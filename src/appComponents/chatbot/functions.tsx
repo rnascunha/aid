@@ -43,10 +43,14 @@ export function messageSubmit(
   return newMessage;
 }
 
-function getContentText(response: Record<string, unknown>) {
-  const parts = (response.content as Record<string, unknown>).parts as Part[];
-  const data = parts.find((p) => !("thought" in p));
-  return (data as PartText).text;
+function getContents(response: Record<string, unknown>[]) {
+  const parts = (response[0].content as Record<string, unknown>)
+    .parts as Part[];
+  return parts.map((p) => ({
+    success: true as const,
+    data: response,
+    response: (p as PartText).text,
+  }));
 }
 
 export async function messageResponse(
@@ -70,28 +74,25 @@ export async function messageResponse(
     parts: [{ text: message }],
   });
 
-  const content: ChatMessage = response.ok
-    ? {
-        success: true,
-        data: response.data,
-        response: getContentText(response.data[0]),
-      }
-    : {
-        error: response.error,
-        detail: response.detail!.message,
-        code: 0,
-      };
+  const contents: ChatMessage[] = response.ok
+    ? getContents(response.data)
+    : [
+        {
+          error: response.error,
+          detail: response.detail!.message,
+          code: 0,
+        },
+      ];
 
-  const newIdString = `${newId}:r`;
-  const newMessage = {
-    id: newIdString,
+  const newMessages = contents.map((c, i) => ({
+    id: `${newId}:r${i}`,
     sender: session,
-    content,
+    content: c,
     timestamp: Date.now(),
-  } as MessageChatbotProps;
+  }));
   setChats((prev) => ({
     ...prev,
-    [session.id]: [...prev[session.id], newMessage],
+    [session.id]: [...prev[session.id], ...newMessages],
   }));
-  return newMessage;
+  return newMessages;
 }

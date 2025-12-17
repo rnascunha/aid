@@ -24,7 +24,7 @@ interface ChatBotProps {
   chats: ChatMessagesChatbotProps;
   user: string;
   onMessage?: (
-    message: MessageChatbotProps,
+    message: MessageChatbotProps | MessageChatbotProps[],
     contactId: string
   ) => Promise<void> | void;
   onAddRemoveSession?: (session: string | SessionType) => Promise<void> | void;
@@ -42,7 +42,7 @@ export default function ChatBot({
     null
   );
   const [chats, setChats] = useState<ChatMessagesChatbotProps>(initChats);
-  const [isPending, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition();
 
   const onDeleteSession = async (session: SessionType) => {
     setSessions((prev) => prev.filter((ss) => ss.id !== session.id));

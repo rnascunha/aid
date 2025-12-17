@@ -4,18 +4,19 @@ import { BaseSender, ChatMessagesProps, MessageProps } from "../../types";
 
 export async function onMessage<T extends BaseSender>(
   table: TableMessages,
-  message: MessageProps<T>,
+  message: MessageProps<T> | MessageProps<T>[],
   contactId: string
 ) {
-  const msg: MessageDB = {
-    id: message.id,
-    content: message.content,
-    timestamp: message.timestamp,
+  if (!Array.isArray(message)) message = [message];
+  const msgs: MessageDB[] = message.map((m) => ({
+    id: m.id,
+    content: m.content,
+    timestamp: m.timestamp,
     contactId,
-    attachment: message.attachment,
-    type: message.sender === "You" ? "sent" : "received",
-  };
-  await table.add(msg);
+    attachment: m.attachment,
+    type: m.sender === "You" ? "sent" : "received",
+  }));
+  await table.bulkAdd(msgs);
 }
 
 export async function getAllMessages<T extends BaseSender>(
@@ -58,9 +59,12 @@ export async function deleteAllMessages(table: TableMessages) {
 }
 
 export async function deleteMessages(table: TableMessages, modelId?: string) {
-  await (modelId
-    ? deleteModelMessages(table, modelId)
-    : deleteAllMessages(table));
+  if (!modelId) {
+    deleteAllMessages(table);
+    return;
+  }
+
+  deleteModelMessages(table, modelId);
 }
 
 /**
