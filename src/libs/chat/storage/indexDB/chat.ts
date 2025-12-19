@@ -2,30 +2,24 @@ import { ChatSettings } from "@/appComponents/chat/types";
 import {
   deleteMessages,
   getAllMessages,
-  getAllModels,
-  onAddRemoveModel,
+  getAllSenders,
+  onAddRemoveSender,
   onMessage,
 } from "./functions";
 import { aISettings } from "./store";
-import {
-  ChatMessagesModelProps,
-  MessageModelProps,
-  ModelProps,
-} from "@/components/chat/model/types";
+import { ModelProps } from "@/libs/chat/models/types";
+import { ChatMessagesProps, MessageProps } from "../../types";
 
 /**
  * Messages
  */
-export async function onChatMessage(
-  message: MessageModelProps,
-  contactId: string
-) {
-  await onMessage(aISettings.chatMessages, message, contactId);
+export async function onChatMessage(message: MessageProps | MessageProps[]) {
+  await onMessage(aISettings.chatMessages, message);
 }
 
 export async function getAllChatMessages(
   models: ModelProps[]
-): Promise<ChatMessagesModelProps> {
+): Promise<ChatMessagesProps> {
   return await getAllMessages(aISettings.chatMessages, models);
 }
 
@@ -38,11 +32,11 @@ export async function deleteChatMessages(modelId?: string) {
  */
 
 export async function getAllChatModels() {
-  return getAllModels(aISettings.chatModels);
+  return getAllSenders(aISettings.chatModels);
 }
 
 export async function onAddRemoveChatModel(model: string | ModelProps) {
-  onAddRemoveModel(aISettings.chatModels, model, aISettings.chatMessages);
+  onAddRemoveSender(aISettings.chatModels, model, aISettings.chatMessages);
 }
 
 /**

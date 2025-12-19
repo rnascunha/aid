@@ -2,7 +2,7 @@
 
 import { Container } from "@mui/material";
 import { ReactNode, useEffect } from "react";
-import { openMessagesPane } from "../../libs/chat/utils";
+import { openMessagesPane } from "./utils";
 
 interface ChatContainer {
   chatHeader: ReactNode;

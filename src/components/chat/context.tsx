@@ -1,7 +1,7 @@
 "use client";
 
 import { getIpiFyIP } from "@/libs/apis/ipify";
-import { initTools } from "@/libs/chat/data";
+import { initTools } from "@/libs/chat/models/data";
 import { getProviders, getTools } from "@/libs/chat/storage/indexDB/general";
 import { ToolsProps } from "@/libs/chat/types";
 import {
@@ -12,7 +12,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { ProviderProps } from "./model/types";
+import { ProviderProps } from "../../libs/chat/models/types";
 
 interface AIContext {
   providers: ProviderProps[];
@@ -66,13 +66,6 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
       import("dexie-export-import"),
     ]);
   }, []);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     await import("dexie-export-import");
-  //     setMount(true);
-  //   })();
-  // }, []);
 
   return (
     <aIContext.Provider

@@ -2,15 +2,15 @@ import { Stack, TextField } from "@mui/material";
 
 import { AudioFileUploadButton } from "./fileUpload";
 import { MicInput } from "./micInput";
-import { Attachment } from "@/libs/chat/types";
 import { AudioToTextSettings } from "../types";
 import { Dispatch, SetStateAction, useMemo } from "react";
 import { debounce } from "@/libs/debounce";
+import { PartInlineData } from "@/libs/chat/types";
 
 interface AudioInputProps {
   settings: AudioToTextSettings;
   setSettings: Dispatch<SetStateAction<AudioToTextSettings>>;
-  onSubmit: (file: Attachment | null) => void;
+  onSubmit: (file: PartInlineData | null) => void;
   isPending: boolean;
 }
 
@@ -56,10 +56,12 @@ export function AudioInput({
           isPending={isPending}
           onSubmit={(data, size) =>
             onSubmit({
-              name: "recorded",
-              type: "audio/ogg",
-              size: size ?? data.length,
-              data,
+              inlineData: {
+                displayName: "recorded",
+                mimeType: "audio/ogg",
+                size: size ?? data.length,
+                data,
+              },
             })
           }
         />

@@ -1,45 +1,26 @@
 /**
  * Messages
  */
-
-import { filePathToBase64 } from "@/libs/base64";
 import {
   deleteMessages,
   getAllMessages,
-  onAddRemoveModel,
+  onAddRemoveSender,
   onMessage,
 } from "./functions";
 import { aISettings } from "./store";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
-import {
-  ChatMessagesModelProps,
-  MessageModelProps,
-  ModelProps,
-} from "@/components/chat/model/types";
+import { ModelProps } from "@/libs/chat/models/types";
+import { ChatMessagesProps, MessageProps } from "../../types";
 
 export async function onAudioToTextMessage(
-  message: MessageModelProps,
-  contactId: string
+  message: MessageProps | MessageProps[]
 ) {
-  const msg = !message.attachment
-    ? message
-    : {
-        ...message,
-        attachment: {
-          ...message.attachment,
-          data: await filePathToBase64(
-            message.attachment.data,
-            message.attachment.type,
-            true
-          ),
-        },
-      };
-  return await onMessage(aISettings.audioToTextMessages, msg, contactId);
+  return await onMessage(aISettings.audioToTextMessages, message);
 }
 
 export async function getAllAudioToTextMessages(
   models: ModelProps[]
-): Promise<ChatMessagesModelProps> {
+): Promise<ChatMessagesProps> {
   return await getAllMessages(aISettings.audioToTextMessages, models);
 }
 
@@ -55,7 +36,7 @@ export async function getAllAudioToTextModels() {
 }
 
 export async function onAddAudioToTextRemoveModel(model: string | ModelProps) {
-  await onAddRemoveModel(
+  await onAddRemoveSender(
     aISettings.audioToTextModels,
     model,
     aISettings.audioToTextMessages

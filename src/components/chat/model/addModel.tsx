@@ -15,9 +15,9 @@ import {
   Typography,
 } from "@mui/material";
 
-import { ModelProps, ProviderProps } from "@/components/chat/model/types";
-import { checkProviderAvaiable } from "@/libs/chat/functions";
-import { providerBaseMap } from "@/libs/chat/data";
+import { ModelProps, ProviderProps } from "@/libs/chat/models/types";
+import { checkProviderAvaiable } from "@/libs/chat/models/functions";
+import { providerBaseMap } from "@/libs/chat/models/data";
 
 import AddIcon from "@mui/icons-material/Add";
 import { useContext, useState } from "react";

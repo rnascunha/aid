@@ -1,158 +1,162 @@
-import { BaseSender, ChatMessage, MessageProps } from "@/libs/chat/types";
+import {
+  MessageContentStatus,
+  MessageProps,
+  Part,
+  PartInlineData,
+  PartText,
+  PartType,
+  TypeMessage,
+} from "@/libs/chat/types";
 import {
   Avatar,
   Box,
   Container,
+  Divider,
   IconButton,
   Stack,
   Typography,
 } from "@mui/material";
 import dayjs from "@/libs/dayjs";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { createHiperlinks } from "@/libs/links";
 import { formatBytes } from "@/libs/formatData";
+
+import { getPartType, isStatusMessage } from "@/libs/chat/functions";
 
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 
-function getContentData(content: ChatMessage) {
-  if ("success" in content)
+const messageTypeBGStyle: Record<string, string> = {
+  [TypeMessage.ERROR]: "var(--mui-palette-error-main)",
+  [TypeMessage.WARNING]: "var(--mui-palette-warning-main)",
+  [TypeMessage.SUCCESS]: "var(--mui-palette-success-main)",
+  [TypeMessage.INFO]: "var(--mui-palette-info-main)",
+  [`${TypeMessage.MESSAGE}:sent`]: "rgba(50, 50, 200, 0.7)",
+  [`${TypeMessage.MESSAGE}:received`]: "rgba(200, 200, 200, 0.7)",
+};
+
+function getMessageBGStyle(message: MessageProps) {
+  if (isStatusMessage(message)) return messageTypeBGStyle[message.type];
+  return messageTypeBGStyle[`${TypeMessage.MESSAGE}:${message.origin}`];
+}
+
+function PartTextMessage({ part }: { part: PartText }) {
+  if ("thought" in part && part.thought)
     return (
-      <Typography
-        fontSize="14px"
-        sx={{
-          whiteSpace: "pre-line",
-          wordBreak: "break-word",
-        }}
-      >
-        {createHiperlinks(content.response)}
-      </Typography>
+      <Stack>
+        <Typography fontSize="16px" fontWeight="bold">
+          Thought
+        </Typography>
+        <Typography
+          fontSize="14px"
+          sx={{
+            whiteSpace: "pre-line",
+            wordBreak: "break-word",
+          }}
+        >
+          {createHiperlinks(part.text)}
+        </Typography>
+      </Stack>
     );
 
   return (
+    <Typography
+      fontSize="14px"
+      sx={{
+        whiteSpace: "pre-line",
+        wordBreak: "break-word",
+      }}
+    >
+      {createHiperlinks(part.text)}
+    </Typography>
+  );
+}
+
+function PartInlineMessage({ part }: { part: PartInlineData }) {
+  return (
     <Stack>
-      <Typography fontSize="16px" fontWeight="bold">
-        {content.error}
-      </Typography>
-      <Typography
-        fontSize="14px"
-        sx={{
-          whiteSpace: "pre-line",
-          wordBreak: "break-word",
-        }}
-      >
-        {createHiperlinks(content.detail)}
-      </Typography>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+        <Avatar color="primary">
+          <InsertDriveFileRoundedIcon />
+        </Avatar>
+        <div>
+          <Typography>
+            {part.inlineData.displayName ?? part.inlineData.mimeType}
+          </Typography>
+          <Typography>
+            {formatBytes(part.inlineData.size ?? part.inlineData.data.length)}
+          </Typography>
+        </div>
+      </Stack>
+      {part.inlineData.mimeType.startsWith("audio/") && (
+        <audio controls>
+          <source
+            src={`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`}
+            type={part.inlineData.mimeType}
+            title={part.inlineData.displayName}
+          />
+        </audio>
+      )}
     </Stack>
   );
 }
 
-function TextMessage<T extends BaseSender>({
-  message,
-  isSent,
-}: {
-  message: MessageProps<T>;
-  isSent: boolean;
-}) {
-  return (
-    <Container
-      sx={[
-        {
-          p: 1.25,
-          borderRadius: "10px",
-          color: "var(--mui-palette-text-primary)",
-        },
-        isSent
-          ? {
-              backgroundColor: "rgba(50, 50, 200, 0.7)",
-
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: 0,
-            }
-          : {
-              backgroundColor:
-                "success" in message.content
-                  ? "rgba(200, 200, 200, 0.7)"
-                  : "rgba(200, 5, 5, 0.5)",
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: "10px",
-            },
-      ]}
-    >
-      {getContentData(message.content)}
-    </Container>
-  );
-}
-
-function AttachmentMessage<T extends BaseSender>({
-  message,
-  isSent,
-}: {
-  message: MessageProps<T>;
-  isSent: boolean;
-}) {
-  const file = message.attachment!;
-  return (
-    <Container
-      sx={[
-        {
-          p: 1.25,
-          borderRadius: "10px",
-          color: "var(--mui-palette-text-primary)",
-        },
-        isSent
-          ? {
-              backgroundColor: "rgba(50, 50, 200, 0.7)",
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: 0,
-            }
-          : {
-              backgroundColor:
-                "success" in message.content
-                  ? "rgba(200, 200, 200, 0.7)"
-                  : "rgba(200, 5, 5, 0.5)",
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: "10px",
-            },
-      ]}
-    >
+function MessageContent({ message }: { message: MessageProps }) {
+  if (isStatusMessage(message)) {
+    const content = message.content as MessageContentStatus;
+    return (
       <Stack>
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-          <Avatar color="primary">
-            <InsertDriveFileRoundedIcon />
-          </Avatar>
-          <div>
-            <Typography>{file.name}</Typography>
-            <Typography>{formatBytes(file.size)}</Typography>
-          </div>
-        </Stack>
-        {file.type.startsWith("audio/") && (
-          <audio controls>
-            <source src={file.data} type={file.type} title={file.name} />
-          </audio>
-        )}
-        {"success" in message.content &&
-          !message.content.response.startsWith("File: ") && (
-            <Typography sx={{ pt: 0.5 }}>{message.content.response}</Typography>
-          )}
+        <Typography
+          fontSize="16px"
+          fontWeight="bold"
+          textTransform="capitalize"
+        >
+          {content.name ?? message.type}
+        </Typography>
+        <Typography
+          fontSize="14px"
+          sx={{
+            whiteSpace: "pre-line",
+            wordBreak: "break-word",
+          }}
+        >
+          {content.text}
+        </Typography>
       </Stack>
-    </Container>
-  );
+    );
+  }
+
+  const parts = message.content as Part[];
+  const elements = parts
+    .reduce((acc, p, i) => {
+      const partType = getPartType(p);
+      switch (partType) {
+        case PartType.TEXT:
+          acc.push(<PartTextMessage key={`${i}:t`} part={p as PartText} />);
+          break;
+        case PartType.INLINEDATA:
+          acc.push(
+            <PartInlineMessage key={`${i}:id`} part={p as PartInlineData} />
+          );
+          break;
+      }
+      return acc;
+    }, [] as ReactNode[])
+    .map((e, i) => [e, <Divider key={i} />])
+    .flat();
+  elements.pop();
+
+  return elements;
 }
 
-interface MessageBubbleProps<T extends BaseSender> {
-  variant: "sent" | "received";
-  message: MessageProps<T>;
+interface MessageBubbleProps {
+  message: MessageProps;
   onClick?: () => void;
 }
 
-export function MessageBubble<T extends BaseSender>({
-  variant,
-  message,
-  onClick,
-}: MessageBubbleProps<T>) {
-  const { timestamp, attachment = undefined } = message;
-  const isSent = variant === "sent";
+export function MessageBubble({ message, onClick }: MessageBubbleProps) {
+  const { timestamp } = message;
+  const isSent = message.origin === "sent";
   const [formatTimestamp, setFormatTimestamp] = useState(dayjs().to(timestamp));
 
   useEffect(() => {
@@ -184,7 +188,7 @@ export function MessageBubble<T extends BaseSender>({
             opacity: 0,
             transition: "opacity 0.3s",
           },
-          message.sender === "You" ? { left: "-35px" } : { right: "-35px" },
+          isSent ? { left: "-35px" } : { right: "-35px" },
         ]}
         onClick={onClick}
       >
@@ -200,11 +204,26 @@ export function MessageBubble<T extends BaseSender>({
           {formatTimestamp}
         </Typography>
       </Stack>
-      {attachment ? (
-        <AttachmentMessage message={message} isSent={isSent} />
-      ) : (
-        <TextMessage message={message} isSent={isSent} />
-      )}
+      <Container
+        sx={[
+          {
+            p: 1.25,
+            borderRadius: "10px",
+            color: "var(--mui-palette-text-primary)",
+          },
+          isSent
+            ? {
+                backgroundColor: getMessageBGStyle(message),
+                borderTopRightRadius: 0,
+              }
+            : {
+                backgroundColor: getMessageBGStyle(message),
+                borderTopRightRadius: "10px",
+              },
+        ]}
+      >
+        <MessageContent message={message} />
+      </Container>
     </Box>
   );
 }

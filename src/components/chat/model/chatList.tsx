@@ -1,64 +1,49 @@
-import { List, Stack } from "@mui/material";
-import { Dispatch, ReactNode, SetStateAction } from "react";
-import ChatListItem from "./chatItemList";
-import { sortedModels } from "@/libs/chat/functions";
+import { Dispatch, SetStateAction } from "react";
+import { BaseSender, ChatMessagesProps } from "@/libs/chat/types";
 
-import HubIcon from "@mui/icons-material/Hub";
-import { ChatMessagesModelProps, ModelProps } from "./types";
+import { ChatList } from "../chatList";
+import { ModelProps, ProviderProps } from "@/libs/chat/models/types";
+import { providerBaseMap } from "@/libs/chat/models/data";
+import {
+  checkProviderAvaiable,
+  getProviderBase,
+} from "@/libs/chat/models/functions";
 
-export function EmptyChatList({
-  addModelButton,
-}: {
-  addModelButton: ReactNode;
-}) {
-  return (
-    <Stack
-      sx={{
-        height: "100%",
-      }}
-      justifyContent="center"
-      alignItems="center"
-      gap={5}
-    >
-      <HubIcon fontSize="large" />
-      {addModelButton}
-    </Stack>
-  );
-}
-
-interface ChatListProps {
+interface ChatModelListProps {
   models: ModelProps[];
-  chats: ChatMessagesModelProps;
-  selectedModel: ModelProps | undefined;
-  setSelectedModel: Dispatch<SetStateAction<ModelProps | undefined>>;
+  providers: ProviderProps[];
+  chats: ChatMessagesProps;
+  selectedModel: ModelProps | null;
+  setSelectedModel: Dispatch<SetStateAction<ModelProps | null>>;
 }
 
-export function ChatList({
+export function ChatModelList({
   models,
+  providers,
   chats,
   selectedModel,
   setSelectedModel,
-}: ChatListProps) {
-  const sortModelsId = sortedModels(chats);
-  const sortModels = sortModelsId.map((id) =>
-    models.find((p) => p.id === id)
-  ) as ModelProps[];
-
+}: ChatModelListProps) {
   return (
-    <List dense>
-      {sortModels.map((p) => {
-        if (!p) return;
-        return (
-          <ChatListItem
-            key={p.id}
-            model={p}
-            sender={p}
-            messages={chats[p.id]}
-            selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
-          />
-        );
-      })}
-    </List>
+    <ChatList
+      senders={models}
+      chats={chats}
+      selectedSender={selectedModel}
+      setSelectedSender={
+        setSelectedModel as Dispatch<SetStateAction<BaseSender | null>>
+      }
+      getAvatar={(s) => {
+        const m = getProviderBase(s as ModelProps, providers, providerBaseMap);
+        return m?.logo;
+      }}
+      getBGColor={(s) => {
+        const model = s as ModelProps;
+        const provider = providers.find((p) => p.id === model.providerId);
+        const hasProviderAuth = provider
+          ? checkProviderAvaiable(provider)
+          : false;
+        return hasProviderAuth ? "inherit" : "background.paper";
+      }}
+    />
   );
 }

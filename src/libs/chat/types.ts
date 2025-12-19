@@ -3,39 +3,72 @@ export interface BaseSender {
   name: string;
 }
 
-interface ChatErrorMessage {
-  code: number;
-  error: string;
-  detail: string;
+export interface MessageContentStatus {
+  name?: string;
+  text: string;
 }
 
-export interface ChatSuccessMessage {
-  success: true;
-  response: string;
-  data: object;
+export enum PartType {
+  TEXT = "text",
+  INLINEDATA = "inlineData",
 }
 
-export type ChatMessage = ChatErrorMessage | ChatSuccessMessage;
-
-export interface Attachment {
-  name: string;
-  size: number;
-  type: string;
-  data: string;
+export interface PartText {
+  [PartType.TEXT]: string;
+  thought?: boolean;
 }
 
-export interface MessageProps<T extends BaseSender> {
+export interface PartInlineData {
+  [PartType.INLINEDATA]: {
+    displayName?: string;
+    data: string;
+    mimeType: string;
+    size?: number;
+  };
+}
+
+export type Part = PartText | PartInlineData;
+
+export enum TypeMessage {
+  MESSAGE = "message",
+  INFO = "info",
+  SUCCESS = "success",
+  WARNING = "warning",
+  ERROR = "error",
+}
+
+export type MessageOrigin = "sent" | "received";
+
+export interface MessageBaseProps {
   id: string;
-  content: ChatMessage;
   timestamp: number;
-  sender: T | "You";
-  attachment?: Attachment;
+  senderId: string;
+  origin: MessageOrigin;
+  raw?: object;
 }
 
-export type ChatMessagesProps<T extends BaseSender> = Record<
-  string,
-  MessageProps<T>[]
->;
+export interface MessageStatus extends MessageBaseProps {
+  content: MessageContentStatus;
+  type:
+    | TypeMessage.INFO
+    | TypeMessage.WARNING
+    | TypeMessage.SUCCESS
+    | TypeMessage.ERROR;
+}
+
+export interface MessageExachange extends MessageBaseProps {
+  content: Part[];
+  type: TypeMessage.MESSAGE;
+}
+
+export type MessageProps = MessageStatus | MessageExachange;
+
+export type MessageContent = Part | MessageStatus;
+export interface MessageFlattenProps extends Omit<MessageProps, "content"> {
+  content: MessageContent;
+}
+
+export type ChatMessagesProps = Record<string, MessageProps[]>;
 
 export type MessageRoleType = "user" | "assistant" | "system";
 export interface MessageContext {

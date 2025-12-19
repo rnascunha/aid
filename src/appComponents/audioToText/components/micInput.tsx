@@ -5,7 +5,7 @@ import CenterSpinner from "@/components/spinner/centerSpinner";
 import StopIcon from "@mui/icons-material/Stop";
 import { blue, red } from "@mui/material/colors";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Mic } from "./mic";
+import { Mic } from "../../../libs/mic";
 
 function RecordButton({
   recording,

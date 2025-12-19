@@ -1,16 +1,16 @@
 import { IconButton, Stack, Tooltip } from "@mui/material";
 
 import { useRef } from "react";
-import { Attachment } from "@/libs/chat/types";
 import AudioFileIcon from "@mui/icons-material/AudioFile";
 import { VisuallyHiddenInput } from "@/components/fileUpload";
+import { PartInlineData } from "@/libs/chat/types";
 
 export function AudioFileUploadButton({
   isPending,
   onSubmit,
 }: {
   isPending: boolean;
-  onSubmit: (file: Attachment | null) => void;
+  onSubmit: (file: PartInlineData | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   return (
@@ -41,10 +41,12 @@ export function AudioFileUploadButton({
                   return;
                 }
                 const newFile = {
-                  name: file.name,
-                  type: file.type,
-                  size: file.size,
-                  data: URL.createObjectURL(file),
+                  inlineData: {
+                    displayName: file.name,
+                    mimeType: file.type,
+                    size: file.size,
+                    data: URL.createObjectURL(file),
+                  },
                 };
                 onSubmit(newFile);
                 inputRef.current!.value = "";

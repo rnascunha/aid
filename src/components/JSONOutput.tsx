@@ -41,5 +41,11 @@ const chooseTheme = (
 
 export default function JSONOutput(props: ReactJsonViewProps) {
   const { mode, systemMode } = useColorScheme();
-  return <ReactJson theme={chooseTheme(mode, systemMode)} {...props} />;
+  return (
+    <ReactJson
+      theme={chooseTheme(mode, systemMode)}
+      collapseStringsAfterLength={124}
+      {...props}
+    />
+  );
 }

@@ -15,17 +15,17 @@ export interface UpdateSesionProps extends GetSessionProps {
   data: Record<string, unknown>;
 }
 
-export interface PartText {
+export interface ADKPartText {
   text: string;
 }
 
-export interface PartInlineData {
+export interface ADKPartInlineData {
   displayName?: string;
   data: string;
   mimeType: string;
 }
 
-export type Part = PartText | PartInlineData;
+export type Part = ADKPartText | ADKPartInlineData;
 
 export interface SendQueryProps extends GetSessionProps {
   parts: Part[];

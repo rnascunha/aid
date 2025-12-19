@@ -20,12 +20,12 @@ import { StaticAvatar } from "@/components/chat/staticAvatar";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { SelectProvider } from "@/components/chat/model/selectProvider";
 import { generateUUID } from "@/libs/uuid";
-import { checkProviderAvaiable } from "@/libs/chat/functions";
-import { providerBaseMap } from "@/libs/chat/data";
+import { checkProviderAvaiable } from "@/libs/chat/models/functions";
+import { providerBaseMap } from "@/libs/chat/models/data";
 import { audioToTextProviderModel } from "../data";
 import { SelectModel } from "./selectetModel";
 import { NoProvidersHeader } from "@/components/chat/model/addModel";
-import { ModelProps, ProviderProps } from "@/components/chat/model/types";
+import { ModelProps, ProviderProps } from "@/libs/chat/models/types";
 
 function ModelItem({
   model,

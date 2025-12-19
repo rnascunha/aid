@@ -3,10 +3,7 @@
 import { AudioToText } from "@/appComponents/audioToText/audioToText";
 import { initAudioSettings } from "@/appComponents/audioToText/data";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
-import {
-  ChatMessagesModelProps,
-  ModelProps,
-} from "@/components/chat/model/types";
+import { ModelProps } from "@/libs/chat/models/types";
 import CenterSpinner from "@/components/spinner/centerSpinner";
 import {
   deleteAudioToTextMessages,
@@ -17,15 +14,17 @@ import {
   onAudioToTextMessage,
   updateAudioToTextSettings,
 } from "@/libs/chat/storage/indexDB/audioToText";
-// import { ChatMessagesProps, ModelProps } from "@/libs/chat/types";
 import { useEffect, useState } from "react";
+import { ChatMessagesProps } from "@/libs/chat/types";
+
+interface DataDB {
+  models: ModelProps[];
+  chats: ChatMessagesProps;
+  settings?: AudioToTextSettings;
+}
 
 export default function AudioToTextPage() {
-  const [dbData, setDbData] = useState<null | {
-    models: ModelProps[];
-    chats: ChatMessagesModelProps;
-    settings?: AudioToTextSettings;
-  }>(null);
+  const [dbData, setDbData] = useState<null | DataDB>(null);
 
   useEffect(() => {
     async function getData() {
@@ -33,10 +32,10 @@ export default function AudioToTextPage() {
         getAudioToTextSettings(),
         getAllAudioToTextModels(),
       ]);
-      const chats = await getAllAudioToTextMessages(models);
+      const chats = await getAllAudioToTextMessages(models as ModelProps[]);
       return { chats, settings, models };
     }
-    getData().then((d) => setDbData(d));
+    getData().then((d) => setDbData(d as DataDB));
   }, []);
 
   return dbData === null ? (

@@ -1,16 +1,26 @@
 import { IconButton, Stack, Typography } from "@mui/material";
+import { StaticAvatar } from "./staticAvatar";
+
+import { toggleMessagesPane } from "@/components/chat/utils";
+import { ReactNode } from "react";
+import { BaseSender } from "@/libs/chat/types";
+import { StaticImageData } from "next/image";
 
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import { toggleMessagesPane } from "@/libs/chat/utils";
-import { ReactNode } from "react";
-import { SessionType } from "../types";
 
-type MessagesPaneHeaderProps = {
-  session: SessionType;
+type MessagesHeaderProps = {
+  sender: BaseSender;
+  subtitle?: string;
   options?: ReactNode;
+  avatar?: StaticImageData;
 };
 
-export function MessagesHeader({ session, options }: MessagesPaneHeaderProps) {
+export function MessagesHeader({
+  sender,
+  subtitle,
+  options,
+  avatar,
+}: MessagesHeaderProps) {
   return (
     <Stack
       direction="row"
@@ -42,6 +52,7 @@ export function MessagesHeader({ session, options }: MessagesPaneHeaderProps) {
           >
             <ArrowBackIosNewRoundedIcon />
           </IconButton>
+          <StaticAvatar src={avatar} alt={sender.name} />
           <Stack>
             <Typography
               component="h2"
@@ -49,23 +60,25 @@ export function MessagesHeader({ session, options }: MessagesPaneHeaderProps) {
               fontSize="medium"
               sx={{ fontWeight: "bold" }}
             >
-              {session.name}
+              {sender.name}
             </Typography>
-            <Typography
-              component="h3"
-              noWrap
-              fontSize="small"
-              color="textSecondary"
-              sx={{
-                display: "-webkit-box",
-                WebkitLineClamp: "1",
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {session.id}
-            </Typography>
+            {subtitle && (
+              <Typography
+                component="h3"
+                noWrap
+                fontSize="small"
+                color="textSecondary"
+                sx={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: "1",
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {subtitle}
+              </Typography>
+            )}
           </Stack>
         </Stack>
         {options}

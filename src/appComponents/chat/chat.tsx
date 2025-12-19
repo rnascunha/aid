@@ -1,25 +1,32 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState, useTransition } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { Stack } from "@mui/material";
 
 import { SettingsDialog } from "./components/settingsDialog";
 import { ChatSettings } from "@/appComponents/chat/types";
 
 import { generateUUID } from "@/libs/uuid";
+import { removeModelsFromRemovedProviders } from "@/libs/chat/models/functions";
 import {
-  addRemoveModel,
-  messageSubmit,
-  onDeleteModelMessages,
-  removeModelsFromRemovedProviders,
+  onDeleteMessages as onDeleteModelMessages,
+  addRemoveSender as addRemoveModel,
 } from "@/libs/chat/functions";
 
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
-import { ChatList, EmptyChatList } from "@/components/chat/model/chatList";
+import { ChatModelList } from "@/components/chat/model/chatList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { MessageInput } from "@/components/chat/messageInput";
-import { MessagesHeader } from "@/components/chat/model/messagesHeader";
+import { MessagesModelHeader } from "@/components/chat/model/messagesHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messageList";
 import { ChatHeader } from "@/components/chat/chatHeader";
@@ -27,22 +34,21 @@ import { DeleteMessagesButton } from "@/components/chat/deleteMessagesButton";
 import { AddModel, AddModelButton } from "@/components/chat/model/addModel";
 import { messageResponse } from "./functions";
 import { aIContext } from "@/components/chat/context";
-import { providerBaseMap } from "@/libs/chat/data";
+import { providerBaseMap } from "@/libs/chat/models/data";
 import ModelAvatar, {
   MessageInputCheck,
 } from "@/components/chat/model/components";
-import {
-  ChatMessagesModelProps,
-  MessageModelProps,
-  ModelProps,
-} from "@/components/chat/model/types";
+import { ModelProps } from "@/libs/chat/models/types";
+import { BaseSender, ChatMessagesProps, MessageProps } from "@/libs/chat/types";
+import { EmptyChatList } from "@/components/chat/chatList";
+import { messageSendSubmit } from "@/libs/chat/functions";
 
 export interface ChatProps {
   models: ModelProps[];
-  chats: ChatMessagesModelProps;
+  chats: ChatMessagesProps;
   settings: ChatSettings;
   onMessage?: (
-    message: MessageModelProps,
+    message: MessageProps,
     contactId: string
   ) => Promise<void> | void;
   onDeleteMessages?: (modelId?: string) => Promise<void> | void;
@@ -60,10 +66,8 @@ export function Chat({
   onSettingsChange,
 }: ChatProps) {
   const [models, setModels] = useState<ModelProps[]>(allModels);
-  const [selectedModel, setSelectedModel] = useState<ModelProps | undefined>(
-    undefined
-  );
-  const [chats, setChats] = useState<ChatMessagesModelProps>(allChats);
+  const [selectedModel, setSelectedModel] = useState<ModelProps | null>(null);
+  const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [isPending, startTransition] = useTransition();
   const [settings, setSettings] = useState(initSettings);
 
@@ -87,7 +91,7 @@ export function Chat({
     selectedModel &&
     !chatProviders.find((p) => p.id === selectedModel?.providerId)
   ) {
-    setSelectedModel(undefined);
+    setSelectedModel(null);
   }
 
   useEffect(() => {
@@ -96,7 +100,16 @@ export function Chat({
 
   const onMessageHandler = async (message: string) => {
     const newId = generateUUID();
-    const newMessage = messageSubmit(message, newId, selectedModel!, setChats);
+    const newMessage = messageSendSubmit(
+      [
+        {
+          text: message,
+        },
+      ],
+      newId,
+      selectedModel!.id,
+      setChats
+    );
     await onMessage?.(newMessage, selectedModel!.id);
     startTransition(async () => {
       const response = await messageResponse(
@@ -122,7 +135,13 @@ export function Chat({
     await onDeleteMessages?.(modelId);
   };
   const onAddRemoveModelHandler = async (model: string | ModelProps) => {
-    addRemoveModel(models, setModels, setChats, setSelectedModel, model);
+    addRemoveModel(
+      model,
+      models,
+      setModels as Dispatch<SetStateAction<BaseSender[]>>,
+      setChats,
+      setSelectedModel as Dispatch<SetStateAction<BaseSender | null>>
+    );
     await onAddRemoveModel?.(model);
   };
 
@@ -160,11 +179,12 @@ export function Chat({
                 }
               />
             ) : (
-              <ChatList
+              <ChatModelList
                 models={models}
                 chats={chats}
                 selectedModel={selectedModel}
                 setSelectedModel={setSelectedModel}
+                providers={providers}
               />
             )
           }
@@ -176,7 +196,7 @@ export function Chat({
         ) : (
           <MessagesPane
             header={
-              <MessagesHeader
+              <MessagesModelHeader
                 model={selectedModel}
                 provider={selectedProvider}
                 options={

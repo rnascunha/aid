@@ -1,10 +1,7 @@
 "use client";
 
 import ChatBot from "@/appComponents/chatbot/chatbot";
-import {
-  ChatMessagesChatbotProps,
-  SessionType,
-} from "@/appComponents/chatbot/types";
+import { SessionType } from "@/appComponents/chatbot/types";
 import CenterSpinner from "@/components/spinner/centerSpinner";
 import { basePath } from "@/constants";
 import {
@@ -13,23 +10,28 @@ import {
   onAddRemoveSession,
   onChatbotMessage,
 } from "@/libs/chat/storage/indexDB/chatbot";
+import { ChatMessagesProps } from "@/libs/chat/types";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
+interface DataDB {
+  sessions: SessionType[];
+  chats: ChatMessagesProps;
+}
+
 export default function ChatbotPage() {
-  const [dbData, setDbData] = useState<null | {
-    sessions: SessionType[];
-    chats: ChatMessagesChatbotProps;
-  }>(null);
+  const [dbData, setDbData] = useState<null | DataDB>(null);
   const { data: session, status } = useSession();
 
   useEffect(() => {
     (async function getData() {
       const sessions = await getAllSessions();
-      const chats = await getAllChatbotMessages(sessions);
+      const chats = await getAllChatbotMessages(sessions as SessionType[]);
       return { sessions, chats };
-    })().then(({ sessions, chats }) => setDbData({ sessions, chats }));
+    })().then(({ sessions, chats }) =>
+      setDbData({ sessions, chats } as DataDB)
+    );
   }, []);
 
   if (status === "loading") return <CenterSpinner />;

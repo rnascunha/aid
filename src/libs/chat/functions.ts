@@ -1,16 +1,35 @@
 import { Dispatch, SetStateAction } from "react";
-import { Attachment, ChatSuccessMessage, MessageContext } from "./types";
-import { ContextSettings } from "@/appComponents/chat/types";
 import {
-  ChatMessagesModelProps,
-  MessageModelProps,
-  ModelProps,
-  ProviderBaseProps,
-  ProviderProps,
-} from "@/components/chat/model/types";
+  BaseSender,
+  ChatMessagesProps,
+  MessageContext,
+  MessageFlattenProps,
+  MessageProps,
+  Part,
+  PartText,
+  PartType,
+  TypeMessage,
+} from "./types";
+import { ContextSettings } from "@/appComponents/chat/types";
 
-export function sortedModels(chats: ChatMessagesModelProps) {
-  const list = Object.keys(chats) as (keyof ChatMessagesModelProps)[];
+/**
+ * Messages
+ */
+export function isStatusMessage(message: MessageProps) {
+  return [
+    TypeMessage.ERROR,
+    TypeMessage.INFO,
+    TypeMessage.SUCCESS,
+    TypeMessage.WARNING,
+  ].includes(message.type);
+}
+
+export function getPartType(part: Part): PartType | undefined {
+  return Object.keys(part)[0] as PartType | undefined;
+}
+
+export function sortedSenders(chats: ChatMessagesProps) {
+  const list = Object.keys(chats) as (keyof ChatMessagesProps)[];
   list.sort((c1, c2) => {
     const m1 = chats[c1].at(-1);
     const m2 = chats[c2].at(-1);
@@ -22,81 +41,104 @@ export function sortedModels(chats: ChatMessagesModelProps) {
   return list;
 }
 
-function contextMessagesFilter(
-  messages: MessageModelProps[],
-  {
-    max = 10,
-    elapsedTimeMs = Number.MAX_SAFE_INTEGER,
-  }: { max?: number; elapsedTimeMs?: number }
-) {
-  const now = Date.now();
-  const m = messages
-    .filter((m) => "success" in m.content)
-    .slice(-Math.max(max, 0))
-    .filter((msg) => now - msg.timestamp <= elapsedTimeMs);
-  return m;
+// function flattenMessages(messages: MessageProps[]): MessageFlattenProps[] {
+//   return messages.reduce((acc, m) => {
+//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//     const { content, ...other } = m;
+//     const allm = m.content.map((mm) => ({
+//       ...other,
+//       content: mm,
+//     }));
+
+//     acc.push(...allm);
+//     return acc;
+//   }, [] as MessageFlattenProps[]);
+// }
+
+interface ContextMessageFilter {
+  max?: number;
+  elapsedTimeMs?: number;
 }
 
-function formatContextMessages(messages: MessageModelProps[]) {
-  return messages
-    .filter((m) => "success" in m.content)
-    .map((m) => ({
-      role: m.id.endsWith("r") ? "assistant" : "user",
-      content: (m.content as ChatSuccessMessage).response,
+function flattenMessagesFilter(
+  messages: MessageProps[],
+  {
+    max = Number.MAX_SAFE_INTEGER,
+    elapsedTimeMs = Number.MAX_SAFE_INTEGER,
+  }: ContextMessageFilter
+) {
+  const now = Date.now();
+  const allMessages = messages.reduceRight((acc, m) => {
+    if (
+      m.type !== TypeMessage.MESSAGE ||
+      acc.length > max ||
+      now - m.timestamp > elapsedTimeMs
+    )
+      return acc;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { content, ...other } = m;
+    const allm = m.content.map((mm) => ({
+      ...other,
+      content: mm,
     }));
+
+    const size = acc.push(...allm);
+    return size > max ? acc.slice(-Math.max(max, 0)) : acc;
+  }, [] as MessageFlattenProps[]);
+  return allMessages;
+}
+
+function formatContextMessages(
+  messages: MessageFlattenProps[]
+): MessageContext[] {
+  const filteRedMessages = messages.filter(
+    (m) =>
+      m.type === TypeMessage.MESSAGE &&
+      getPartType(m.content as Part) === PartType.TEXT &&
+      !("thought" in m.content)
+  );
+  return filteRedMessages.map((m) => ({
+    role: m.origin === "received" ? "assistant" : "user",
+    content: (m.content as unknown as PartText).text,
+  }));
 }
 
 export function contextMessages(
-  messages: MessageModelProps[],
-  {
-    max = 10,
-    elapsedTimeMs = Number.MAX_SAFE_INTEGER,
-  }: { max?: number; elapsedTimeMs?: number }
-) {
+  messages: MessageProps[],
+  { max = 10, elapsedTimeMs = Number.MAX_SAFE_INTEGER }: ContextMessageFilter
+): MessageContext[] {
   return formatContextMessages(
-    contextMessagesFilter(messages, { max, elapsedTimeMs })
-  ) as MessageContext[];
+    flattenMessagesFilter(messages, { max, elapsedTimeMs })
+  );
 }
 
-export function messageSubmit(
-  message: string,
+export function makeMessageSend(
+  content: Part[],
   newId: string,
-  provider: ModelProps,
-  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>
-) {
-  const newMessage = {
+  senderId: string,
+  raw?: object
+): MessageProps {
+  return {
     id: newId,
-    sender: "You",
-    content: { response: message, success: true },
+    senderId,
+    content,
+    raw,
+    type: TypeMessage.MESSAGE,
     timestamp: Date.now(),
-  } as MessageModelProps;
-  setChats((prev) => ({
-    ...prev,
-    [provider.id]: [...prev[provider.id], newMessage],
-  }));
-  return newMessage;
+    origin: "sent",
+  };
 }
 
-export async function attachmentSubmit(
-  attachment: Attachment,
+export function messageSendSubmit(
+  content: Part[],
   newId: string,
-  model: ModelProps,
-  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
-  message?: string
+  senderId: string,
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
 ) {
-  const newMessage = {
-    id: newId,
-    sender: "You",
-    content: {
-      response: message ?? `File: ${attachment.name}`,
-      success: true,
-    },
-    timestamp: Date.now(),
-    attachment,
-  } as MessageModelProps;
+  const newMessage = makeMessageSend(content, newId, senderId);
   setChats((prev) => ({
     ...prev,
-    [model.id]: [...prev[model.id], newMessage],
+    [senderId]: [...prev[senderId], newMessage],
   }));
   return newMessage;
 }
@@ -104,7 +146,7 @@ export async function attachmentSubmit(
 export function mergeMessages(
   message: string,
   settings: ContextSettings,
-  chats: MessageModelProps[]
+  chats: MessageProps[]
 ) {
   const trimed = settings.systemPrompt.trim();
   const system = (
@@ -120,17 +162,17 @@ export function mergeMessages(
 }
 
 /**
- *
+ *  Senders
  */
 
-export async function onDeleteModelMessages(
-  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
-  modelId?: string
+export async function onDeleteMessages(
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  senderId?: string
 ) {
-  if (modelId) {
+  if (senderId) {
     setChats((prev) => ({
       ...prev,
-      [modelId]: [],
+      [senderId]: [],
     }));
     return;
   }
@@ -138,71 +180,56 @@ export async function onDeleteModelMessages(
     Object.keys(prev).reduce((acc, v) => {
       acc[v] = [];
       return acc;
-    }, {} as ChatMessagesModelProps)
+    }, {} as ChatMessagesProps)
   );
 }
 
-function removeModel(
-  models: ModelProps[],
-  setModels: Dispatch<SetStateAction<ModelProps[]>>,
-  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
-  setSelectedModel: Dispatch<SetStateAction<ModelProps | undefined>>,
-  modelId: string
+function removeSender(
+  senderId: string,
+  senders: BaseSender[],
+  setSender: Dispatch<SetStateAction<BaseSender[]>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>
 ) {
-  setModels((prev) => prev.filter((f) => f.id !== modelId));
-  setSelectedModel((prev) =>
-    prev === undefined
-      ? undefined
-      : prev.id !== modelId
+  setSender((prev) => prev.filter((f) => f.id !== senderId));
+  setSelectedSender((prev) =>
+    prev === null
+      ? null
+      : prev.id !== senderId
       ? prev
-      : (models.find((f) => f.id !== modelId) as ModelProps)
+      : (senders.find((f) => f.id !== senderId) as BaseSender) ?? null
   );
   setChats((prev) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { [modelId]: remove, ...rest } = prev;
+    const { [senderId]: remove, ...rest } = prev;
     return rest;
   });
 }
 
-export async function addRemoveModel(
-  models: ModelProps[],
-  setModels: Dispatch<SetStateAction<ModelProps[]>>,
-  setChats: Dispatch<SetStateAction<ChatMessagesModelProps>>,
-  setSelectedModel: Dispatch<SetStateAction<ModelProps | undefined>>,
-  model: string | ModelProps
+function addSender(
+  sender: BaseSender,
+  senders: BaseSender[],
+  setSenders: Dispatch<SetStateAction<BaseSender[]>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>
 ) {
-  if (typeof model === "string") {
-    await removeModel(models, setModels, setChats, setSelectedModel, model);
+  setSenders((prev) => [...prev, sender]);
+  setChats((prev) => ({ ...prev, [sender.id]: [] }));
+  if (senders.length === 0) setSelectedSender(sender);
+}
+
+export function addRemoveSender(
+  sender: string | BaseSender,
+  senders: BaseSender[],
+  setSenders: Dispatch<SetStateAction<BaseSender[]>>,
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
+  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>
+) {
+  if (typeof sender === "string") {
+    //Removing
+    removeSender(sender, senders, setSenders, setChats, setSelectedSender);
     return;
   }
-  setModels((prev) => [...prev, model]);
-  setChats((prev) => ({ ...prev, [model.id]: [] }));
-  if (models.length === 0) setSelectedModel(model);
-}
-
-export function checkProviderAvaiable(provider: ProviderProps) {
-  return (
-    provider.auth === undefined ||
-    (Object.values(provider.auth).every((v) => v !== "") &&
-      (provider.config === undefined ||
-        Object.values(provider.config).every((c) => c !== "")))
-  );
-}
-
-export function getProviderBase(
-  model: ModelProps,
-  providers: ProviderProps[],
-  providerBaseMap: Record<string, ProviderBaseProps>
-) {
-  const provider = providers.find((p) => model.providerId === p.id);
-  if (!provider) return;
-  return providerBaseMap[provider.providerBaseId];
-}
-
-export function removeModelsFromRemovedProviders(
-  providers: ProviderProps[],
-  setModels: Dispatch<SetStateAction<ModelProps[]>>
-) {
-  const providerIds = providers.map((p) => p.id);
-  setModels((prev) => prev.filter((m) => providerIds.includes(m.providerId)));
+  // Adding
+  addSender(sender, senders, setSenders, setChats, setSelectedSender);
 }

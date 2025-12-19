@@ -14,28 +14,28 @@ import {
   onChatMessage,
   updateChatSettings,
 } from "@/libs/chat/storage/indexDB/chat";
-import {
-  ChatMessagesModelProps,
-  ModelProps,
-} from "@/components/chat/model/types";
+import { ModelProps } from "@/libs/chat/models/types";
+import { ChatMessagesProps } from "@/libs/chat/types";
+
+interface DataDB {
+  chats: ChatMessagesProps;
+  models: ModelProps[];
+  settings?: ChatSettings;
+}
 
 export default function ChatPage() {
-  const [dbData, setDbData] = useState<null | {
-    chats: ChatMessagesModelProps;
-    models: ModelProps[];
-    settings?: ChatSettings;
-  }>(null);
-  
+  const [dbData, setDbData] = useState<null | DataDB>(null);
+
   useEffect(() => {
     async function getData() {
       const [models, settings] = await Promise.all([
         getAllChatModels(),
         getChatSettings(),
       ]);
-      const chats = await getAllChatMessages(models);
+      const chats = await getAllChatMessages(models as ModelProps[]);
       return { models, chats, settings };
     }
-    getData().then((d) => setDbData(d));
+    getData().then((d) => setDbData(d as DataDB));
   }, []);
 
   return dbData === null ? (

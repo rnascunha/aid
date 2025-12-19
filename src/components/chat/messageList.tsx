@@ -7,39 +7,20 @@ import {
   DialogTitle,
   Stack,
 } from "@mui/material";
-import { BaseSender, MessageProps } from "../../libs/chat/types";
+import { MessageProps } from "../../libs/chat/types";
 import { MessageBubble } from "./messageBubble";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import JSONOutput from "../JSONOutput";
 
-function MessageDetail<T extends BaseSender>({
-  message,
-}: {
-  message: MessageProps<T>;
-}) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { sender, attachment, ...rest } = message;
-  const msg =
-    "error" in rest
-      ? rest
-      : {
-          ...rest,
-          attachment: attachment
-            ? {
-                name: attachment.name,
-                size: attachment.size,
-                type: attachment.type,
-              }
-            : null,
-        };
-  return <JSONOutput src={msg} name={null} />;
+function MessageDetail({ message }: { message: MessageProps }) {
+  return <JSONOutput src={message} name={null} />;
 }
 
-function MessageDetailDialog<T extends BaseSender>({
+function MessageDetailDialog({
   message,
   onClose,
 }: {
-  message: MessageProps<T> | null;
+  message: MessageProps | null;
   onClose: () => void;
 }) {
   return (
@@ -68,17 +49,14 @@ function MessageDetailDialog<T extends BaseSender>({
   );
 }
 
-interface MessageListProps<T extends BaseSender> {
-  messages: MessageProps<T>[];
+interface MessageListProps {
+  messages: MessageProps[];
   avatar?: ReactNode;
 }
 
-export function MessageList<T extends BaseSender>({
-  messages,
-  avatar,
-}: MessageListProps<T>) {
+export function MessageList({ messages, avatar }: MessageListProps) {
   const el = useRef<HTMLDivElement>(null);
-  const [message, setMessage] = useState<MessageProps<T> | null>(null);
+  const [message, setMessage] = useState<MessageProps | null>(null);
 
   useEffect(() => {
     const elem = el.current;
@@ -112,8 +90,8 @@ export function MessageList<T extends BaseSender>({
           overflowX: "hidden",
         }}
       >
-        {messages.map((message: MessageProps<T>, index: number) => {
-          const isYou = message.sender === "You";
+        {messages.map((message: MessageProps, index: number) => {
+          const isYou = message.origin === "sent";
           return (
             <Stack
               key={index}
@@ -121,9 +99,8 @@ export function MessageList<T extends BaseSender>({
               spacing={2}
               sx={{ flexDirection: isYou ? "row-reverse" : "row" }}
             >
-              {message.sender !== "You" && avatar && avatar}
+              {!isYou && avatar}
               <MessageBubble
-                variant={isYou ? "sent" : "received"}
                 message={message}
                 onClick={() => setMessage(message)}
               />

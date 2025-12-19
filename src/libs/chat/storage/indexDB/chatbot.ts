@@ -1,25 +1,19 @@
 import { deleteMessages, getAllMessages, onMessage } from "./functions";
 import { aISettings } from "./store";
-import {
-  ChatMessagesChatbotProps,
-  MessageChatbotProps,
-  SessionType,
-} from "@/appComponents/chatbot/types";
-import { TableChatbotSessions, TableMessages } from "./types";
+import { SessionType } from "@/appComponents/chatbot/types";
+import { TableSenders, TableMessages } from "./types";
+import { ChatMessagesProps, MessageProps } from "../../types";
 
 /**
  * Messages
  */
-export async function onChatbotMessage(
-  message: MessageChatbotProps | MessageChatbotProps[],
-  contactId: string
-) {
-  await onMessage(aISettings.chatbotMessages, message, contactId);
+export async function onChatbotMessage(message: MessageProps | MessageProps[]) {
+  await onMessage(aISettings.chatbotMessages, message);
 }
 
 export async function getAllChatbotMessages(
   sessions: SessionType[]
-): Promise<ChatMessagesChatbotProps> {
+): Promise<ChatMessagesProps> {
   return await getAllMessages(aISettings.chatbotMessages, sessions);
 }
 
@@ -35,7 +29,7 @@ export async function getAllSessions() {
 }
 
 async function updateSession(
-  table: TableChatbotSessions,
+  table: TableSenders,
   session: SessionType | SessionType[]
 ) {
   if (!Array.isArray(session)) session = [session];
@@ -43,7 +37,7 @@ async function updateSession(
 }
 
 async function removeSession(
-  table: TableChatbotSessions,
+  table: TableSenders,
   sessionId: string,
   tableMessages: TableMessages
 ) {

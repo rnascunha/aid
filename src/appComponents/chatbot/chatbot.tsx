@@ -2,29 +2,28 @@
 
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
-import { EmptyChatList } from "@/components/chat/model/chatList";
+import { ChatList, EmptyChatList } from "@/components/chat/chatList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatHeader } from "@/components/chat/chatHeader";
-import { useState, useTransition } from "react";
-import { AddSession, SessionList } from "./components/sessionList";
-import {
-  ChatMessagesChatbotProps,
-  MessageChatbotProps,
-  SessionType,
-} from "./types";
-import { createNewSession, messageResponse, messageSubmit } from "./functions";
-import { MessagesHeader } from "./components/messageHeader";
+import { Dispatch, SetStateAction, useState, useTransition } from "react";
+import { AddSession } from "./components/addSession";
+import { SessionType } from "./types";
+import { createNewSession, messageResponse } from "./functions";
 import { MessageInput } from "@/components/chat/messageInput";
 import { MessageList } from "@/components/chat/messageList";
 import { generateUUID } from "@/libs/uuid";
+import { BaseSender, ChatMessagesProps, MessageProps } from "@/libs/chat/types";
+import { messageSendSubmit } from "@/libs/chat/functions";
+import { MessagesHeader } from "@/components/chat/messagesHeader";
+import { ChatbotOptions } from "./components/sessionOptions";
 
 interface ChatBotProps {
   sessions: SessionType[];
-  chats: ChatMessagesChatbotProps;
+  chats: ChatMessagesProps;
   user: string;
   onMessage?: (
-    message: MessageChatbotProps | MessageChatbotProps[],
+    message: MessageProps | MessageProps[],
     contactId: string
   ) => Promise<void> | void;
   onAddRemoveSession?: (session: string | SessionType) => Promise<void> | void;
@@ -41,7 +40,7 @@ export default function ChatBot({
   const [selectedSession, setSelectedSession] = useState<SessionType | null>(
     null
   );
-  const [chats, setChats] = useState<ChatMessagesChatbotProps>(initChats);
+  const [chats, setChats] = useState<ChatMessagesProps>(initChats);
   const [isPending, startTransition] = useTransition();
 
   const onDeleteSession = async (session: SessionType) => {
@@ -62,19 +61,26 @@ export default function ChatBot({
     await onAddRemoveSession?.(fSession);
   };
 
-  const onAddSession = (name: string = "") => {
+  const onAddSession = async (name: string = "") => {
     const newSession = createNewSession(name);
     setSessions((prev) => [...prev, newSession]);
     setChats((prev) => ({
       ...prev,
       [newSession.id]: [],
     }));
+    await onAddRemoveSession?.(newSession);
   };
 
   const onMessageHandler = async (message: string) => {
     const newId = generateUUID();
-    const newMessage = messageSubmit(
-      { message, newId, session: selectedSession as SessionType },
+    const newMessage = messageSendSubmit(
+      [
+        {
+          text: message,
+        },
+      ],
+      newId,
+      selectedSession!.id,
       setChats
     );
     await onMessage?.(newMessage, selectedSession!.id);
@@ -106,12 +112,15 @@ export default function ChatBot({
             sessions.length === 0 ? (
               <EmptyChatList addModelButton={<div></div>} />
             ) : (
-              <SessionList
-                sessions={sessions}
-                selectedSession={selectedSession}
-                setSelectedSession={setSelectedSession}
-                onDeleteSession={onDeleteSession}
-                onEditSession={onEditSession}
+              <ChatList
+                senders={sessions}
+                chats={chats}
+                selectedSender={selectedSession}
+                setSelectedSender={
+                  setSelectedSession as Dispatch<
+                    SetStateAction<BaseSender | null>
+                  >
+                }
               />
             )
           }
@@ -122,11 +131,22 @@ export default function ChatBot({
           <EmptyMessagesPane />
         ) : (
           <MessagesPane
-            header={<MessagesHeader session={selectedSession} />}
+            header={
+              <MessagesHeader
+                sender={selectedSession}
+                options={
+                  <ChatbotOptions
+                    session={selectedSession}
+                    onDeleteSession={onDeleteSession}
+                    onEditSession={onEditSession}
+                  />
+                }
+              />
+            }
             loader={isPending && <BouncingLoader />}
             messages={
               <MessageList
-                messages={chats[selectedSession.id] as MessageChatbotProps[]}
+                messages={chats[selectedSession.id] as MessageProps[]}
               />
             }
             input={

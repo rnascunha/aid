@@ -1,4 +1,13 @@
-import { ChatMessage } from "../../../libs/chat/types";
+import {
+  BaseSender,
+  MessageExachange,
+  MessageProps,
+  MessageStatus,
+  PartInlineData,
+  PartText,
+  PartType,
+  TypeMessage,
+} from "@/libs/chat/types";
 import {
   ListItem,
   ListItemButton,
@@ -7,50 +16,56 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
-import { StaticAvatar } from "../staticAvatar";
-import { toggleMessagesPane } from "@/libs/chat/utils";
-import { providerBaseMap } from "@/libs/chat/data";
-import { aIContext } from "../context";
-import { checkProviderAvaiable } from "@/libs/chat/functions";
-import { MessageModelProps, ModelProps } from "./types";
+import { useEffect, useState } from "react";
+import { toggleMessagesPane } from "@/components/chat/utils";
+import { getPartType, isStatusMessage } from "@/libs/chat/functions";
+import { StaticAvatar } from "./staticAvatar";
+import { StaticImageData } from "next/image";
 
-type ChatListItemProps = ListItemButtonProps & {
-  model: ModelProps;
-  sender: ModelProps;
-  messages: MessageModelProps[];
-  selectedModel: ModelProps | undefined;
-  setSelectedModel: (chat: ModelProps) => void;
-};
-
-function getFormatedTimestamp(messages: MessageModelProps[]) {
+function getFormatedTimestamp(messages: MessageProps[]) {
   return messages.at(-1)?.timestamp
     ? dayjs().to(messages.at(-1)?.timestamp)
     : "";
 }
 
-function getDetailMessage(message: ChatMessage | undefined) {
+function getDetailMessage(message?: MessageProps): string {
   if (!message) return "";
-  if ("error" in message) return message.error;
-  return message.response;
+  if (isStatusMessage(message)) return (message as MessageStatus).content.text;
+  const part = (message as MessageExachange).content.at(-1);
+  if (!part) return "";
+
+  const partType = getPartType(part);
+  if (partType === PartType.TEXT)
+    return (part as unknown as PartText).text as string;
+  if (partType === PartType.INLINEDATA) {
+    const partIL = part as unknown as PartInlineData;
+    return "displayName" in partIL
+      ? `File: ${partIL.inlineData.displayName}`
+      : `File: ${partIL.inlineData.mimeType}`;
+  }
+  return "";
 }
 
+type ChatListItemProps = ListItemButtonProps & {
+  sender: BaseSender;
+  messages: MessageProps[];
+  isSelected: boolean;
+  setSelectedModel: (chat: BaseSender) => void;
+  avatar?: StaticImageData;
+  bgcolor?: string;
+};
+
 export default function ChatListItem({
-  model,
   sender,
   messages,
-  selectedModel,
+  isSelected,
   setSelectedModel,
+  avatar,
+  bgcolor = "inherit",
 }: ChatListItemProps) {
   const [formatTimestamp, setFormatTimestamp] = useState(
     getFormatedTimestamp(messages)
   );
-  const { providers } = useContext(aIContext);
-
-  const selected = selectedModel?.id === model.id;
-  const provider = providers.find((p) => p.id === model.providerId);
-  const hasProviderAuth = provider ? checkProviderAvaiable(provider) : false;
-
   useEffect(() => {
     const handle = setInterval(
       () => setFormatTimestamp(getFormatedTimestamp(messages)),
@@ -59,7 +74,7 @@ export default function ChatListItem({
     return () => clearInterval(handle);
   }, [messages]);
 
-  const message = messages.at(-1)?.content;
+  const message = messages.at(-1);
 
   return (
     <ListItem
@@ -67,15 +82,15 @@ export default function ChatListItem({
         p: 0,
         borderBottom: "1px solid",
         borderColor: "lightgray",
-        bgcolor: hasProviderAuth ? "inherit" : "background.paper",
+        bgcolor,
       }}
     >
       <ListItemButton
         onClick={() => {
-          setSelectedModel(model);
+          setSelectedModel(sender);
           toggleMessagesPane();
         }}
-        selected={selected}
+        selected={isSelected}
         color="neutral"
         sx={{
           flexDirection: "column",
@@ -90,14 +105,7 @@ export default function ChatListItem({
           alignItems="center"
         >
           <Stack direction="row" spacing={1.5} alignItems="center">
-            <StaticAvatar
-              src={
-                provider
-                  ? providerBaseMap?.[provider.providerBaseId].logo
-                  : undefined
-              }
-              alt={sender.name}
-            />
+            <StaticAvatar src={avatar} alt={sender.name} />
             <Stack>
               <Typography>{sender.name}</Typography>
               <Typography
@@ -111,7 +119,7 @@ export default function ChatListItem({
                   textOverflow: "ellipsis",
                 }}
               >
-                {sender.model}
+                {sender.name}
               </Typography>
             </Stack>
           </Stack>
@@ -120,7 +128,11 @@ export default function ChatListItem({
           </Typography>
         </Stack>
         <Typography
-          color={message && "success" in message ? "textSecondary" : "error"}
+          color={
+            message?.type === TypeMessage.MESSAGE
+              ? "textSecondary"
+              : message?.type
+          }
           fontSize="small"
           sx={{
             display: "-webkit-box",

@@ -11,7 +11,7 @@ import {
   ProviderConfig,
   ProviderConfigType,
   ProviderProps,
-} from "../types";
+} from "@/libs/chat/models/types";
 import {
   Button,
   Divider,
@@ -36,7 +36,7 @@ import {
   providerAuthTemplate,
   providerConfigTemplate,
   providersBase,
-} from "@/libs/chat/data";
+} from "@/libs/chat/models/data";
 import { generateUUID } from "@/libs/uuid";
 
 import LaunchIcon from "@mui/icons-material/Launch";

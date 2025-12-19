@@ -1,14 +1,9 @@
-import {
-  ChatMessagesChatbotProps,
-  MessageChatbotProps,
-  SessionType,
-} from "./types";
+import { SessionType } from "./types";
 import { sendQuery } from "@/actions/chatbot";
 import { app_name } from "./constants";
 import { generateUUID } from "@/libs/uuid";
 import { Dispatch, SetStateAction } from "react";
-import { ChatMessage } from "@/libs/chat/types";
-import { Part, PartText } from "@/actions/adk/types";
+import { ChatMessagesProps, MessageProps } from "@/libs/chat/types";
 
 export function createNewSession(name: string = ""): SessionType {
   return {
@@ -16,41 +11,6 @@ export function createNewSession(name: string = ""): SessionType {
     id: generateUUID(),
     state: {},
   };
-}
-
-export function messageSubmit(
-  {
-    message,
-    session,
-    newId,
-  }: {
-    message: string;
-    session: SessionType;
-    newId: string;
-  },
-  setChats: Dispatch<SetStateAction<ChatMessagesChatbotProps>>
-): MessageChatbotProps {
-  const newMessage = {
-    id: newId,
-    sender: "You",
-    content: { response: message, success: true },
-    timestamp: Date.now(),
-  } as MessageChatbotProps;
-  setChats((prev) => ({
-    ...prev,
-    [session.id]: [...prev[session.id], newMessage],
-  }));
-  return newMessage;
-}
-
-function getContents(response: Record<string, unknown>[]) {
-  const parts = (response[0].content as Record<string, unknown>)
-    .parts as Part[];
-  return parts.map((p) => ({
-    success: true as const,
-    data: response,
-    response: (p as PartText).text,
-  }));
 }
 
 export async function messageResponse(
@@ -65,7 +25,7 @@ export async function messageResponse(
     user: string;
     session: SessionType;
   },
-  setChats: Dispatch<SetStateAction<ChatMessagesChatbotProps>>
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
 ) {
   const response = await sendQuery({
     app_name,
@@ -74,25 +34,18 @@ export async function messageResponse(
     parts: [{ text: message }],
   });
 
-  const contents: ChatMessage[] = response.ok
-    ? getContents(response.data)
-    : [
-        {
-          error: response.error,
-          detail: response.detail!.message,
-          code: 0,
-        },
-      ];
-
-  const newMessages = contents.map((c, i) => ({
-    id: `${newId}:r${i}`,
-    sender: session,
-    content: c,
+  const newMessages: MessageProps = {
+    id: `${newId}:r`,
+    senderId: session.id,
+    content: response.content,
     timestamp: Date.now(),
-  }));
+    type: response.type,
+    raw: response,
+    origin: "received",
+  } as MessageProps;
   setChats((prev) => ({
     ...prev,
-    [session.id]: [...prev[session.id], ...newMessages],
+    [session.id]: [...prev[session.id], newMessages],
   }));
   return newMessages;
 }

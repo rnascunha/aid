@@ -1,23 +1,30 @@
 "use server";
 
-import { ProviderAuth, ProviderConfig } from "@/components/chat/model/types";
+import { ProviderAuth, ProviderConfig } from "@/libs/chat/models/types";
 import { serverAPIhost } from "./constants";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
+import { MessageContentStatus, Part, TypeMessage } from "@/libs/chat/types";
 
-interface AudioToTextMessageSuccess {
-  success: true;
-  response: string;
+// interface AudioToTextMessageSuccess {
+//   success: true;
+//   response: string;
+// }
+
+// interface AudioToTextMessageError {
+//   code: number;
+//   error: string;
+//   detail: string;
+// }
+
+// export type AudioToTextMessage =
+//   | AudioToTextMessageSuccess
+//   | AudioToTextMessageError;
+
+interface AudioToTextResponse {
+  type: TypeMessage;
+  content: MessageContentStatus | Part[];
+  raw: object;
 }
-
-interface AudioToTextMessageError {
-  code: number;
-  error: string;
-  detail: string;
-}
-
-export type AudioToTextMessage =
-  | AudioToTextMessageSuccess
-  | AudioToTextMessageError;
 
 export async function fetchAudioToText(data: {
   provider: string;
@@ -26,7 +33,7 @@ export async function fetchAudioToText(data: {
   settings: AudioToTextSettings;
   auth: ProviderAuth | undefined;
   config: ProviderConfig | undefined;
-}) {
+}): Promise<AudioToTextResponse> {
   try {
     const response = await fetch(`${serverAPIhost}/audiototext/`, {
       method: "POST",
@@ -36,17 +43,34 @@ export async function fetchAudioToText(data: {
       body: JSON.stringify(data),
     });
     const raw = await response.json();
-    if ("error" in raw) return raw;
+    console.log("Audio to raw", raw);
+    if ("error" in raw)
+      return {
+        type: TypeMessage.ERROR,
+        content: {
+          name: raw.error,
+          text: raw.detail,
+        },
+        raw,
+      };
+
     return {
-      ...raw,
-      response: raw.data.text,
-      data: raw.data,
+      type: TypeMessage.MESSAGE,
+      content: [
+        {
+          text: raw.data.text,
+        },
+      ],
+      raw: raw,
     };
   } catch (e) {
     return {
-      code: 9,
-      error: "Fetch Data Error",
-      detail: (e as Error).message,
+      type: TypeMessage.ERROR,
+      content: {
+        name: "Fetch Data Error",
+        text: (e as Error).message,
+      },
+      raw: e as Error,
     };
   }
 }

@@ -1,7 +1,10 @@
-import { checkProviderAvaiable, getProviderBase } from "@/libs/chat/functions";
+import {
+  checkProviderAvaiable,
+  getProviderBase,
+} from "@/libs/chat/models/functions";
 import { StaticAvatar } from "../staticAvatar";
-import { ModelProps, ProviderProps } from "./types";
-import { providerBaseMap } from "@/libs/chat/data";
+import { ModelProps, ProviderProps } from "../../../libs/chat/models/types";
+import { providerBaseMap } from "@/libs/chat/models/data";
 import { ReactNode, useContext } from "react";
 import { Button, Stack, Typography } from "@mui/material";
 import { aIContext } from "../context";

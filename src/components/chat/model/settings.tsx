@@ -10,7 +10,7 @@ import { ToolsProps } from "@/libs/chat/types";
 import { ArrayPanel, PanelConfig } from "@/components/panels";
 import { SettingsTools } from "./settings/settigsTools";
 import { SettingStorage } from "./settings/settingsStorage";
-import { ProviderProps } from "./types";
+import { ProviderProps } from "../../../libs/chat/models/types";
 
 interface SettingsDialogProps {
   open: boolean;

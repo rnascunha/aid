@@ -1,4 +1,4 @@
-import { BaseSender, ChatMessagesProps, MessageProps } from "@/libs/chat/types";
+import { BaseSender } from "@/libs/chat/types";
 
 import { StaticImageData } from "next/image";
 
@@ -86,6 +86,3 @@ export interface ModelProps extends BaseSender {
   providerId: string;
   model: string;
 }
-
-export type MessageModelProps = MessageProps<ModelProps>;
-export type ChatMessagesModelProps = ChatMessagesProps<ModelProps>;

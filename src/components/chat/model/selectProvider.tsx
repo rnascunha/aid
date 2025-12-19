@@ -6,8 +6,8 @@ import {
   Typography,
 } from "@mui/material";
 
-import { providerBaseMap, providersBase } from "@/libs/chat/data";
-import { ProviderBaseProps, ProviderProps } from "./types";
+import { providerBaseMap, providersBase } from "@/libs/chat/models/data";
+import { ProviderBaseProps, ProviderProps } from "../../../libs/chat/models/types";
 import { StaticAvatar } from "../staticAvatar";
 
 function ProviderItem({ provider }: { provider: ProviderProps }) {
