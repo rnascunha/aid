@@ -18,20 +18,20 @@ import {
 } from "@mui/material";
 import dayjs from "@/libs/dayjs";
 import { ReactNode, useEffect, useState } from "react";
-import { createHiperlinks } from "@/libs/links";
 import { formatBytes } from "@/libs/formatData";
 
 import { getPartType, isStatusMessage } from "@/libs/chat/functions";
 
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
+import { MarkdownText } from "./markdownText";
 
 const messageTypeBGStyle: Record<string, string> = {
   [TypeMessage.ERROR]: "var(--mui-palette-error-main)",
   [TypeMessage.WARNING]: "var(--mui-palette-warning-main)",
   [TypeMessage.SUCCESS]: "var(--mui-palette-success-main)",
   [TypeMessage.INFO]: "var(--mui-palette-info-main)",
-  [`${TypeMessage.MESSAGE}:sent`]: "rgba(50, 50, 200, 0.7)",
+  [`${TypeMessage.MESSAGE}:sent`]: "rgba(130, 103, 177, 0.7)",
   [`${TypeMessage.MESSAGE}:received`]: "rgba(200, 200, 200, 0.7)",
 };
 
@@ -44,32 +44,14 @@ function PartTextMessage({ part }: { part: PartText }) {
   if ("thought" in part && part.thought)
     return (
       <Stack>
-        <Typography fontSize="16px" fontWeight="bold">
-          Thought
-        </Typography>
-        <Typography
-          fontSize="14px"
-          sx={{
-            whiteSpace: "pre-line",
-            wordBreak: "break-word",
-          }}
-        >
-          {createHiperlinks(part.text)}
-        </Typography>
+        <Divider><Typography fontSize="14px" fontStyle="italic">Thought</Typography></Divider>
+        <MarkdownText pstyle={{
+          fontSize: "13px"
+        }}>{part.text}</MarkdownText>
       </Stack>
     );
 
-  return (
-    <Typography
-      fontSize="14px"
-      sx={{
-        whiteSpace: "pre-line",
-        wordBreak: "break-word",
-      }}
-    >
-      {createHiperlinks(part.text)}
-    </Typography>
-  );
+  return <MarkdownText>{part.text}</MarkdownText>;
 }
 
 function PartInlineMessage({ part }: { part: PartInlineData }) {
@@ -113,15 +95,7 @@ function MessageContent({ message }: { message: MessageProps }) {
         >
           {content.name ?? message.type}
         </Typography>
-        <Typography
-          fontSize="14px"
-          sx={{
-            whiteSpace: "pre-line",
-            wordBreak: "break-word",
-          }}
-        >
-          {content.text}
-        </Typography>
+        <MarkdownText>{content.text}</MarkdownText>
       </Stack>
     );
   }
@@ -142,7 +116,7 @@ function MessageContent({ message }: { message: MessageProps }) {
       }
       return acc;
     }, [] as ReactNode[])
-    .map((e, i) => [e, <Divider key={i} />])
+    .map((e, i) => [e, <Divider key={i} sx={{ my: 1 }} />])
     .flat();
   elements.pop();
 

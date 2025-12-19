@@ -19,14 +19,13 @@ export async function getAllMessages(
 ): Promise<ChatMessagesProps> {
   const messages = await table.toArray();
 
-  // Creating Senders
   const baseChats = senders.reduce((acc, m) => {
     acc[m.id] = [];
     return acc;
   }, {} as ChatMessagesProps);
 
   const chats = messages.reduce((acc, m) => {
-    if (!acc[m.senderId]) acc[m.senderId] = [];
+    if (!acc[m.senderId]) return acc;
     acc[m.senderId].push(m);
     return acc;
   }, baseChats);

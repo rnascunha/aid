@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 export function ChatHeader({
   chatOptions = undefined,
-  chatTitle = "AIs",
+  chatTitle = "Models",
 }: {
   chatOptions?: ReactNode;
   chatTitle?: string;

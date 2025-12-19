@@ -18,7 +18,7 @@ export async function proxy(request: NextRequest) {
 
   if (isAuthenticated && nextUrl.pathname === loginPath)
     return goToPath(nextUrl, restrictedPath, false);
-  if (!isAuthenticated && nextUrl.pathname === restrictedPath)
+  if (!isAuthenticated && nextUrl.pathname !== loginPath)
     return goToPath(nextUrl, loginPath, true);
 }
 
