@@ -5,21 +5,6 @@ import { serverAPIhost } from "./constants";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { MessageContentStatus, Part, TypeMessage } from "@/libs/chat/types";
 
-// interface AudioToTextMessageSuccess {
-//   success: true;
-//   response: string;
-// }
-
-// interface AudioToTextMessageError {
-//   code: number;
-//   error: string;
-//   detail: string;
-// }
-
-// export type AudioToTextMessage =
-//   | AudioToTextMessageSuccess
-//   | AudioToTextMessageError;
-
 interface AudioToTextResponse {
   type: TypeMessage;
   content: MessageContentStatus | Part[];
@@ -43,7 +28,7 @@ export async function fetchAudioToText(data: {
       body: JSON.stringify(data),
     });
     const raw = await response.json();
-    console.log("Audio to raw", raw);
+
     if ("error" in raw)
       return {
         type: TypeMessage.ERROR,
