@@ -10,24 +10,39 @@ export interface MessageContentStatus {
 
 export enum PartType {
   TEXT = "text",
-  INLINEDATA = "inlineData",
+  INLINE_DATA = "inlineData",
+  FUNCTION_CALL = "functionCall",
+  FUNCTION_RESPONSE = "functionResponse",
 }
 
-export interface PartText {
-  [PartType.TEXT]: string;
-  thought?: boolean;
-}
+export type PartText = string;
 
 export interface PartInlineData {
-  [PartType.INLINEDATA]: {
-    displayName?: string;
-    data: string;
-    mimeType: string;
-    size?: number;
-  };
+  displayName?: string;
+  data: string;
+  mimeType: string;
+  size?: number;
 }
 
-export type Part = PartText | PartInlineData;
+export interface PartFunctionCall {
+  name: string;
+  args: Record<string, unknown>;
+  id: string;
+}
+
+export interface PartFunctionResponse {
+  name: string;
+  response: Record<string, unknown>;
+  id: string;
+}
+
+export interface Part {
+  [PartType.TEXT]?: PartText;
+  [PartType.INLINE_DATA]?: PartInlineData;
+  [PartType.FUNCTION_CALL]?: PartFunctionCall;
+  [PartType.FUNCTION_RESPONSE]?: PartFunctionResponse;
+  thought?: boolean;
+}
 
 export enum TypeMessage {
   MESSAGE = "message",

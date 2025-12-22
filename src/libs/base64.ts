@@ -27,3 +27,13 @@ export async function filePathToBase64(
   const blob = await res.blob();
   return await blobTobase64(blob, type, prefix);
 }
+
+export function calculateBase64SizeInBytes(base64: string) {
+  // Remove any whitespace or newline characters if present
+  base64 = base64.replace(/\s/g, "");
+  const n = base64.length;
+  const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
+  const sizeInBytes = Math.floor((n * 3) / 4) - padding;
+
+  return sizeInBytes;
+}

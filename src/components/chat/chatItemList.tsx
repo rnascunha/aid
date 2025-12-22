@@ -4,7 +4,6 @@ import {
   MessageProps,
   MessageStatus,
   PartInlineData,
-  PartText,
   PartType,
   TypeMessage,
 } from "@/libs/chat/types";
@@ -35,13 +34,18 @@ function getDetailMessage(message?: MessageProps): string {
   if (!part) return "";
 
   const partType = getPartType(part);
-  if (partType === PartType.TEXT)
-    return (part as unknown as PartText).text as string;
-  if (partType === PartType.INLINEDATA) {
-    const partIL = part as unknown as PartInlineData;
-    return "displayName" in partIL
-      ? `File: ${partIL.inlineData.displayName}`
-      : `File: ${partIL.inlineData.mimeType}`;
+  switch (partType) {
+    case PartType.TEXT:
+      return part[PartType.TEXT] as string;
+    case PartType.INLINE_DATA:
+      const partIL = part[PartType.INLINE_DATA] as PartInlineData;
+      return "displayName" in partIL
+        ? `File: ${partIL.displayName}`
+        : `File: ${partIL.mimeType}`;
+    case PartType.FUNCTION_CALL:
+      return part[PartType.FUNCTION_CALL]!.name;
+    case PartType.FUNCTION_RESPONSE:
+      return part[PartType.FUNCTION_RESPONSE]!.name;
   }
   return "";
 }

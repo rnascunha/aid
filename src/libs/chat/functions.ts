@@ -2,19 +2,24 @@ import { Dispatch, SetStateAction } from "react";
 import {
   BaseSender,
   ChatMessagesProps,
+  MessageContentStatus,
   MessageContext,
   MessageFlattenProps,
   MessageProps,
   Part,
-  PartText,
   PartType,
   TypeMessage,
 } from "./types";
 import { ContextSettings } from "@/appComponents/chat/types";
+import { generateUUID } from "../uuid";
 
 /**
  * Messages
  */
+export function isStatusType(type: TypeMessage) {
+  return type !== TypeMessage.MESSAGE;
+}
+
 export function isStatusMessage(message: MessageProps) {
   return [
     TypeMessage.ERROR,
@@ -91,15 +96,15 @@ function flattenMessagesFilter(
 function formatContextMessages(
   messages: MessageFlattenProps[]
 ): MessageContext[] {
-  const filteRedMessages = messages.filter(
+  const filteredMessages = messages.filter(
     (m) =>
       m.type === TypeMessage.MESSAGE &&
       getPartType(m.content as Part) === PartType.TEXT &&
       !("thought" in m.content)
   );
-  return filteRedMessages.map((m) => ({
+  return filteredMessages.map((m) => ({
     role: m.origin === "received" ? "assistant" : "user",
-    content: (m.content as unknown as PartText).text,
+    content: (m.content as Part).text as string,
   }));
 }
 
@@ -141,6 +146,39 @@ export function messageSendSubmit(
     [senderId]: [...prev[senderId], newMessage],
   }));
   return newMessage;
+}
+
+export function messageStatusReceive({
+  id,
+  type,
+  content,
+  senderId,
+  setChats,
+  raw,
+}: {
+  id?: string;
+  type: TypeMessage;
+  content: MessageContentStatus;
+  senderId: string;
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>;
+  raw?: object;
+}) {
+  const newId = id ?? generateUUID();
+  const responseMessage: MessageProps = {
+    id: `${newId}:r`,
+    senderId,
+    timestamp: Date.now(),
+    origin: "received",
+    type: type,
+    content,
+    raw: raw ?? content,
+  } as MessageProps;
+  setChats((prev) => ({
+    ...prev,
+    [senderId]: [...prev[senderId], responseMessage],
+  }));
+
+  return responseMessage;
 }
 
 export function mergeMessages(

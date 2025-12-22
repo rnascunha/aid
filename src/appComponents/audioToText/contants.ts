@@ -1,0 +1,1 @@
+export const serverActionBodySizeLimit = 1024 * 1024;

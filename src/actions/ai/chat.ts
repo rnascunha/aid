@@ -40,7 +40,7 @@ export async function fetchChatRequest(data: {
       body: JSON.stringify(data),
     });
     const raw = await response.json();
-    console.log('Chat raw', raw)
+  
     if ("error" in raw)
       return {
         type: TypeMessage.ERROR,

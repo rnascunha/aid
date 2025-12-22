@@ -8,6 +8,7 @@ import {
   ChatMessagesProps,
   MessageProps,
   PartInlineData,
+  PartType,
 } from "@/libs/chat/types";
 import { messageSendSubmit } from "@/libs/chat/functions";
 import { formatBytes } from "@/libs/formatData";
@@ -19,22 +20,19 @@ export async function messageSubmit(
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
   message?: string
 ) {
-  const audioData = await filePathToBase64(
-    data.inlineData.data,
-    data.inlineData.mimeType
-  );
+  const audioData = await filePathToBase64(data.data, data.mimeType);
   const inlineData = {
-    ...data.inlineData,
+    ...data,
     data: audioData,
   };
 
   const newMessage = messageSendSubmit(
     [
       {
-        inlineData,
+        [PartType.INLINE_DATA]: inlineData,
       },
       {
-        text:
+        [PartType.TEXT]:
           message ??
           `File: ${
             inlineData.displayName ?? inlineData.mimeType
@@ -63,10 +61,6 @@ export async function attachmentResponse({
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>;
   settings: AudioToTextSettings;
 }) {
-  // const base64 = await filePathToBase64(
-  //   file.inlineData.data,
-  //   file.inlineData.mimeType
-  // );
   const response = await fetchAudioToText({
     provider: providerBaseMap[provider.providerBaseId].provider,
     model: model.model,

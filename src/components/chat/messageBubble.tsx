@@ -1,10 +1,12 @@
 import {
   MessageContentStatus,
   MessageProps,
+  PartType,
   Part,
   PartInlineData,
   PartText,
-  PartType,
+  PartFunctionCall,
+  PartFunctionResponse,
   TypeMessage,
 } from "@/libs/chat/types";
 import {
@@ -17,14 +19,15 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "@/libs/dayjs";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { formatBytes } from "@/libs/formatData";
 
-import { getPartType, isStatusMessage } from "@/libs/chat/functions";
+import { isStatusMessage } from "@/libs/chat/functions";
 
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import { MarkdownText } from "./markdownText";
+import { calculateBase64SizeInBytes } from "@/libs/base64";
 
 const messageTypeBGStyle: Record<string, string> = {
   [TypeMessage.ERROR]: "var(--mui-palette-error-main)",
@@ -40,21 +43,30 @@ function getMessageBGStyle(message: MessageProps) {
   return messageTypeBGStyle[`${TypeMessage.MESSAGE}:${message.origin}`];
 }
 
-function PartTextMessage({ part }: { part: PartText }) {
-  if ("thought" in part && part.thought)
-    return (
-      <Stack>
-        <Divider><Typography fontSize="14px" fontStyle="italic">Thought</Typography></Divider>
-        <MarkdownText pstyle={{
-          fontSize: "13px"
-        }}>{part.text}</MarkdownText>
-      </Stack>
-    );
-
-  return <MarkdownText>{part.text}</MarkdownText>;
+function StatusMessage({ message }: { message: MessageProps }) {
+  const content = message.content as MessageContentStatus;
+  return (
+    <Stack>
+      <Typography fontSize="16px" fontWeight="bold" textTransform="capitalize">
+        {content.name ?? message.type}
+      </Typography>
+      <MarkdownText>{content.text}</MarkdownText>
+    </Stack>
+  );
 }
 
-function PartInlineMessage({ part }: { part: PartInlineData }) {
+function ThoughtPart() {
+  return <Divider>Thought</Divider>;
+}
+
+function PartTextMessage({ text }: { text: PartText }) {
+  return <MarkdownText>{text}</MarkdownText>;
+}
+
+function PartInlineMessage({ indata }: { indata: PartInlineData }) {
+  const size = formatBytes(
+    indata.size ?? calculateBase64SizeInBytes(indata.data)
+  );
   return (
     <Stack>
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
@@ -62,20 +74,16 @@ function PartInlineMessage({ part }: { part: PartInlineData }) {
           <InsertDriveFileRoundedIcon />
         </Avatar>
         <div>
-          <Typography>
-            {part.inlineData.displayName ?? part.inlineData.mimeType}
-          </Typography>
-          <Typography>
-            {formatBytes(part.inlineData.size ?? part.inlineData.data.length)}
-          </Typography>
+          <Typography>{indata.displayName ?? indata.mimeType}</Typography>
+          <Typography>{size}</Typography>
         </div>
       </Stack>
-      {part.inlineData.mimeType.startsWith("audio/") && (
+      {indata.mimeType.startsWith("audio/") && (
         <audio controls>
           <source
-            src={`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`}
-            type={part.inlineData.mimeType}
-            title={part.inlineData.displayName}
+            src={`data:${indata.mimeType};base64,${indata.data}`}
+            type={indata.mimeType}
+            title={indata.displayName}
           />
         </audio>
       )}
@@ -83,40 +91,83 @@ function PartInlineMessage({ part }: { part: PartInlineData }) {
   );
 }
 
+function PartFunctionCallMessage({ call }: { call: PartFunctionCall }) {
+  return (
+    <Stack>
+      <Divider>Function Call</Divider>
+      <Typography>{`ID: ${call.id}`}</Typography>
+      <Typography
+        sx={{
+          whiteSpace: "pre-line",
+        }}
+      >{`${call.name}(\n${Object.entries(call.args)
+        .map(([k, v]) => `${k} = ${v}`)
+        .join("\n")})`}</Typography>
+    </Stack>
+  );
+}
+
+function PartFunctionResponseMessage({
+  response,
+}: {
+  response: PartFunctionResponse;
+}) {
+  return (
+    <Stack>
+      <Divider>Function Response</Divider>
+      <Typography>{`ID: ${response.id}`}</Typography>
+      <Typography>{response.name}</Typography>
+      <Typography>
+        {Object.entries(response.response)
+          .map(([k, v]) => `${k} = ${v}`)
+          .join("\n")}
+      </Typography>
+    </Stack>
+  );
+}
+
+function MessagePart({ part }: { part: Part }) {
+  return (
+    <Stack
+      sx={[
+        part.thought
+          ? {
+              fontSize: "11px",
+              backdropFilter: "brightness(0.9)",
+              borderRadius: "5px",
+              padding: "3px",
+            }
+          : {
+              fontSize: "14px",
+            },
+      ]}
+    >
+      {part.thought && <ThoughtPart />}
+      {part[PartType.TEXT] && <PartTextMessage text={part[PartType.TEXT]} />}
+      {part[PartType.INLINE_DATA] && (
+        <PartInlineMessage indata={part[PartType.INLINE_DATA]} />
+      )}
+      {part[PartType.FUNCTION_CALL] && (
+        <PartFunctionCallMessage call={part[PartType.FUNCTION_CALL]} />
+      )}
+      {part[PartType.FUNCTION_RESPONSE] && (
+        <PartFunctionResponseMessage
+          response={part[PartType.FUNCTION_RESPONSE]}
+        />
+      )}
+    </Stack>
+  );
+}
+
 function MessageContent({ message }: { message: MessageProps }) {
-  if (isStatusMessage(message)) {
-    const content = message.content as MessageContentStatus;
-    return (
-      <Stack>
-        <Typography
-          fontSize="16px"
-          fontWeight="bold"
-          textTransform="capitalize"
-        >
-          {content.name ?? message.type}
-        </Typography>
-        <MarkdownText>{content.text}</MarkdownText>
-      </Stack>
-    );
-  }
+  if (isStatusMessage(message)) return <StatusMessage message={message} />;
 
   const parts = message.content as Part[];
   const elements = parts
-    .reduce((acc, p, i) => {
-      const partType = getPartType(p);
-      switch (partType) {
-        case PartType.TEXT:
-          acc.push(<PartTextMessage key={`${i}:t`} part={p as PartText} />);
-          break;
-        case PartType.INLINEDATA:
-          acc.push(
-            <PartInlineMessage key={`${i}:id`} part={p as PartInlineData} />
-          );
-          break;
-      }
-      return acc;
-    }, [] as ReactNode[])
-    .map((e, i) => [e, <Divider key={i} sx={{ my: 1 }} />])
+    .map((p, i) => [
+      <MessagePart key={`${i}:m`} part={p} />,
+      <Divider key={i} sx={{ my: 1 }} />,
+    ])
     .flat();
   elements.pop();
 

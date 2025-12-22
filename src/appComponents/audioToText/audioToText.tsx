@@ -11,8 +11,10 @@ import { MessagesModelHeader } from "@/components/chat/model/messagesHeader";
 import {
   BaseSender,
   ChatMessagesProps,
+  MessageContentStatus,
   MessageProps,
   PartInlineData,
+  TypeMessage,
 } from "@/libs/chat/types";
 import {
   Dispatch,
@@ -28,6 +30,8 @@ import { AudioInput } from "./components/audioInput";
 import {
   onDeleteMessages as onDeleteModelMessages,
   addRemoveSender as addRemoveModel,
+  isStatusType,
+  messageStatusReceive,
 } from "@/libs/chat/functions";
 import { generateUUID } from "@/libs/uuid";
 import { AudioToTextSettings } from "./types";
@@ -101,11 +105,27 @@ export function AudioToText({
     onSettingsChange?.(settings);
   }, [settings, onSettingsChange]);
 
-  const onMessageHandler = async (file: PartInlineData | null) => {
+  const onMessageHandler = async (
+    file: PartInlineData | MessageContentStatus | null,
+    type: TypeMessage
+  ) => {
     if (!file) return;
     const newId = generateUUID();
+    if (isStatusType(type)) {
+      const m = messageStatusReceive({
+        id: newId,
+        senderId: selectedModel!.id,
+        type,
+        content: file as MessageContentStatus,
+        setChats,
+        raw: file,
+      });
+      await onMessage?.(m, selectedModel!.id);
+      return;
+    }
+
     const [newMessage, audio] = await messageSubmit(
-      file,
+      file as PartInlineData,
       newId,
       selectedModel!,
       setChats,
