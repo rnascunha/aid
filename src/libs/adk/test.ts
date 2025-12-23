@@ -5,7 +5,10 @@ const app_name = "chatbot",
   // session = "17bca9d1-4445-45b7-9ee5-10f935ab3e8b",
   session = uuidv4(),
   user = "rafaelo",
-  question = "When Pedro Alvares Cabral discovered Brasil?";
+  question = "At Vitória, Brazil, what is the current weather?";
+  // question = "At Vitória, Brazil, what is the best restaurant to go?";
+  // question = "Is there aliens at other planets?";
+  // question = "When Pedro Alvares Cabral discovered Brasil?";
 
 async function initiateSessionA() {
   try {
@@ -16,6 +19,7 @@ async function initiateSessionA() {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function sendQueryA() {
   try {
     const response = await base.sendQuery({
@@ -27,8 +31,31 @@ async function sendQueryA() {
           text: question,
         },
       ],
+      streaming: false,
+      sse: true,
     });
+
     console.dir(response, { maxArrayLength: null, depth: null });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function sendQuerySSE() {
+  try {
+    await base.sendQuerySSE({
+      app_name,
+      user,
+      session,
+      parts: [
+        {
+          text: question,
+        },
+      ],
+      streaming: false,
+      handler: (response) =>
+        console.dir(response, { maxArrayLength: null, depth: null }),
+    });
   } catch (e) {
     console.error(e);
   }
@@ -37,7 +64,8 @@ async function sendQueryA() {
 async function callF() {
   await initiateSessionA();
   // await initiateSessionA();
-  await sendQueryA();
+  // await sendQueryA();
+  await sendQuerySSE();
 }
 
 callF();

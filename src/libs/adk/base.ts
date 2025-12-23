@@ -1,5 +1,3 @@
-"use server";
-
 import { makeSessionAddress, makeQueryAddress } from "./functions";
 import {
   DeleteSessionProps,
@@ -8,6 +6,9 @@ import {
   SendQueryProps,
   UpdateSesionProps,
   ADKException,
+  FetchQueryProps,
+  ADKEvent,
+  Part,
 } from "./types";
 
 export async function initiateSession({
@@ -154,15 +155,17 @@ export async function deleteSession({
   }
 }
 
-export async function sendQuery({
+export async function fetchQuery({
   app_name,
   user,
   session,
   url,
   parts,
-}: SendQueryProps) {
+  sse,
+  streaming,
+}: FetchQueryProps) {
   try {
-    const address = makeQueryAddress({ url });
+    const address = makeQueryAddress({ url, sse });
 
     const headers = {
       "Content-Type": "application/json",
@@ -175,12 +178,33 @@ export async function sendQuery({
         role: "user",
         parts,
       },
+      streaming,
     };
 
-    const response = await fetch(address, {
+    return await fetch(address, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
+    });
+  } catch (e) {
+    throw new ADKException("Fetch error", (e as Error).message, e as Error);
+  }
+}
+
+export async function sendQuery({
+  app_name,
+  user,
+  session,
+  url,
+  parts,
+}: SendQueryProps) {
+  try {
+    const response = await fetchQuery({
+      app_name,
+      user,
+      session,
+      url,
+      parts,
     });
 
     const raw = await response.json();
@@ -192,5 +216,87 @@ export async function sendQuery({
     };
   } catch (e) {
     throw new ADKException("Fetch error", (e as Error).message, e as Error);
+  }
+}
+
+export async function readQuerySSE(
+  response: Response,
+  handler: (event: ADKEvent | Error, error: boolean) => void
+) {
+  console.log(response);
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value);
+    const lines = chunk.split("\n");
+
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        try {
+          const event = JSON.parse(line.replace("data: ", ""));
+          handler(event, false);
+        } catch (e) {
+          handler(e as Error, true);
+        }
+      }
+    }
+  }
+}
+
+export class PartialDataAggregator {
+  private _data: string = "";
+  private _current_partial: boolean = false;
+  private _is_thought: boolean = false;
+
+  get data() {
+    return this._data;
+  }
+
+  get is_partial() {
+    return this._current_partial;
+  }
+
+  get is_thought() {
+    return this._is_thought;
+  }
+
+  get parts(): Part[] {
+    return [
+      {
+        text: this._data,
+        thought: this._is_thought,
+      },
+    ];
+  }
+
+  addMessage(message: ADKEvent) {
+    const curr = this._current_partial;
+    this._current_partial = message.partial ?? false;
+    if (!message.partial) {
+      this._data = "";
+      return curr;
+    }
+    const [res, data, thought] = PartialDataAggregator.getContent(message);
+    this._is_thought = thought;
+    if (!res) {
+      this._data = "";
+      return curr;
+    }
+    this._data += data;
+    return curr;
+  }
+
+  private static getContent(message: ADKEvent): [boolean, string, boolean] {
+    const content = message.content;
+    if (content && "text" in content.parts?.[0]) {
+      const text = content.parts[0].text;
+      const thought = content.parts[0].thought ?? false;
+      return [true, text, thought];
+    }
+    return [false, "", false];
   }
 }

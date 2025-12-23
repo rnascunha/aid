@@ -1,8 +1,8 @@
 "use server";
 
 import { MessageContentStatus, TypeMessage } from "@/libs/chat/types";
-import * as adk from "./adk/base";
-import { ADKException, Part, SendQueryProps } from "./adk/types";
+import * as adk from "@/libs/adk/base";
+import { ADKException, Part, SendQueryProps } from "../libs/adk/types";
 
 interface ChatbotResponse {
   type: TypeMessage;
@@ -21,10 +21,22 @@ function errorResponse(message: Awaited<ReturnType<typeof adk.sendQuery>>) {
   };
 }
 
+function mergeContentResponses(
+  message: Awaited<ReturnType<typeof adk.sendQuery>>
+) {
+  return message.data.reduce(
+    (acc: Part[], c: { content: { parts: Part[] } }) => {
+      acc.push(...c.content!.parts);
+      return acc;
+    },
+    [] as Part[]
+  );
+}
+
 function messageResponse(message: Awaited<ReturnType<typeof adk.sendQuery>>) {
   return {
     type: TypeMessage.MESSAGE,
-    content: message.data[0].content.parts,
+    content: mergeContentResponses(message),
     raw: message,
   };
 }

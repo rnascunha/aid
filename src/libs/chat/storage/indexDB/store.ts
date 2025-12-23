@@ -26,15 +26,15 @@ aISettings.version(1).stores({
   providers: "id",
   tools: "",
   // Chat
-  chatMessages: "[id+senderId], senderId",
+  chatMessages: "[id+senderId], senderId, timestamp",
   chatModels: "id, providerId",
   chatSettings: "",
   // Audio to Text
-  audioToTextMessages: "[id+senderId], senderId",
+  audioToTextMessages: "[id+senderId], senderId, timestamp",
   audioToTextModels: "id, providerId",
   audioToTextSettings: "",
   // Chatbot
-  chatbotMessages: "[id+senderId], senderId",
+  chatbotMessages: "[id+senderId], senderId, timestamp",
   chatbotSessions: "id",
 });
 

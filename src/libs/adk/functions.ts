@@ -14,8 +14,14 @@ export function makeSessionAddress({
   return `${url}/apps/${app_name}/users/${user}/sessions/${session}`;
 }
 
-export function makeQueryAddress({ url = server_addr }: { url?: string }) {
-  return `${url}/run`;
+export function makeQueryAddress({
+  url = server_addr,
+  sse = false,
+}: {
+  url?: string;
+  sse?: boolean;
+}) {
+  return sse ? `${url}/run_sse` : `${url}/run`;
 }
 
 export function makeListAppsAddress({ url = server_addr }: { url?: string }) {

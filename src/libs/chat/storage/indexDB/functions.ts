@@ -17,7 +17,7 @@ export async function getAllMessages(
   table: TableMessages,
   senders: BaseSender[]
 ): Promise<ChatMessagesProps> {
-  const messages = await table.toArray();
+  const messages = await table.orderBy("timestamp").toArray();
 
   const baseChats = senders.reduce((acc, m) => {
     acc[m.id] = [];
