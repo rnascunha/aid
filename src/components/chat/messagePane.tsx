@@ -45,7 +45,7 @@ export function MessagesPane({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: 1,
+        gap: 0,
         overflow: "hidden",
         transform: {
           xs: "translateX(calc(200% * (var(--MessagesPane-slideIn, 0))))",

@@ -13,7 +13,8 @@ import {
   ChatMessagesProps,
   MessageContentStatus,
   MessageProps,
-  PartInlineData,
+  Part,
+  PartType,
   TypeMessage,
 } from "@/libs/chat/types";
 import {
@@ -25,17 +26,14 @@ import {
   useState,
   useTransition,
 } from "react";
-import { AudioInput } from "./components/audioInput";
 
 import {
   onDeleteMessages as onDeleteModelMessages,
   addRemoveSender as addRemoveModel,
-  isStatusType,
-  messageStatusReceive,
+  onMessageSendHandler,
 } from "@/libs/chat/functions";
-import { generateUUID } from "@/libs/uuid";
 import { AudioToTextSettings } from "./types";
-import { attachmentResponse, messageSubmit } from "./functions";
+import { attachmentResponse } from "./functions";
 import { DeleteMessagesButton } from "@/components/chat/deleteMessagesButton";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { Stack } from "@mui/material";
@@ -49,6 +47,7 @@ import ModelAvatar, {
   MessageInputCheck,
 } from "@/components/chat/model/components";
 import { removeModelsFromRemovedProviders } from "@/libs/chat/models/functions";
+import { MessageInput } from "@/components/chat/input/messageInput";
 
 interface AudioToTextPros {
   models: ModelProps[];
@@ -105,41 +104,35 @@ export function AudioToText({
     onSettingsChange?.(settings);
   }, [settings, onSettingsChange]);
 
+  /**
+   * It still need the make the input work only when one (and only one) audio
+   * file is attached
+   */
   const onMessageHandler = async (
-    file: PartInlineData | MessageContentStatus | null,
+    messages: Part[] | MessageContentStatus,
     type: TypeMessage
   ) => {
-    if (!file) return;
-    const newId = generateUUID();
-    if (isStatusType(type)) {
-      const m = messageStatusReceive({
-        id: newId,
-        senderId: selectedModel!.id,
-        type,
-        content: file as MessageContentStatus,
-        setChats,
-        raw: file,
-      });
-      await onMessage?.(m, selectedModel!.id);
-      return;
-    }
-
-    const [newMessage, audio] = await messageSubmit(
-      file as PartInlineData,
-      newId,
-      selectedModel!,
-      setChats,
-      settings.prompt ? settings.prompt : undefined
+    const newMessage = onMessageSendHandler(
+      messages,
+      type,
+      selectedModel!.id,
+      setChats
     );
     await onMessage?.(newMessage, selectedModel!.id);
+    if (newMessage.type !== TypeMessage.MESSAGE) return;
+
     startTransition(async () => {
+      const audio = (messages as Part[]).find((m) => PartType.INLINE_DATA in m);
+      if (!audio) return;
+      const prompt = (messages as Part[]).find((m) => PartType.TEXT in m);
+      const text = prompt?.[PartType.TEXT] ?? "";
       const response = await attachmentResponse({
-        data: audio,
-        newId,
+        data: audio[PartType.INLINE_DATA]!.data,
+        newId: newMessage.id,
         model: selectedModel as ModelProps,
         provider: selectedProvider as ProviderProps,
         setChats,
-        settings,
+        settings: { ...settings, prompt: text },
       });
       await onMessage?.(response, selectedModel!.id);
     });
@@ -250,12 +243,18 @@ export function AudioToText({
               <MessageInputCheck
                 provider={selectedProvider!}
                 input={
-                  <AudioInput
-                    settings={settings}
-                    setSettings={setSettings}
-                    onSubmit={onMessageHandler}
+                  <MessageInput
                     isPending={isPending}
+                    onSubmit={onMessageHandler}
+                    allowedAttachmentTypes="audio/*"
+                    multipleFiles={false}
                   />
+                  // <AudioInput
+                  //   settings={settings}
+                  //   setSettings={setSettings}
+                  //   onSubmit={onMessageHandler}
+                  //   isPending={isPending}
+                  // />
                 }
               />
             }

@@ -12,6 +12,8 @@ import {
 } from "./types";
 import { ContextSettings } from "@/appComponents/chat/types";
 import { generateUUID } from "../uuid";
+import { serverActionBodySizeLimit } from "@/appComponents/audioToText/contants";
+import { formatBytes } from "../formatData";
 
 /**
  * Messages
@@ -179,6 +181,57 @@ export function messageStatusReceive({
   }));
 
   return responseMessage;
+}
+
+export function onMessageSendHandler(
+  messages: Part[] | MessageContentStatus,
+  type: TypeMessage,
+  senderId: string,
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
+) {
+  if (isStatusType(type)) {
+    const msg = messageStatusReceive({
+      type,
+      content: messages as MessageContentStatus,
+      senderId,
+      setChats,
+    });
+    return msg;
+  }
+
+  const parts = messages as Part[];
+  const partFiltered = parts.find(
+    (p) =>
+      PartType.INLINE_DATA in p &&
+      (p[PartType.INLINE_DATA]?.size ?? 0) > serverActionBodySizeLimit
+  );
+
+  if (partFiltered) {
+    const msg = messageStatusReceive({
+      type: TypeMessage.WARNING,
+      content: {
+        name: "File Size Exceeded",
+        text: `File '${
+          partFiltered[PartType.INLINE_DATA]?.displayName
+        }' is bigger than allowed size (${formatBytes(
+          serverActionBodySizeLimit
+        )})`,
+      },
+      senderId,
+      setChats,
+    });
+    return msg;
+  }
+
+  const newId = generateUUID();
+  const newMessage = messageSendSubmit(
+    parts as Part[],
+    newId,
+    senderId,
+    setChats
+  );
+
+  return newMessage;
 }
 
 export function mergeMessages(

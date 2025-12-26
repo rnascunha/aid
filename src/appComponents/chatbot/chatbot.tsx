@@ -10,13 +10,21 @@ import { Dispatch, SetStateAction, useState, useTransition } from "react";
 import { AddSession } from "./components/addSession";
 import { SessionType } from "./types";
 import { createNewSession, messageResponse } from "./functions";
-import { MessageInput } from "@/components/chat/messageInput";
+// import { MessageInput } from "@/components/chat/messageInput";
 import { MessageList } from "@/components/chat/messageList";
-import { generateUUID } from "@/libs/uuid";
-import { BaseSender, ChatMessagesProps, MessageProps } from "@/libs/chat/types";
-import { messageSendSubmit } from "@/libs/chat/functions";
+import {
+  BaseSender,
+  ChatMessagesProps,
+  MessageContentStatus,
+  MessageProps,
+  Part,
+  PartType,
+  TypeMessage,
+} from "@/libs/chat/types";
+import { onMessageSendHandler } from "@/libs/chat/functions";
 import { MessagesHeader } from "@/components/chat/messagesHeader";
 import { ChatbotOptions } from "./components/sessionOptions";
+import { MessageInput } from "@/components/chat/input/messageInput";
 
 interface ChatBotProps {
   sessions: SessionType[];
@@ -71,25 +79,28 @@ export default function ChatBot({
     await onAddRemoveSession?.(newSession);
   };
 
-  const onMessageHandler = async (message: string) => {
-    const newId = generateUUID();
-    const newMessage = messageSendSubmit(
-      [
-        {
-          text: message,
-        },
-      ],
-      newId,
+  const onMessageHandler = async (
+    messages: Part[] | MessageContentStatus,
+    type: TypeMessage
+  ) => {
+    const newMessage = onMessageSendHandler(
+      messages,
+      type,
       selectedSession!.id,
       setChats
     );
     await onMessage?.(newMessage, selectedSession!.id);
+    if (newMessage.type !== TypeMessage.MESSAGE) return;
+
     startTransition(async () => {
+      const textMessage = (messages as Part[]).find((f) => PartType.TEXT in f);
+      if (!textMessage) return;
+
       const response = await messageResponse(
         {
-          message,
+          message: textMessage.text as string,
           user,
-          newId,
+          newId: newMessage.id,
           session: selectedSession as SessionType,
         },
         setChats
@@ -151,8 +162,10 @@ export default function ChatBot({
             }
             input={
               <MessageInput
-                onSubmit={(value) => onMessageHandler(value)}
+                disableAttachment={true}
+                disableRecord={true}
                 isPending={isPending}
+                onSubmit={onMessageHandler}
               />
             }
           />

@@ -14,34 +14,42 @@ import { Stack } from "@mui/material";
 import { SettingsDialog } from "./components/settingsDialog";
 import { ChatSettings } from "@/appComponents/chat/types";
 
-import { generateUUID } from "@/libs/uuid";
 import { removeModelsFromRemovedProviders } from "@/libs/chat/models/functions";
 import {
   onDeleteMessages as onDeleteModelMessages,
   addRemoveSender as addRemoveModel,
+  onMessageSendHandler,
 } from "@/libs/chat/functions";
 
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { ChatModelList } from "@/components/chat/model/chatList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
-import { MessageInput } from "@/components/chat/messageInput";
+import { MessageInput } from "@/components/chat/input/messageInput";
 import { MessagesModelHeader } from "@/components/chat/model/messagesHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messageList";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { DeleteMessagesButton } from "@/components/chat/deleteMessagesButton";
 import { AddModel, AddModelButton } from "@/components/chat/model/addModel";
-import { messageResponse } from "./functions";
+
 import { aIContext } from "@/components/chat/context";
 import { providerBaseMap } from "@/libs/chat/models/data";
 import ModelAvatar, {
   MessageInputCheck,
 } from "@/components/chat/model/components";
 import { ModelProps } from "@/libs/chat/models/types";
-import { BaseSender, ChatMessagesProps, MessageProps } from "@/libs/chat/types";
+import {
+  BaseSender,
+  ChatMessagesProps,
+  MessageContentStatus,
+  MessageProps,
+  PartType,
+  TypeMessage,
+} from "@/libs/chat/types";
 import { EmptyChatList } from "@/components/chat/chatList";
-import { messageSendSubmit } from "@/libs/chat/functions";
+import { Part } from "@/libs/chat/types";
+import { messageResponse } from "./functions";
 
 export interface ChatProps {
   models: ModelProps[];
@@ -98,23 +106,24 @@ export function Chat({
     onSettingsChange?.(settings);
   }, [settings, onSettingsChange]);
 
-  const onMessageHandler = async (message: string) => {
-    const newId = generateUUID();
-    const newMessage = messageSendSubmit(
-      [
-        {
-          text: message,
-        },
-      ],
-      newId,
+  const onMessageHandler = async (
+    messages: Part[] | MessageContentStatus,
+    type: TypeMessage
+  ) => {
+    const newMessage = onMessageSendHandler(
+      messages,
+      type,
       selectedModel!.id,
       setChats
     );
     await onMessage?.(newMessage, selectedModel!.id);
+    if (newMessage.type !== TypeMessage.MESSAGE) return;
+
     startTransition(async () => {
+      const textMessage = (messages as Part[]).find((f) => PartType.TEXT in f);
       const response = await messageResponse(
-        message,
-        newId,
+        textMessage![PartType.TEXT] as string,
+        newMessage.id,
         selectedModel!,
         selectedProvider!,
         setChats,
@@ -224,6 +233,8 @@ export function Chat({
                   <MessageInput
                     onSubmit={onMessageHandler}
                     isPending={isPending}
+                    disableAttachment={true}
+                    disableRecord={true}
                   />
                 }
               />

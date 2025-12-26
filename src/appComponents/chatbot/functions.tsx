@@ -18,6 +18,18 @@ export function createNewSession(name: string = ""): SessionType {
   };
 }
 
+async function getResponseBodyError(response: Response) {
+  try {
+    return await response.json();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e) {
+    return {
+      status: response.status,
+      statusText: response.statusText,
+    };
+  }
+}
+
 export async function messageResponse(
   {
     message,
@@ -45,8 +57,9 @@ export async function messageResponse(
     }),
   });
 
-  if (response.status !== 200 || !response.body)
-    return {
+  if (response.status !== 200 || !response.body) {
+    const raw = await getResponseBodyError(response);
+    const errorMessage = {
       id: `${newId}:r`,
       senderId: session.id,
       content: {
@@ -55,9 +68,15 @@ export async function messageResponse(
       },
       timestamp: Date.now(),
       type: TypeMessage.ERROR,
-      raw: response,
+      raw,
       origin: "received",
     } as MessageProps;
+    setChats((prev) => ({
+      ...prev,
+      [session.id]: [...prev[session.id], errorMessage],
+    }));
+    return errorMessage;
+  }
 
   const msgs: MessageProps[] = [];
   let count = 0;
@@ -70,8 +89,6 @@ export async function messageResponse(
     }
 
     const event = data as ADKEvent;
-    console.dir(event, { depth: null });
-
     const was_partial = partial.addMessage(event);
 
     const newMessage: MessageProps = {

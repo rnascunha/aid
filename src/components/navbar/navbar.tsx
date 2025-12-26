@@ -16,7 +16,8 @@ export default async function NavBar() {
         display: "flex",
         justifyContent: "space-between",
         flexDirection: "row",
-        p: 1,
+        px: 1,
+        py: 0,
         alignItems: "center",
         zIndex: 10001,
       }}
