@@ -14,6 +14,8 @@ import { ContextSettings } from "@/appComponents/chat/types";
 import { generateUUID } from "../uuid";
 import { serverActionBodySizeLimit } from "@/appComponents/audioToText/contants";
 import { formatBytes } from "../formatData";
+import { InputOutput } from "@/components/chat/input/types";
+import { makeInputParts } from "@/components/chat/input/function";
 
 /**
  * Messages
@@ -184,7 +186,7 @@ export function messageStatusReceive({
 }
 
 export function onMessageSendHandler(
-  messages: Part[] | MessageContentStatus,
+  messages: InputOutput | MessageContentStatus,
   type: TypeMessage,
   senderId: string,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>
@@ -199,7 +201,7 @@ export function onMessageSendHandler(
     return msg;
   }
 
-  const parts = messages as Part[];
+  const parts = makeInputParts(messages as InputOutput);
   const partFiltered = parts.find(
     (p) =>
       PartType.INLINE_DATA in p &&

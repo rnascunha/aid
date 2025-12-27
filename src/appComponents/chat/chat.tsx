@@ -44,12 +44,11 @@ import {
   ChatMessagesProps,
   MessageContentStatus,
   MessageProps,
-  PartType,
   TypeMessage,
 } from "@/libs/chat/types";
 import { EmptyChatList } from "@/components/chat/chatList";
-import { Part } from "@/libs/chat/types";
 import { messageResponse } from "./functions";
+import { InputOutput } from "@/components/chat/input/types";
 
 export interface ChatProps {
   models: ModelProps[];
@@ -107,11 +106,15 @@ export function Chat({
   }, [settings, onSettingsChange]);
 
   const onMessageHandler = async (
-    messages: Part[] | MessageContentStatus,
+    message: InputOutput | MessageContentStatus,
     type: TypeMessage
   ) => {
+    if (type === TypeMessage.MESSAGE && !(message as InputOutput).text.trim()) {
+      return;
+    }
+
     const newMessage = onMessageSendHandler(
-      messages,
+      message,
       type,
       selectedModel!.id,
       setChats
@@ -120,9 +123,9 @@ export function Chat({
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
     startTransition(async () => {
-      const textMessage = (messages as Part[]).find((f) => PartType.TEXT in f);
+      const textMessage = (message as InputOutput).text;
       const response = await messageResponse(
-        textMessage![PartType.TEXT] as string,
+        textMessage,
         newMessage.id,
         selectedModel!,
         selectedProvider!,
@@ -232,9 +235,9 @@ export function Chat({
                 input={
                   <MessageInput
                     onSubmit={onMessageHandler}
-                    isPending={isPending}
-                    disableAttachment={true}
-                    disableRecord={true}
+                    disabled={isPending}
+                    attachment={false}
+                    record={false}
                   />
                 }
               />

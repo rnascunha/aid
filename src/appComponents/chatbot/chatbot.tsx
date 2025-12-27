@@ -10,21 +10,19 @@ import { Dispatch, SetStateAction, useState, useTransition } from "react";
 import { AddSession } from "./components/addSession";
 import { SessionType } from "./types";
 import { createNewSession, messageResponse } from "./functions";
-// import { MessageInput } from "@/components/chat/messageInput";
 import { MessageList } from "@/components/chat/messageList";
 import {
   BaseSender,
   ChatMessagesProps,
   MessageContentStatus,
   MessageProps,
-  Part,
-  PartType,
   TypeMessage,
 } from "@/libs/chat/types";
 import { onMessageSendHandler } from "@/libs/chat/functions";
 import { MessagesHeader } from "@/components/chat/messagesHeader";
 import { ChatbotOptions } from "./components/sessionOptions";
 import { MessageInput } from "@/components/chat/input/messageInput";
+import { InputOutput } from "@/components/chat/input/types";
 
 interface ChatBotProps {
   sessions: SessionType[];
@@ -80,25 +78,26 @@ export default function ChatBot({
   };
 
   const onMessageHandler = async (
-    messages: Part[] | MessageContentStatus,
+    messages: InputOutput | MessageContentStatus,
     type: TypeMessage
   ) => {
+    if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
+      return;
+
     const newMessage = onMessageSendHandler(
       messages,
       type,
       selectedSession!.id,
       setChats
     );
+
     await onMessage?.(newMessage, selectedSession!.id);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
     startTransition(async () => {
-      const textMessage = (messages as Part[]).find((f) => PartType.TEXT in f);
-      if (!textMessage) return;
-
       const response = await messageResponse(
         {
-          message: textMessage.text as string,
+          message: messages.text,
           user,
           newId: newMessage.id,
           session: selectedSession as SessionType,
@@ -162,10 +161,10 @@ export default function ChatBot({
             }
             input={
               <MessageInput
-                disableAttachment={true}
-                disableRecord={true}
-                isPending={isPending}
                 onSubmit={onMessageHandler}
+                disabled={isPending}
+                attachment={false}
+                record={false}
               />
             }
           />

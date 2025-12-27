@@ -1,78 +1,67 @@
-import { Fab, Stack } from "@mui/material";
-import { MicInput } from "./micInput";
+import { Stack } from "@mui/material";
+import { MicInput, MicInputProps } from "./micInput";
 
-import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import {
   MessageContentStatus,
   PartInlineData,
   TypeMessage,
 } from "@/libs/chat/types";
 import { AttachFilesList } from "./attachFilesList";
-import { InputFile } from "./inputFile";
+import { InputFile, InputFilesProps } from "./inputFile";
+import { InputSubmit, InputSubmitProps } from "./inputSubmitButton";
 
-export type InputOptionsProps = {
+export interface InputOptionsProps {
   onSubmit: () => Promise<void>;
-  isPending: boolean;
+  disabled: boolean;
   files: PartInlineData[];
   addFiles: (
     parts: PartInlineData[] | PartInlineData | MessageContentStatus,
     type: TypeMessage
   ) => Promise<void>;
   removeFile: (file: PartInlineData, index: number) => void;
-  canSubmit: boolean;
-  disableRecord?: boolean;
-  disableAttachment?: boolean;
-  allowedAttachmentTypes?: string;
-  multipleFiles?: boolean;
-};
+  submit?: InputSubmitProps;
+  attachment?: InputFilesProps | false;
+  record?: MicInputProps | false;
+}
 
 export function InputOptions({
   files,
-  onSubmit,
   addFiles,
   removeFile,
-  isPending,
-  canSubmit,
-  disableRecord,
-  disableAttachment,
-  allowedAttachmentTypes,
-  multipleFiles,
+  disabled,
+  submit,
+  attachment,
+  record,
 }: InputOptionsProps) {
   return (
     <Stack
       direction="row"
-      justifyContent={
-        disableAttachment && disableRecord ? "flex-end" : "space-between"
-      }
+      justifyContent={!attachment && !record ? "flex-end" : "space-between"}
       alignItems="center"
       sx={{
         pr: 0.5,
         pb: 0.5,
       }}
     >
-      {!disableAttachment && !disableRecord && (
+      {(attachment || record) && (
         <AttachFilesList files={files} removeFile={removeFile} />
       )}
       <Stack direction="row" gap={0.5}>
-        {!disableAttachment && (
+        {attachment && (
           <InputFile
-            onSubmit={addFiles}
-            isPending={isPending}
-            allowedAttachmentTypes={allowedAttachmentTypes}
-            multipleFiles={multipleFiles}
+            {...attachment}
+            disabled={attachment.disabled || disabled}
+            onAddFile={addFiles}
           />
         )}
-        {!disableRecord && (
-          <MicInput onSubmit={addFiles} isPending={isPending} />
+        {record && (
+          <MicInput
+            {...record}
+            disabled={record.disabled || disabled}
+            onAddFile={addFiles}
+          />
         )}
-        <Fab
-          size="small"
-          color="primary"
-          disabled={isPending || !canSubmit}
-          onClick={() => onSubmit()}
-        >
-          <SendRoundedIcon />
-        </Fab>
+        <InputSubmit {...submit} disabled={submit?.disabled || disabled} />
       </Stack>
     </Stack>
   );

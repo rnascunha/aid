@@ -13,8 +13,6 @@ import {
   ChatMessagesProps,
   MessageContentStatus,
   MessageProps,
-  Part,
-  PartType,
   TypeMessage,
 } from "@/libs/chat/types";
 import {
@@ -48,6 +46,7 @@ import ModelAvatar, {
 } from "@/components/chat/model/components";
 import { removeModelsFromRemovedProviders } from "@/libs/chat/models/functions";
 import { MessageInput } from "@/components/chat/input/messageInput";
+import { InputOutput } from "@/components/chat/input/types";
 
 interface AudioToTextPros {
   models: ModelProps[];
@@ -60,6 +59,11 @@ interface AudioToTextPros {
   onDeleteMessages?: (modelId?: string) => Promise<void> | void;
   onSettingsChange?: (settings: AudioToTextSettings) => Promise<void> | void;
   onAddRemoveModel?: (model: string | ModelProps) => Promise<void> | void;
+}
+
+interface InputState {
+  attachment: boolean;
+  record: boolean;
 }
 
 export function AudioToText({
@@ -76,6 +80,10 @@ export function AudioToText({
   const [chats, setChats] = useState<ChatMessagesProps>(allChats);
   const [settings, setSettings] = useState<AudioToTextSettings>(initSettings);
   const [isPending, startTransition] = useTransition();
+  const [inputState, setInputState] = useState<InputState>({
+    attachment: false,
+    record: false,
+  });
 
   const { providers } = useContext(aIContext);
   const audioToTextProviders = useMemo(() => {
@@ -104,14 +112,16 @@ export function AudioToText({
     onSettingsChange?.(settings);
   }, [settings, onSettingsChange]);
 
-  /**
-   * It still need the make the input work only when one (and only one) audio
-   * file is attached
-   */
   const onMessageHandler = async (
-    messages: Part[] | MessageContentStatus,
+    messages: InputOutput | MessageContentStatus,
     type: TypeMessage
   ) => {
+    if (
+      type === TypeMessage.MESSAGE &&
+      (messages as InputOutput).files.length !== 1
+    )
+      return;
+
     const newMessage = onMessageSendHandler(
       messages,
       type,
@@ -122,17 +132,13 @@ export function AudioToText({
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
     startTransition(async () => {
-      const audio = (messages as Part[]).find((m) => PartType.INLINE_DATA in m);
-      if (!audio) return;
-      const prompt = (messages as Part[]).find((m) => PartType.TEXT in m);
-      const text = prompt?.[PartType.TEXT] ?? "";
       const response = await attachmentResponse({
-        data: audio[PartType.INLINE_DATA]!.data,
+        data: (messages as InputOutput).files[0].data,
         newId: newMessage.id,
         model: selectedModel as ModelProps,
         provider: selectedProvider as ProviderProps,
         setChats,
-        settings: { ...settings, prompt: text },
+        settings: { ...settings, prompt: messages.text },
       });
       await onMessage?.(response, selectedModel!.id);
     });
@@ -244,17 +250,32 @@ export function AudioToText({
                 provider={selectedProvider!}
                 input={
                   <MessageInput
-                    isPending={isPending}
+                    disabled={isPending}
                     onSubmit={onMessageHandler}
-                    allowedAttachmentTypes="audio/*"
-                    multipleFiles={false}
+                    attachment={{
+                      accept: "audio/*",
+                      multiple: false,
+                      disabled: inputState.attachment,
+                    }}
+                    record={{
+                      disabled: inputState.record,
+                    }}
+                    onInputChange={(d) =>
+                      setInputState((prev) => {
+                        const res = d.files.length === 1;
+
+                        return prev.attachment !== res
+                          ? {
+                              attachment: res,
+                              record: res,
+                            }
+                          : prev;
+                      })
+                    }
+                    submit={{
+                      disabled: !inputState.attachment,
+                    }}
                   />
-                  // <AudioInput
-                  //   settings={settings}
-                  //   setSettings={setSettings}
-                  //   onSubmit={onMessageHandler}
-                  //   isPending={isPending}
-                  // />
                 }
               />
             }

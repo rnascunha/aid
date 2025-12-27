@@ -223,7 +223,6 @@ export async function readQuerySSE(
   response: Response,
   handler: (event: ADKEvent | Error, error: boolean) => void
 ) {
-  console.log(response);
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
 

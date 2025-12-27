@@ -2,55 +2,54 @@
 
 import { useState } from "react";
 
-import { Input, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { InputOptions } from "./inputOptions";
 import {
   MessageContentStatus,
-  Part,
   PartInlineData,
-  PartType,
   TypeMessage,
 } from "@/libs/chat/types";
+import { TextInput } from "./textInput";
+import { InputOutput, onSubmitInputType } from "./types";
+import { InputSubmitProps } from "./inputSubmitButton";
+import { InputFilesProps } from "./inputFile";
+import { MicInputProps } from "./micInput";
 
-export type MessageInputProps = {
-  onSubmit: (
-    value: Part[] | MessageContentStatus,
-    type: TypeMessage
-  ) => Promise<void>;
-  isPending: boolean;
-  disableRecord?: boolean;
-  disableAttachment?: boolean;
-  allowedAttachmentTypes?: string;
-  multipleFiles?: boolean;
-};
+export interface MessageInputProps {
+  onSubmit: onSubmitInputType;
+  disabled: boolean;
+  submit?: InputSubmitProps;
+  attachment?: InputFilesProps | false;
+  record?: MicInputProps | false;
+  onInputChange?: (data: InputOutput) => void;
+}
 
 export function MessageInput({
   onSubmit,
-  isPending,
-  disableRecord,
-  disableAttachment,
-  allowedAttachmentTypes,
-  multipleFiles,
+  disabled,
+  submit,
+  attachment,
+  record,
+  onInputChange,
 }: MessageInputProps) {
   const [text, setText] = useState("");
   const [files, setFiles] = useState<PartInlineData[]>([]);
 
-  const canSubmit = !isPending && (text.trim().length > 0 || files.length > 0);
+  const canSubmit =
+    !disabled && submit?.disabled !== undefined
+      ? !submit.disabled
+      : text.trim().length > 0 || files.length > 0;
 
   const onSubmitData = async () => {
     if (!canSubmit) return;
 
-    const parts: Part[] = [];
-    const ttext = text.trim();
-    if (ttext !== "") parts.push({ text: ttext });
-
-    const fileParts = files.map((f) => ({
-      [PartType.INLINE_DATA]: f,
-    }));
-
-    parts.push(...fileParts);
-
-    await onSubmit(parts, TypeMessage.MESSAGE);
+    await onSubmit(
+      {
+        text: text.trim(),
+        files,
+      },
+      TypeMessage.MESSAGE
+    );
 
     setText("");
     setFiles([]);
@@ -61,16 +60,32 @@ export function MessageInput({
     type: TypeMessage
   ) => {
     if (type === TypeMessage.MESSAGE) {
+      let nf: PartInlineData[] = [];
       const partsArray = Array.isArray(parts)
         ? parts
         : ([parts] as PartInlineData[]);
-      setFiles((prev) => [...prev, ...partsArray]);
+      setFiles((prev) => {
+        nf = [...prev, ...partsArray];
+        return nf;
+      });
+      onInputChange?.({ text, files: nf });
       return;
     }
     await onSubmit(parts as MessageContentStatus, type);
   };
-  const removeFile = (file: PartInlineData, index: number) =>
-    setFiles((prev) => prev.filter((f, i) => i !== index));
+  const removeFile = (file: PartInlineData, index: number) => {
+    let nf: PartInlineData[] = [];
+    setFiles((prev) => {
+      nf = prev.filter((f, i) => i !== index);
+      return nf;
+    });
+    onInputChange?.({ text, files: nf });
+  };
+
+  const changeText = (value: string) => {
+    setText(value);
+    onInputChange?.({ text: value, files });
+  };
 
   return (
     <Stack
@@ -81,36 +96,26 @@ export function MessageInput({
         mb: 0.5,
       }}
     >
-      <Input
-        placeholder="Type something here…"
-        fullWidth
-        aria-label="Message"
-        onChange={(event) => setText(event.target.value)}
+      <TextInput
         value={text}
-        minRows={2}
-        multiline
-        disableUnderline={true}
-        onKeyDown={(event) => {
-          if (isPending) return;
-          if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-            onSubmitData();
-          }
-        }}
-        sx={{
-          px: 2,
-        }}
+        disabled={disabled}
+        onChange={(ev) => changeText(ev.target.value)}
+        changeValue={changeText}
+        onSubmit={onSubmitData}
       />
       <InputOptions
+        onSubmit={onSubmitData}
         addFiles={addFiles}
         removeFile={removeFile}
         files={files}
-        canSubmit={canSubmit}
-        onSubmit={onSubmitData}
-        isPending={isPending}
-        disableRecord={disableRecord}
-        disableAttachment={disableAttachment}
-        allowedAttachmentTypes={allowedAttachmentTypes}
-        multipleFiles={multipleFiles}
+        submit={{
+          onClick: onSubmitData,
+          disabled: !canSubmit,
+          ...submit,
+        }}
+        attachment={attachment}
+        record={record}
+        disabled={disabled}
       />
     </Stack>
   );
