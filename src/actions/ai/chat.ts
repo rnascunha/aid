@@ -1,26 +1,12 @@
 "use server";
 
-import {
-  MessageContentStatus,
-  Part,
-  ToolsProps,
-  TypeMessage,
-} from "@/libs/chat/types";
+import { TypeMessage } from "@/libs/chat/types";
 import { serverAPIhost } from "./constants";
 import { MessageContext } from "@/libs/chat/types";
-import { GeneralSettings, ToolsSettings } from "@/appComponents/chat/types";
+
 import { ProviderAuth, ProviderConfig } from "@/libs/chat/models/types";
-
-type ChatSettingsPython = GeneralSettings & ToolsSettings;
-interface ChatInfo {
-  tool: ToolsProps;
-}
-
-interface ChatResponse {
-  type: TypeMessage;
-  content: MessageContentStatus | Part[];
-  raw: object;
-}
+import { ChatInfo, ChatResponse, ChatSettingsPython } from "./types";
+import { getResponseParts } from "./function";
 
 export async function fetchChatRequest(data: {
   provider: string;
@@ -40,7 +26,7 @@ export async function fetchChatRequest(data: {
       body: JSON.stringify(data),
     });
     const raw = await response.json();
-  
+
     if ("error" in raw)
       return {
         type: TypeMessage.ERROR,
@@ -50,13 +36,15 @@ export async function fetchChatRequest(data: {
         },
         raw,
       };
+
     return {
       type: TypeMessage.MESSAGE,
-      content: [
-        {
-          text: raw.data.choices[0].message.content,
-        },
-      ],
+      content: getResponseParts(raw.data),
+      // content: [
+      //   {
+      //     text: raw.data.choices[0].message.content,
+      //   },
+      // ],
       raw: raw,
     };
   } catch (e) {

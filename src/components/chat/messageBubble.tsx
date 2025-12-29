@@ -17,6 +17,7 @@ import {
   IconButton,
   Stack,
   Typography,
+  TypographyProps,
 } from "@mui/material";
 import dayjs from "@/libs/dayjs";
 import { useEffect, useState } from "react";
@@ -37,6 +38,20 @@ const messageTypeBGStyle: Record<string, string> = {
   [`${TypeMessage.MESSAGE}:sent`]: "rgba(130, 103, 177, 0.7)",
   [`${TypeMessage.MESSAGE}:received`]: "rgba(200, 200, 200, 0.7)",
 };
+
+function TypographyS({ sx, children, ...other }: TypographyProps) {
+  return (
+    <Typography
+      sx={{
+        fontSize: "13px",
+        ...sx,
+      }}
+      {...other}
+    >
+      {children}
+    </Typography>
+  );
+}
 
 function getMessageBGStyle(message: MessageProps) {
   if (isStatusMessage(message)) return messageTypeBGStyle[message.type];
@@ -95,14 +110,14 @@ function PartFunctionCallMessage({ call }: { call: PartFunctionCall }) {
   return (
     <Stack>
       <Divider>Function Call</Divider>
-      <Typography>{`ID: ${call.id}`}</Typography>
-      <Typography
+      {/* <TypographyS>{`ID: ${call.id}`}</TypographyS> */}
+      <TypographyS
         sx={{
           whiteSpace: "pre-line",
         }}
-      >{`${call.name}(\n${Object.entries(call.args)
+      >{`${call.name}\n${Object.entries(call.args)
         .map(([k, v]) => `${k} = ${v}`)
-        .join("\n")})`}</Typography>
+        .join("\n")}`}</TypographyS>
     </Stack>
   );
 }
@@ -115,13 +130,13 @@ function PartFunctionResponseMessage({
   return (
     <Stack>
       <Divider>Function Response</Divider>
-      <Typography>{`ID: ${response.id}`}</Typography>
-      <Typography>{response.name}</Typography>
-      <Typography>
+      {/* <TypographyS>{`ID: ${response.id}`}</TypographyS> */}
+      <TypographyS>{response.name}</TypographyS>
+      <TypographyS>
         {Object.entries(response.response)
           .map(([k, v]) => `${k} = ${v}`)
           .join("\n")}
-      </Typography>
+      </TypographyS>
     </Stack>
   );
 }
@@ -138,7 +153,7 @@ function MessagePart({ part }: { part: Part }) {
               padding: "3px",
             }
           : {
-              fontSize: "14px",
+              fontSize: "inherit",
             },
       ]}
     >
