@@ -28,6 +28,12 @@ export async function filePathToBase64(
   return await blobTobase64(blob, type, prefix);
 }
 
+export function unicodeToBase64(str: string): string {
+  const utf8Bytes: Uint8Array = new TextEncoder().encode(str);
+  const binaryString: string = String.fromCharCode(...utf8Bytes);
+  return btoa(binaryString);
+}
+
 export function calculateBase64SizeInBytes(base64: string) {
   // Remove any whitespace or newline characters if present
   base64 = base64.replace(/\s/g, "");

@@ -16,6 +16,7 @@ import {
   Divider,
   IconButton,
   Stack,
+  Tooltip,
   Typography,
   TypographyProps,
 } from "@mui/material";
@@ -25,10 +26,15 @@ import { formatBytes } from "@/libs/formatData";
 
 import { isStatusMessage } from "@/libs/chat/functions";
 
-import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
-import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import { MarkdownText } from "./markdownText";
 import { calculateBase64SizeInBytes } from "@/libs/base64";
+import { downloadBase64 } from "@/libs/download";
+
+import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
+import DataObjectIcon from "@mui/icons-material/DataObject";
+import AudioFileIcon from "@mui/icons-material/AudioFile";
+import DownloadIcon from "@mui/icons-material/Download";
 
 const messageTypeBGStyle: Record<string, string> = {
   [TypeMessage.ERROR]: "var(--mui-palette-error-main)",
@@ -78,23 +84,49 @@ function PartTextMessage({ text }: { text: PartText }) {
   return <MarkdownText>{text}</MarkdownText>;
 }
 
+function FileIconType({ mimeType }: { mimeType: string }) {
+  if (mimeType.startsWith("audio/")) return <AudioFileIcon />;
+  switch (mimeType) {
+    case "application/json":
+      return <DataObjectIcon />;
+    default:
+      return <InsertDriveFileRoundedIcon />;
+  }
+}
+
 function PartInlineMessage({ indata }: { indata: PartInlineData }) {
   const size = formatBytes(
     indata.size ?? calculateBase64SizeInBytes(indata.data)
   );
   return (
     <Stack>
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-        <Avatar color="primary">
-          <InsertDriveFileRoundedIcon />
-        </Avatar>
-        <div>
-          <Typography>{indata.displayName ?? indata.mimeType}</Typography>
-          <Typography>{size}</Typography>
-        </div>
+      <Stack
+        direction="row"
+        spacing={1.5}
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Stack direction="row" gap={1} alignItems="center">
+          <Avatar color="primary">
+            <FileIconType mimeType={indata.mimeType} />
+          </Avatar>
+          <div>
+            <TypographyS>{indata.displayName ?? indata.mimeType}</TypographyS>
+            <TypographyS>{size}</TypographyS>
+          </div>
+        </Stack>
+        <Tooltip title="Download">
+          <IconButton
+            onClick={async () => {
+              downloadBase64(indata.data, indata.displayName ?? "file");
+            }}
+          >
+            <DownloadIcon />
+          </IconButton>
+        </Tooltip>
       </Stack>
       {indata.mimeType.startsWith("audio/") && (
-        <audio controls>
+        <audio controls style={{ paddingTop: "8px" }}>
           <source
             src={`data:${indata.mimeType};base64,${indata.data}`}
             type={indata.mimeType}
