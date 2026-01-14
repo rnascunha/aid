@@ -1,5 +1,5 @@
 import { List, Stack } from "@mui/material";
-import { Dispatch, ReactNode, SetStateAction } from "react";
+import { ReactNode } from "react";
 import ChatListItem from "./chatItemList";
 import { sortedSenders } from "@/libs/chat/functions";
 import { BaseSender, ChatMessagesProps } from "@/libs/chat/types";
@@ -31,7 +31,7 @@ interface ChatListProps {
   senders: BaseSender[];
   chats: ChatMessagesProps;
   selectedSender: BaseSender | null;
-  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>;
+  setSelectedSender: (chat: BaseSender | null) => void;
   getAvatar?: (s: BaseSender) => StaticImageData | undefined;
   getBGColor?: (s: BaseSender) => string;
 }

@@ -138,6 +138,31 @@ export function makeMessageSend(
   };
 }
 
+export function makeMessageStatusSend({
+  id,
+  type,
+  content,
+  senderId,
+  raw,
+}: {
+  id?: string;
+  type: TypeMessage;
+  content: MessageContentStatus;
+  senderId: string;
+  raw?: object;
+}): MessageProps {
+  const newId = id ?? generateUUID();
+  return {
+    id: `${newId}:r`,
+    senderId,
+    timestamp: Date.now(),
+    origin: "received",
+    type: type,
+    content,
+    raw: raw ?? content,
+  } as MessageProps;
+}
+
 export function messageSendSubmit(
   content: Part[],
   newId: string,
@@ -183,6 +208,49 @@ export function messageStatusReceive({
   }));
 
   return responseMessage;
+}
+
+export function sendMessageHandler(
+  messages: InputOutput | MessageContentStatus,
+  type: TypeMessage,
+  senderId: string
+): MessageProps {
+  if (isStatusType(type)) {
+    const msg = makeMessageStatusSend({
+      type,
+      content: messages as MessageContentStatus,
+      senderId,
+    });
+    return msg;
+  }
+
+  const parts = makeInputParts(messages as InputOutput);
+  const partFiltered = parts.find(
+    (p) =>
+      PartType.INLINE_DATA in p &&
+      (p[PartType.INLINE_DATA]?.size ?? 0) > serverActionBodySizeLimit
+  );
+
+  if (partFiltered) {
+    const msg = makeMessageStatusSend({
+      type: TypeMessage.WARNING,
+      content: {
+        name: "File Size Exceeded",
+        text: `File '${
+          partFiltered[PartType.INLINE_DATA]?.displayName
+        }' is bigger than allowed size (${formatBytes(
+          serverActionBodySizeLimit
+        )})`,
+      },
+      senderId,
+    });
+    return msg;
+  }
+
+  const newId = generateUUID();
+  const newMessage = makeMessageSend(parts as Part[], newId, senderId);
+
+  return newMessage;
 }
 
 export function onMessageSendHandler(
