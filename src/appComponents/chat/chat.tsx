@@ -38,6 +38,7 @@ import { messageResponse } from "./functions";
 import { InputOutput } from "@/components/chat/input/types";
 import { reducer } from "@/libs/chat/state/functions";
 import { Actions } from "@/libs/chat/state/types";
+import { MultipleMessage } from "@/components/chat/input/multipleMessages";
 
 export interface ChatProps {
   models: ModelProps[];
@@ -264,6 +265,20 @@ export function Chat({
                     disabled={isPending}
                     attachment={false}
                     record={false}
+                    otherOptions={(value, clear, disabled) => (
+                      <MultipleMessage
+                        disabled={disabled || state.sessions.length < 2}
+                        sessions={state.sessions}
+                        sendMessage={async (session) => {
+                          clear();
+                          await sendMessage(
+                            session as ModelProps,
+                            value,
+                            TypeMessage.MESSAGE,
+                          );
+                        }}
+                      />
+                    )}
                   />
                 }
               />
