@@ -6,7 +6,7 @@ import { ChatList, EmptyChatList } from "@/components/chat/chatList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatHeader } from "@/components/chat/chatHeader";
-import { Dispatch, SetStateAction, useState, useTransition } from "react";
+import { useReducer } from "react";
 import { AddSession } from "./components/addSession";
 import { SessionType } from "./types";
 import { createNewSession, messageResponse } from "./functions";
@@ -18,11 +18,14 @@ import {
   MessageProps,
   TypeMessage,
 } from "@/libs/chat/types";
-import { onMessageSendHandler } from "@/libs/chat/functions";
+import { sendMessageHandler } from "@/libs/chat/functions";
 import { MessagesHeader } from "@/components/chat/messagesHeader";
 import { ChatbotOptions } from "./components/sessionOptions";
 import { MessageInput } from "@/components/chat/input/messageInput";
 import { InputOutput } from "@/components/chat/input/types";
+import { reducer } from "@/libs/chat/state/functions";
+import { Actions } from "@/libs/chat/state/types";
+import { MultipleMessage } from "@/components/chat/input/multipleMessages";
 
 interface ChatBotProps {
   sessions: SessionType[];
@@ -42,16 +45,15 @@ export default function ChatBot({
   onMessage,
   onAddRemoveSession,
 }: ChatBotProps) {
-  const [sessions, setSessions] = useState<SessionType[]>(initSessions);
-  const [selectedSession, setSelectedSession] = useState<SessionType | null>(
-    null,
-  );
-  const [chats, setChats] = useState<ChatMessagesProps>(initChats);
-  const [isPending, startTransition] = useTransition();
+  const [state, dispatch] = useReducer(reducer, {
+    selected: null,
+    sessions: initSessions,
+    chats: initChats,
+    pending: [],
+  });
 
   const onDeleteSession = async (session: SessionType) => {
-    setSessions((prev) => prev.filter((ss) => ss.id !== session.id));
-    if (session.id === selectedSession?.id) setSelectedSession(null);
+    dispatch({ action: Actions.DELETE_SESSION, sessionId: session.id });
     await onAddRemoveSession?.(session.id);
   };
 
@@ -60,53 +62,74 @@ export default function ChatBot({
     field: K,
     value: SessionType[K],
   ) => {
-    const fSession = sessions.find((s) => s.id === session.id);
-    if (!fSession) return;
-    fSession[field] = value;
-    setSessions((prev) => [...prev]);
-    await onAddRemoveSession?.(fSession);
+    const newSession = {
+      ...session,
+      [field]: value,
+    };
+    dispatch({
+      action: Actions.EDIT_SESSION,
+      newSession,
+    });
+    await onAddRemoveSession?.(newSession);
   };
 
   const onAddSession = async (name: string = "") => {
     const newSession = createNewSession(name);
-    setSessions((prev) => [...prev, newSession]);
-    setChats((prev) => ({
-      ...prev,
-      [newSession.id]: [],
-    }));
+    dispatch({
+      action: Actions.ADD_SESSION,
+      session: newSession,
+    });
     await onAddRemoveSession?.(newSession);
   };
 
-  const onMessageHandler = async (
+  const sendMessage = async (
+    session: SessionType,
     messages: InputOutput | MessageContentStatus,
     type: TypeMessage,
   ) => {
     if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
       return;
 
-    const newMessage = onMessageSendHandler(
-      messages,
-      type,
-      selectedSession!.id,
-      setChats,
-    );
+    const newMessage = sendMessageHandler(messages, type, session.id);
+    dispatch({
+      action: Actions.ADD_MESSAGE,
+      message: newMessage,
+      sessionId: session.id,
+    });
 
-    await onMessage?.(newMessage, selectedSession!.id);
+    await onMessage?.(newMessage, session.id);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
-    startTransition(async () => {
+    dispatch({ action: Actions.ADD_PENDING, sessionId: session.id });
+    try {
       const response = await messageResponse(
         {
           message: messages.text,
           user,
           newId: newMessage.id,
-          session: selectedSession as SessionType,
+          session: session,
         },
-        setChats,
+        dispatch,
       );
-      await onMessage?.(response, selectedSession!.id);
-    });
+      await onMessage?.(response, session.id);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      dispatch({ action: Actions.REMOVE_PENDING, sessionId: session.id });
+    }
   };
+
+  const setSelectedSession = (session: SessionType | null) => {
+    if (!session) {
+      dispatch({ action: Actions.UNSELECT_SESSION });
+      return;
+    }
+    dispatch({ action: Actions.SELECT_SESSION, sessionId: session.id });
+  };
+
+  const isPending = state.selected?.id
+    ? state.pending.includes(state.selected.id)
+    : false;
 
   return (
     <ChatContainer
@@ -119,17 +142,15 @@ export default function ChatBot({
       chatsPane={
         <ChatsPane
           modelsList={
-            sessions.length === 0 ? (
+            state.sessions.length === 0 ? (
               <EmptyChatList addModelButton={<div></div>} />
             ) : (
               <ChatList
-                senders={sessions}
-                chats={chats}
-                selectedSender={selectedSession}
+                senders={state.sessions}
+                chats={state.chats}
+                selectedSender={state.selected}
                 setSelectedSender={
-                  setSelectedSession as Dispatch<
-                    SetStateAction<BaseSender | null>
-                  >
+                  setSelectedSession as (s: BaseSender | null) => void
                 }
               />
             )
@@ -137,16 +158,16 @@ export default function ChatBot({
         />
       }
       messagePane={
-        !selectedSession ? (
+        !state.selected ? (
           <EmptyMessagesPane />
         ) : (
           <MessagesPane
             header={
               <MessagesHeader
-                sender={selectedSession}
+                sender={state.selected}
                 options={
                   <ChatbotOptions
-                    session={selectedSession}
+                    session={state.selected as SessionType}
                     onDeleteSession={onDeleteSession}
                     onEditSession={onEditSession}
                   />
@@ -156,15 +177,31 @@ export default function ChatBot({
             loader={isPending && <BouncingLoader />}
             messages={
               <MessageList
-                messages={chats[selectedSession.id] as MessageProps[]}
+                messages={state.chats[state.selected.id] as MessageProps[]}
               />
             }
             input={
               <MessageInput
-                onSubmit={onMessageHandler}
+                onSubmit={(value, type) =>
+                  sendMessage(state.selected as SessionType, value, type)
+                }
                 disabled={isPending}
                 attachment={false}
                 record={false}
+                otherOptions={(value, clear, disabled) => (
+                  <MultipleMessage
+                    disabled={disabled || state.sessions.length < 2}
+                    sessions={state.sessions}
+                    sendMessage={async (session) => {
+                      clear();
+                      await sendMessage(
+                        session as SessionType,
+                        value,
+                        TypeMessage.MESSAGE,
+                      );
+                    }}
+                  />
+                )}
               />
             }
           />

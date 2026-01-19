@@ -17,6 +17,8 @@ export enum Actions {
   ADD_SESSION = "add_session",
   // Messages
   ADD_MESSAGE = "add_message",
+  SET_MESSAGES = "set_messages",
+  SLICE_ADD_MESSAGES = "slice_add_messages",
   DELETE_SENDER_MESSAGE = "delete_sender_message",
   DELETE_ALL_SENDER_MESSAGES = "delete_all_sender_messages",
   DELETE_ALL_MESSAGES = "delete_all_messages",
@@ -44,6 +46,17 @@ interface EditSessionArgs {
 interface AddMessageArgs {
   sessionId: string;
   message: MessageProps[] | MessageProps;
+}
+
+interface SetMessagesArgs {
+  sessionId: string;
+  messages: MessageProps[];
+}
+
+interface SliceAddMessagesArgs {
+  sessionId: string;
+  slice: [number, number];
+  messages: MessageProps[];
 }
 
 interface DeleteMessageArgs {
@@ -78,6 +91,12 @@ export type ChatActionArgs =
   | ({
       action: Actions.ADD_MESSAGE;
     } & AddMessageArgs)
+  | ({
+      action: Actions.SET_MESSAGES;
+    } & SetMessagesArgs)
+  | ({
+      action: Actions.SLICE_ADD_MESSAGES;
+    } & SliceAddMessagesArgs)
   | ({
       action: Actions.DELETE_SENDER_MESSAGE;
     } & DeleteMessageArgs)

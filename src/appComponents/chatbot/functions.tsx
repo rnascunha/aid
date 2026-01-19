@@ -1,14 +1,11 @@
 import { SessionType } from "./types";
 import { adk_api_events, app_name } from "./constants";
 import { generateUUID } from "@/libs/uuid";
-import { Dispatch, SetStateAction } from "react";
-import {
-  ChatMessagesProps,
-  MessageProps,
-  TypeMessage,
-} from "@/libs/chat/types";
+import { MessageProps, TypeMessage } from "@/libs/chat/types";
 import { PartialDataAggregator, readQuerySSE } from "@/libs/adk/base";
 import { ADKEvent } from "@/libs/adk/types";
+import { ActionDispatch } from "react";
+import { Actions, ChatActionArgs } from "@/libs/chat/state/types";
 
 export function createNewSession(name: string = ""): SessionType {
   return {
@@ -42,7 +39,7 @@ export async function messageResponse(
     user: string;
     session: SessionType;
   },
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
+  dispatch: ActionDispatch<[action: ChatActionArgs]>,
 ) {
   const response = await fetch(adk_api_events, {
     method: "POST",
@@ -71,10 +68,11 @@ export async function messageResponse(
       raw,
       origin: "received",
     } as MessageProps;
-    setChats((prev) => ({
-      ...prev,
-      [session.id]: [...prev[session.id], errorMessage],
-    }));
+    dispatch({
+      action: Actions.ADD_MESSAGE,
+      sessionId: session.id,
+      message: errorMessage,
+    });
     return errorMessage;
   }
 
@@ -103,15 +101,18 @@ export async function messageResponse(
     } as MessageProps;
 
     if (was_partial) {
-      setChats((prev) => {
-        const data = prev[session.id].slice(0, -1);
-        return { ...prev, [session.id]: [...data, newMessage] };
+      dispatch({
+        action: Actions.SLICE_ADD_MESSAGES,
+        messages: [newMessage],
+        slice: [0, -1],
+        sessionId: session.id,
       });
     } else {
-      setChats((prev) => ({
-        ...prev,
-        [session.id]: [...prev[session.id], newMessage],
-      }));
+      dispatch({
+        action: Actions.ADD_MESSAGE,
+        sessionId: session.id,
+        message: newMessage,
+      });
     }
 
     if (!event.partial) {

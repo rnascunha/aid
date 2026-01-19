@@ -61,6 +61,27 @@ export function reducer(state: ChatState, action: ChatActionArgs): ChatState {
         },
       };
     }
+    case Actions.SET_MESSAGES: {
+      if (!(action.sessionId in state.chats)) return state;
+      return {
+        ...state,
+        chats: {
+          ...state.chats,
+          [action.sessionId]: action.messages,
+        },
+      };
+    }
+    case Actions.SLICE_ADD_MESSAGES: {
+      if (!(action.sessionId in state.chats)) return state;
+      const data = state.chats[action.sessionId].slice(...action.slice);
+      return {
+        ...state,
+        chats: {
+          ...state.chats,
+          [action.sessionId]: [...data, ...action.messages],
+        },
+      };
+    }
     case Actions.DELETE_SENDER_MESSAGE: {
       if (!(action.sessionId in state.chats)) return state;
       return {
