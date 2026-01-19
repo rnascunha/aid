@@ -211,7 +211,15 @@ export function AudioToText({
                 models={models}
                 chats={chats}
                 selectedModel={selectedModel}
-                setSelectedModel={setSelectedModel}
+                setSelectedModel={(mId) => {
+                  if (!mId) {
+                    setSelectedModel(null);
+                    return;
+                  }
+                  const model = models.find((m) => m.id === mId);
+                  if (!model) return;
+                  setSelectedModel(model);
+                }}
                 providers={providers}
               />
             )

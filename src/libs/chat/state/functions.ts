@@ -1,3 +1,4 @@
+import { ChatMessagesProps } from "../types";
 import { Actions, ChatActionArgs, ChatState } from "./types";
 
 export function reducer(state: ChatState, action: ChatActionArgs): ChatState {
@@ -60,7 +61,7 @@ export function reducer(state: ChatState, action: ChatActionArgs): ChatState {
         },
       };
     }
-    case Actions.DELETE_MESSAGE: {
+    case Actions.DELETE_SENDER_MESSAGE: {
       if (!(action.sessionId in state.chats)) return state;
       return {
         ...state,
@@ -72,6 +73,23 @@ export function reducer(state: ChatState, action: ChatActionArgs): ChatState {
         },
       };
     }
+    case Actions.DELETE_ALL_SENDER_MESSAGES:
+      if (!(action.sessionId in state.chats)) return state;
+      return {
+        ...state,
+        chats: {
+          ...state.chats,
+          [action.sessionId]: [],
+        },
+      };
+    case Actions.DELETE_ALL_MESSAGES:
+      return {
+        ...state,
+        chats: Object.keys(state.chats).reduce((acc, sender) => {
+          acc[sender] = [];
+          return acc;
+        }, {} as ChatMessagesProps),
+      };
     case Actions.ADD_PENDING: {
       return {
         ...state,

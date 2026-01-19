@@ -1,25 +1,13 @@
 "use client";
 
-import {
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
+import { useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { Stack } from "@mui/material";
 
 import { SettingsDialog } from "./components/settingsDialog";
 import { ChatSettings } from "@/appComponents/chat/types";
 
-import { removeModelsFromRemovedProviders } from "@/libs/chat/models/functions";
-import {
-  onDeleteMessages as onDeleteModelMessages,
-  addRemoveSender as addRemoveModel,
-  onMessageSendHandler,
-} from "@/libs/chat/functions";
+import { removeModelsFromRemovedProviders2 } from "@/libs/chat/models/functions";
+import { sendMessageHandler } from "@/libs/chat/functions";
 
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
@@ -40,7 +28,6 @@ import ModelAvatar, {
 } from "@/components/chat/model/components";
 import { ModelProps } from "@/libs/chat/models/types";
 import {
-  BaseSender,
   ChatMessagesProps,
   MessageContentStatus,
   MessageProps,
@@ -49,6 +36,8 @@ import {
 import { EmptyChatList } from "@/components/chat/chatList";
 import { messageResponse } from "./functions";
 import { InputOutput } from "@/components/chat/input/types";
+import { reducer } from "@/libs/chat/state/functions";
+import { Actions } from "@/libs/chat/state/types";
 
 export interface ChatProps {
   models: ModelProps[];
@@ -72,10 +61,12 @@ export function Chat({
   onAddRemoveModel,
   onSettingsChange,
 }: ChatProps) {
-  const [models, setModels] = useState<ModelProps[]>(allModels);
-  const [selectedModel, setSelectedModel] = useState<ModelProps | null>(null);
-  const [chats, setChats] = useState<ChatMessagesProps>(allChats);
-  const [isPending, startTransition] = useTransition();
+  const [state, dispatch] = useReducer(reducer, {
+    chats: allChats,
+    sessions: allModels,
+    selected: null,
+    pending: [],
+  });
   const [settings, setSettings] = useState(initSettings);
 
   const { providers, tools } = useContext(aIContext);
@@ -84,19 +75,35 @@ export function Chat({
       providerBaseMap[p.providerBaseId].type.includes("chat"),
     );
     // Remove models from removed providers
-    removeModelsFromRemovedProviders(cp, setModels);
+    removeModelsFromRemovedProviders2(
+      cp,
+      state.sessions as ModelProps[],
+      (mId) => dispatch({ action: Actions.DELETE_SESSION, sessionId: mId }),
+    );
     return cp;
-  }, [providers, setModels]);
+  }, [providers, state.sessions]);
+
+  const setSelectedModel = (modelId: string | null) => {
+    if (!modelId) {
+      dispatch({ action: Actions.UNSELECT_SESSION });
+      return;
+    }
+    dispatch({ action: Actions.SELECT_SESSION, sessionId: modelId });
+  };
 
   // Get provider from selected model
-  const selectedProvider = !selectedModel
+  const selectedProvider = !state.selected
     ? undefined
-    : chatProviders.find((p) => p.id === selectedModel?.providerId);
+    : chatProviders.find(
+        (p) => p.id === (state.selected as ModelProps | null)?.providerId,
+      );
 
   // Check if selected model still exist
   if (
-    selectedModel &&
-    !chatProviders.find((p) => p.id === selectedModel?.providerId)
+    state.selected &&
+    !chatProviders.find(
+      (p) => p.id === (state.selected as ModelProps | null)?.providerId,
+    )
   ) {
     setSelectedModel(null);
   }
@@ -105,57 +112,70 @@ export function Chat({
     onSettingsChange?.(settings);
   }, [settings, onSettingsChange]);
 
-  const onMessageHandler = async (
-    message: InputOutput | MessageContentStatus,
+  const sendMessage = async (
+    session: ModelProps,
+    messages: InputOutput | MessageContentStatus,
     type: TypeMessage,
   ) => {
-    if (type === TypeMessage.MESSAGE && !(message as InputOutput).text.trim()) {
+    if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
       return;
-    }
 
-    const newMessage = onMessageSendHandler(
-      message,
-      type,
-      selectedModel!.id,
-      setChats,
-    );
-    await onMessage?.(newMessage, selectedModel!.id);
+    const newMessage = sendMessageHandler(messages, type, session.id);
+    dispatch({
+      action: Actions.ADD_MESSAGE,
+      message: newMessage,
+      sessionId: session.id,
+    });
+
+    await onMessage?.(newMessage, session.id);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
-    startTransition(async () => {
-      const textMessage = (message as InputOutput).text;
+    dispatch({ action: Actions.ADD_PENDING, sessionId: session.id });
+    try {
       const response = await messageResponse(
-        textMessage,
+        messages.text,
         newMessage.id,
-        selectedModel!,
+        session,
         selectedProvider!,
-        setChats,
         settings,
-        chats[selectedModel!.id],
+        state.chats[session.id],
         tools,
       );
-      await onMessage?.(response, selectedModel!.id);
-    });
+      dispatch({
+        action: Actions.ADD_MESSAGE,
+        message: response,
+        sessionId: session.id,
+      });
+      await onMessage?.(response, session.id);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      dispatch({ action: Actions.REMOVE_PENDING, sessionId: session.id });
+    }
   };
 
   const onDeleteAllMessagesHandler = async () => {
-    onDeleteModelMessages(setChats);
+    dispatch({ action: Actions.DELETE_ALL_MESSAGES });
     await onDeleteMessages?.();
   };
   const onDeleteModelMessagesHandler = async (modelId: string) => {
-    onDeleteModelMessages(setChats, modelId);
+    dispatch({
+      action: Actions.DELETE_ALL_SENDER_MESSAGES,
+      sessionId: modelId,
+    });
     await onDeleteMessages?.(modelId);
   };
   const onAddRemoveModelHandler = async (model: string | ModelProps) => {
-    addRemoveModel(
-      model,
-      models,
-      setModels as Dispatch<SetStateAction<BaseSender[]>>,
-      setChats,
-      setSelectedModel as Dispatch<SetStateAction<BaseSender | null>>,
-    );
+    if (typeof model === "string")
+      dispatch({ action: Actions.DELETE_SESSION, sessionId: model });
+    else dispatch({ action: Actions.ADD_SESSION, session: model });
     await onAddRemoveModel?.(model);
   };
+
+  const models = state.sessions as ModelProps[];
+  const isPending = state.selected?.id
+    ? state.pending.includes(state.selected.id)
+    : false;
 
   return (
     <ChatContainer
@@ -184,7 +204,7 @@ export function Chat({
               <EmptyChatList
                 addModelButton={
                   <AddModelButton
-                    models={models}
+                    models={state.sessions as ModelProps[]}
                     addRemoveModel={onAddRemoveModelHandler}
                     providers={chatProviders}
                   />
@@ -193,8 +213,8 @@ export function Chat({
             ) : (
               <ChatModelList
                 models={models}
-                chats={chats}
-                selectedModel={selectedModel}
+                chats={state.chats}
+                selectedModel={state.selected as ModelProps}
                 setSelectedModel={setSelectedModel}
                 providers={providers}
               />
@@ -203,18 +223,19 @@ export function Chat({
         />
       }
       messagePane={
-        !selectedModel || !selectedProvider ? (
+        !(state.selected as ModelProps) || !selectedProvider ? (
           <EmptyMessagesPane />
         ) : (
           <MessagesPane
+            key={state.selected!.id}
             header={
               <MessagesModelHeader
-                model={selectedModel}
+                model={state.selected as ModelProps}
                 provider={selectedProvider}
                 options={
                   <DeleteMessagesButton
                     onDelete={async () =>
-                      await onDeleteModelMessagesHandler(selectedModel.id)
+                      await onDeleteModelMessagesHandler(state.selected!.id)
                     }
                   />
                 }
@@ -223,9 +244,12 @@ export function Chat({
             loader={isPending && <BouncingLoader />}
             messages={
               <MessageList
-                messages={chats[selectedModel.id]}
+                messages={state.chats[state.selected!.id]}
                 avatar={
-                  <ModelAvatar sender={selectedModel} providers={providers} />
+                  <ModelAvatar
+                    sender={state.selected as ModelProps}
+                    providers={providers}
+                  />
                 }
               />
             }
@@ -234,7 +258,9 @@ export function Chat({
                 provider={selectedProvider!}
                 input={
                   <MessageInput
-                    onSubmit={onMessageHandler}
+                    onSubmit={(value, type) =>
+                      sendMessage(state.selected as ModelProps, value, type)
+                    }
                     disabled={isPending}
                     attachment={false}
                     record={false}

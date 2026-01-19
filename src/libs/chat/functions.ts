@@ -74,7 +74,7 @@ function flattenMessagesFilter(
   {
     max = Number.MAX_SAFE_INTEGER,
     elapsedTimeMs = Number.MAX_SAFE_INTEGER,
-  }: ContextMessageFilter
+  }: ContextMessageFilter,
 ) {
   const now = Date.now();
   const allMessages = messages.reduceRight((acc, m) => {
@@ -98,13 +98,13 @@ function flattenMessagesFilter(
 }
 
 function formatContextMessages(
-  messages: MessageFlattenProps[]
+  messages: MessageFlattenProps[],
 ): MessageContext[] {
   const filteredMessages = messages.filter(
     (m) =>
       m.type === TypeMessage.MESSAGE &&
       getPartType(m.content as Part) === PartType.TEXT &&
-      !("thought" in m.content)
+      !("thought" in m.content),
   );
   return filteredMessages.map((m) => ({
     role: m.origin === "received" ? "assistant" : "user",
@@ -114,10 +114,10 @@ function formatContextMessages(
 
 export function contextMessages(
   messages: MessageProps[],
-  { max = 10, elapsedTimeMs = Number.MAX_SAFE_INTEGER }: ContextMessageFilter
+  { max = 10, elapsedTimeMs = Number.MAX_SAFE_INTEGER }: ContextMessageFilter,
 ): MessageContext[] {
   return formatContextMessages(
-    flattenMessagesFilter(messages, { max, elapsedTimeMs })
+    flattenMessagesFilter(messages, { max, elapsedTimeMs }),
   );
 }
 
@@ -125,7 +125,7 @@ export function makeMessageSend(
   content: Part[],
   newId: string,
   senderId: string,
-  raw?: object
+  raw?: object,
 ): MessageProps {
   return {
     id: newId,
@@ -167,7 +167,7 @@ export function messageSendSubmit(
   content: Part[],
   newId: string,
   senderId: string,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
 ) {
   const newMessage = makeMessageSend(content, newId, senderId);
   setChats((prev) => ({
@@ -213,7 +213,7 @@ export function messageStatusReceive({
 export function sendMessageHandler(
   messages: InputOutput | MessageContentStatus,
   type: TypeMessage,
-  senderId: string
+  senderId: string,
 ): MessageProps {
   if (isStatusType(type)) {
     const msg = makeMessageStatusSend({
@@ -228,7 +228,7 @@ export function sendMessageHandler(
   const partFiltered = parts.find(
     (p) =>
       PartType.INLINE_DATA in p &&
-      (p[PartType.INLINE_DATA]?.size ?? 0) > serverActionBodySizeLimit
+      (p[PartType.INLINE_DATA]?.size ?? 0) > serverActionBodySizeLimit,
   );
 
   if (partFiltered) {
@@ -239,7 +239,7 @@ export function sendMessageHandler(
         text: `File '${
           partFiltered[PartType.INLINE_DATA]?.displayName
         }' is bigger than allowed size (${formatBytes(
-          serverActionBodySizeLimit
+          serverActionBodySizeLimit,
         )})`,
       },
       senderId,
@@ -257,7 +257,7 @@ export function onMessageSendHandler(
   messages: InputOutput | MessageContentStatus,
   type: TypeMessage,
   senderId: string,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>
+  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
 ) {
   if (isStatusType(type)) {
     const msg = messageStatusReceive({
@@ -273,7 +273,7 @@ export function onMessageSendHandler(
   const partFiltered = parts.find(
     (p) =>
       PartType.INLINE_DATA in p &&
-      (p[PartType.INLINE_DATA]?.size ?? 0) > serverActionBodySizeLimit
+      (p[PartType.INLINE_DATA]?.size ?? 0) > serverActionBodySizeLimit,
   );
 
   if (partFiltered) {
@@ -284,7 +284,7 @@ export function onMessageSendHandler(
         text: `File '${
           partFiltered[PartType.INLINE_DATA]?.displayName
         }' is bigger than allowed size (${formatBytes(
-          serverActionBodySizeLimit
+          serverActionBodySizeLimit,
         )})`,
       },
       senderId,
@@ -298,7 +298,7 @@ export function onMessageSendHandler(
     parts as Part[],
     newId,
     senderId,
-    setChats
+    setChats,
   );
 
   return newMessage;
@@ -307,7 +307,7 @@ export function onMessageSendHandler(
 export function mergeMessages(
   message: string,
   settings: ContextSettings,
-  chats: MessageProps[]
+  chats: MessageProps[],
 ) {
   const trimed = settings.systemPrompt.trim();
   const system = (
@@ -328,7 +328,7 @@ export function mergeMessages(
 
 export async function onDeleteMessages(
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  senderId?: string
+  senderId?: string,
 ) {
   if (senderId) {
     setChats((prev) => ({
@@ -341,7 +341,7 @@ export async function onDeleteMessages(
     Object.keys(prev).reduce((acc, v) => {
       acc[v] = [];
       return acc;
-    }, {} as ChatMessagesProps)
+    }, {} as ChatMessagesProps),
   );
 }
 
@@ -350,15 +350,15 @@ function removeSender(
   senders: BaseSender[],
   setSender: Dispatch<SetStateAction<BaseSender[]>>,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>
+  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>,
 ) {
   setSender((prev) => prev.filter((f) => f.id !== senderId));
   setSelectedSender((prev) =>
     prev === null
       ? null
       : prev.id !== senderId
-      ? prev
-      : (senders.find((f) => f.id !== senderId) as BaseSender) ?? null
+        ? prev
+        : ((senders.find((f) => f.id !== senderId) as BaseSender) ?? null),
   );
   setChats((prev) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -372,7 +372,7 @@ function addSender(
   senders: BaseSender[],
   setSenders: Dispatch<SetStateAction<BaseSender[]>>,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>
+  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>,
 ) {
   setSenders((prev) => [...prev, sender]);
   setChats((prev) => ({ ...prev, [sender.id]: [] }));
@@ -384,7 +384,7 @@ export function addRemoveSender(
   senders: BaseSender[],
   setSenders: Dispatch<SetStateAction<BaseSender[]>>,
   setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>
+  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>,
 ) {
   if (typeof sender === "string") {
     //Removing

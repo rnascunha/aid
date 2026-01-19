@@ -54,7 +54,7 @@ type ChatListItemProps = ListItemButtonProps & {
   sender: BaseSender;
   messages: MessageProps[];
   isSelected: boolean;
-  setSelectedModel: (chat: BaseSender) => void;
+  setSelectedModel: (chat: BaseSender | null) => void;
   avatar?: StaticImageData;
   bgcolor?: string;
 };
@@ -68,12 +68,12 @@ export default function ChatListItem({
   bgcolor = "inherit",
 }: ChatListItemProps) {
   const [formatTimestamp, setFormatTimestamp] = useState(
-    getFormatedTimestamp(messages)
+    getFormatedTimestamp(messages),
   );
   useEffect(() => {
     const handle = setInterval(
       () => setFormatTimestamp(getFormatedTimestamp(messages)),
-      30 * 1000
+      30 * 1000,
     );
     return () => clearInterval(handle);
   }, [messages]);

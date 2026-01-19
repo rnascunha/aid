@@ -13,7 +13,7 @@ export function checkProviderAvaiable(provider: ProviderProps) {
 export function getProviderBase(
   model: ModelProps,
   providers: ProviderProps[],
-  providerBaseMap: Record<string, ProviderBaseProps>
+  providerBaseMap: Record<string, ProviderBaseProps>,
 ) {
   const provider = providers.find((p) => model.providerId === p.id);
   if (!provider) return;
@@ -22,8 +22,21 @@ export function getProviderBase(
 
 export function removeModelsFromRemovedProviders(
   providers: ProviderProps[],
-  setModels: Dispatch<SetStateAction<ModelProps[]>>
+  setModels: Dispatch<SetStateAction<ModelProps[]>>,
 ) {
   const providerIds = providers.map((p) => p.id);
   setModels((prev) => prev.filter((m) => providerIds.includes(m.providerId)));
+}
+
+export function removeModelsFromRemovedProviders2(
+  providers: ProviderProps[],
+  models: ModelProps[],
+  removeModel: (modelId: string) => void,
+  // setModels: Dispatch<SetStateAction<ModelProps[]>>
+) {
+  const providerIds = providers.map((p) => p.id);
+  models.forEach((m) => {
+    if (providerIds.includes(m.id)) removeModel(m.id);
+  });
+  // setModels((prev) => prev.filter((m) => providerIds.includes(m.providerId)));
 }
