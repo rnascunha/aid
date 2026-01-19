@@ -6,7 +6,7 @@ import { Stack } from "@mui/material";
 import { SettingsDialog } from "./components/settingsDialog";
 import { ChatSettings } from "@/appComponents/chat/types";
 
-import { removeModelsFromRemovedProviders2 } from "@/libs/chat/models/functions";
+import { removeModelsFromRemovedProviders } from "@/libs/chat/models/functions";
 import { sendMessageHandler } from "@/libs/chat/functions";
 
 import { ChatContainer } from "@/components/chat/chatContainer";
@@ -76,7 +76,7 @@ export function Chat({
       providerBaseMap[p.providerBaseId].type.includes("chat"),
     );
     // Remove models from removed providers
-    removeModelsFromRemovedProviders2(
+    removeModelsFromRemovedProviders(
       cp,
       state.sessions as ModelProps[],
       (mId) => dispatch({ action: Actions.DELETE_SESSION, sessionId: mId }),

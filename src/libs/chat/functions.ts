@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
 import {
-  BaseSender,
   ChatMessagesProps,
   MessageContentStatus,
   MessageContext,
@@ -320,77 +319,4 @@ export function mergeMessages(
   const user = { role: "user", content: message.trim() } as MessageContext;
 
   return system.concat(context, user);
-}
-
-/**
- *  Senders
- */
-
-export async function onDeleteMessages(
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  senderId?: string,
-) {
-  if (senderId) {
-    setChats((prev) => ({
-      ...prev,
-      [senderId]: [],
-    }));
-    return;
-  }
-  setChats((prev) =>
-    Object.keys(prev).reduce((acc, v) => {
-      acc[v] = [];
-      return acc;
-    }, {} as ChatMessagesProps),
-  );
-}
-
-function removeSender(
-  senderId: string,
-  senders: BaseSender[],
-  setSender: Dispatch<SetStateAction<BaseSender[]>>,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>,
-) {
-  setSender((prev) => prev.filter((f) => f.id !== senderId));
-  setSelectedSender((prev) =>
-    prev === null
-      ? null
-      : prev.id !== senderId
-        ? prev
-        : ((senders.find((f) => f.id !== senderId) as BaseSender) ?? null),
-  );
-  setChats((prev) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { [senderId]: remove, ...rest } = prev;
-    return rest;
-  });
-}
-
-function addSender(
-  sender: BaseSender,
-  senders: BaseSender[],
-  setSenders: Dispatch<SetStateAction<BaseSender[]>>,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>,
-) {
-  setSenders((prev) => [...prev, sender]);
-  setChats((prev) => ({ ...prev, [sender.id]: [] }));
-  if (senders.length === 0) setSelectedSender(sender);
-}
-
-export function addRemoveSender(
-  sender: string | BaseSender,
-  senders: BaseSender[],
-  setSenders: Dispatch<SetStateAction<BaseSender[]>>,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-  setSelectedSender: Dispatch<SetStateAction<BaseSender | null>>,
-) {
-  if (typeof sender === "string") {
-    //Removing
-    removeSender(sender, senders, setSenders, setChats, setSelectedSender);
-    return;
-  }
-  // Adding
-  addSender(sender, senders, setSenders, setChats, setSelectedSender);
 }

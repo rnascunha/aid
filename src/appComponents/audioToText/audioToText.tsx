@@ -9,27 +9,14 @@ import { MessageList } from "@/components/chat/messageList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { MessagesModelHeader } from "@/components/chat/model/messagesHeader";
 import {
-  BaseSender,
   ChatMessagesProps,
   MessageContentStatus,
   MessageProps,
   TypeMessage,
 } from "@/libs/chat/types";
-import {
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
+import { useContext, useEffect, useMemo, useReducer, useState } from "react";
 
-import {
-  onDeleteMessages as onDeleteModelMessages,
-  addRemoveSender as addRemoveModel,
-  onMessageSendHandler,
-} from "@/libs/chat/functions";
+import { sendMessageHandler } from "@/libs/chat/functions";
 import { AudioToTextSettings } from "./types";
 import { attachmentResponse } from "./functions";
 import { DeleteMessagesButton } from "@/components/chat/deleteMessagesButton";
@@ -47,6 +34,9 @@ import ModelAvatar, {
 import { removeModelsFromRemovedProviders } from "@/libs/chat/models/functions";
 import { MessageInput } from "@/components/chat/input/messageInput";
 import { InputOutput } from "@/components/chat/input/types";
+import { reducer } from "@/libs/chat/state/functions";
+import { Actions } from "@/libs/chat/state/types";
+import { MultipleMessage } from "@/components/chat/input/multipleMessages";
 
 interface AudioToTextPros {
   models: ModelProps[];
@@ -75,11 +65,13 @@ export function AudioToText({
   onSettingsChange,
   onAddRemoveModel,
 }: AudioToTextPros) {
-  const [selectedModel, setSelectedModel] = useState<ModelProps | null>(null);
-  const [models, setModels] = useState<ModelProps[]>(allModel);
-  const [chats, setChats] = useState<ChatMessagesProps>(allChats);
+  const [state, dispatch] = useReducer(reducer, {
+    selected: null,
+    chats: allChats,
+    sessions: allModel,
+    pending: [],
+  });
   const [settings, setSettings] = useState<AudioToTextSettings>(initSettings);
-  const [isPending, startTransition] = useTransition();
   const [inputState, setInputState] = useState<InputState>({
     attachment: false,
     record: false,
@@ -91,19 +83,35 @@ export function AudioToText({
       providerBaseMap[p.providerBaseId].type.includes("audioToText"),
     );
     // Remove models from removed providers
-    removeModelsFromRemovedProviders(cp, setModels);
+    removeModelsFromRemovedProviders(
+      cp,
+      state.sessions as ModelProps[],
+      (mId) => dispatch({ action: Actions.DELETE_SESSION, sessionId: mId }),
+    );
     return cp;
-  }, [providers, setModels]);
+  }, [providers, state.sessions]);
+
+  const setSelectedModel = (modelId: string | null) => {
+    if (!modelId) {
+      dispatch({ action: Actions.UNSELECT_SESSION });
+      return;
+    }
+    dispatch({ action: Actions.SELECT_SESSION, sessionId: modelId });
+  };
 
   // Get provider from selected model
-  const selectedProvider = !selectedModel
+  const selectedProvider = !state.selected
     ? null
-    : audioToTextProviders.find((p) => p.id === selectedModel?.providerId);
+    : audioToTextProviders.find(
+        (p) => p.id === (state.selected as ModelProps).providerId,
+      );
 
   // Check if selected model still exist
   if (
-    selectedModel &&
-    !audioToTextProviders.find((p) => p.id === selectedModel?.providerId)
+    (state.selected as ModelProps) &&
+    !audioToTextProviders.find(
+      (p) => p.id === (state.selected as ModelProps).providerId,
+    )
   ) {
     setSelectedModel(null);
   }
@@ -112,57 +120,68 @@ export function AudioToText({
     onSettingsChange?.(settings);
   }, [settings, onSettingsChange]);
 
-  const onMessageHandler = async (
+  const sendMessage = async (
+    session: ModelProps,
     messages: InputOutput | MessageContentStatus,
     type: TypeMessage,
   ) => {
-    if (
-      type === TypeMessage.MESSAGE &&
-      (messages as InputOutput).files.length !== 1
-    )
+    if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
       return;
 
-    const newMessage = onMessageSendHandler(
-      messages,
-      type,
-      selectedModel!.id,
-      setChats,
-    );
-    await onMessage?.(newMessage, selectedModel!.id);
+    const newMessage = sendMessageHandler(messages, type, session.id);
+    dispatch({
+      action: Actions.ADD_MESSAGE,
+      message: newMessage,
+      sessionId: session.id,
+    });
+
+    await onMessage?.(newMessage, session.id);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
-    startTransition(async () => {
+    dispatch({ action: Actions.ADD_PENDING, sessionId: session.id });
+    try {
       const response = await attachmentResponse({
         data: (messages as InputOutput).files[0].data,
         newId: newMessage.id,
-        model: selectedModel as ModelProps,
+        model: session as ModelProps,
         provider: selectedProvider as ProviderProps,
-        setChats,
         settings: { ...settings, prompt: messages.text },
       });
-      await onMessage?.(response, selectedModel!.id);
-    });
+      dispatch({
+        action: Actions.ADD_MESSAGE,
+        message: response,
+        sessionId: session.id,
+      });
+      await onMessage?.(response, session.id);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      dispatch({ action: Actions.REMOVE_PENDING, sessionId: session.id });
+    }
   };
 
   const onAddRemoveModelHandler = async (model: string | ModelProps) => {
-    addRemoveModel(
-      model,
-      models,
-      setModels as Dispatch<SetStateAction<BaseSender[]>>,
-      setChats,
-      setSelectedModel as Dispatch<SetStateAction<BaseSender | null>>,
-    );
+    if (typeof model === "string")
+      dispatch({ action: Actions.DELETE_SESSION, sessionId: model });
+    else dispatch({ action: Actions.ADD_SESSION, session: model });
     await onAddRemoveModel?.(model);
   };
 
   const onDeleteAllMessagesHandler = async () => {
-    onDeleteModelMessages(setChats);
+    dispatch({ action: Actions.DELETE_ALL_MESSAGES });
     await onDeleteMessages?.();
   };
   const onDeleteModelMessagesHandler = async (modelId: string) => {
-    onDeleteModelMessages(setChats, modelId);
+    dispatch({
+      action: Actions.DELETE_ALL_SENDER_MESSAGES,
+      sessionId: modelId,
+    });
     await onDeleteMessages?.(modelId);
   };
+
+  const isPending = state.selected?.id
+    ? state.pending.includes(state.selected.id)
+    : false;
 
   return (
     <ChatContainer
@@ -171,7 +190,7 @@ export function AudioToText({
           chatOptions={
             <Stack direction="row" gap={0.5}>
               <AddModel
-                models={models}
+                models={state.sessions as ModelProps[]}
                 providers={audioToTextProviders}
                 addRemoveModel={onAddRemoveModelHandler}
               />
@@ -196,11 +215,11 @@ export function AudioToText({
       chatsPane={
         <ChatsPane
           modelsList={
-            models.length === 0 ? (
+            state.sessions.length === 0 ? (
               <EmptyChatList
                 addModelButton={
                   <AddModelButton
-                    models={models}
+                    models={state.sessions as ModelProps[]}
                     addRemoveModel={onAddRemoveModelHandler}
                     providers={audioToTextProviders}
                   />
@@ -208,17 +227,17 @@ export function AudioToText({
               />
             ) : (
               <ChatModelList
-                models={models}
-                chats={chats}
-                selectedModel={selectedModel}
+                models={state.sessions as ModelProps[]}
+                chats={state.chats}
+                selectedModel={state.selected as ModelProps}
                 setSelectedModel={(mId) => {
                   if (!mId) {
                     setSelectedModel(null);
                     return;
                   }
-                  const model = models.find((m) => m.id === mId);
+                  const model = state.sessions.find((m) => m.id === mId);
                   if (!model) return;
-                  setSelectedModel(model);
+                  setSelectedModel((model as ModelProps).id);
                 }}
                 providers={providers}
               />
@@ -227,18 +246,20 @@ export function AudioToText({
         />
       }
       messagePane={
-        !selectedModel || !selectedProvider ? (
+        !state.selected || !selectedProvider ? (
           <EmptyMessagesPane />
         ) : (
           <MessagesPane
             header={
               <MessagesModelHeader
-                model={selectedModel}
+                model={state.selected as ModelProps}
                 provider={selectedProvider}
                 options={
                   <DeleteMessagesButton
                     onDelete={async () =>
-                      await onDeleteModelMessagesHandler(selectedModel.id)
+                      await onDeleteModelMessagesHandler(
+                        (state.selected as ModelProps).id,
+                      )
                     }
                   />
                 }
@@ -247,9 +268,12 @@ export function AudioToText({
             loader={isPending && <BouncingLoader />}
             messages={
               <MessageList
-                messages={chats[selectedModel.id]}
+                messages={state.chats[state.selected.id]}
                 avatar={
-                  <ModelAvatar providers={providers} sender={selectedModel} />
+                  <ModelAvatar
+                    providers={providers}
+                    sender={state.selected as ModelProps}
+                  />
                 }
               />
             }
@@ -259,7 +283,17 @@ export function AudioToText({
                 input={
                   <MessageInput
                     disabled={isPending}
-                    onSubmit={onMessageHandler}
+                    onSubmit={async (value, type) => {
+                      await sendMessage(
+                        state.selected as ModelProps,
+                        value,
+                        type,
+                      );
+                      setInputState({
+                        attachment: false,
+                        record: false,
+                      });
+                    }}
                     attachment={{
                       accept: "audio/*",
                       multiple: false,
@@ -283,6 +317,25 @@ export function AudioToText({
                     submit={{
                       disabled: !inputState.attachment,
                     }}
+                    otherOptions={(value, clear, disabled) => (
+                      <MultipleMessage
+                        disabled={
+                          disabled ||
+                          isPending ||
+                          state.sessions.length < 2 ||
+                          !inputState.attachment
+                        }
+                        sessions={state.sessions}
+                        sendMessage={async (session) => {
+                          clear();
+                          await sendMessage(
+                            session as ModelProps,
+                            value,
+                            TypeMessage.MESSAGE,
+                          );
+                        }}
+                      />
+                    )}
                   />
                 }
               />

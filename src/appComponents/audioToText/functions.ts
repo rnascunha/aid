@@ -51,14 +51,12 @@ export async function attachmentResponse({
   newId,
   model,
   provider,
-  setChats,
   settings,
 }: {
   data: string;
   newId: string;
   model: ModelProps;
   provider: ProviderProps;
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>;
   settings: AudioToTextSettings;
 }) {
   const response = await fetchAudioToText({
@@ -79,9 +77,45 @@ export async function attachmentResponse({
     content: response.content,
     raw: response.raw,
   } as MessageProps;
-  setChats((prev) => ({
-    ...prev,
-    [model.id]: [...prev[model.id], responseMessage],
-  }));
   return responseMessage;
 }
+
+// export async function attachmentResponse({
+//   data,
+//   newId,
+//   model,
+//   provider,
+//   setChats,
+//   settings,
+// }: {
+//   data: string;
+//   newId: string;
+//   model: ModelProps;
+//   provider: ProviderProps;
+//   setChats: Dispatch<SetStateAction<ChatMessagesProps>>;
+//   settings: AudioToTextSettings;
+// }) {
+//   const response = await fetchAudioToText({
+//     provider: providerBaseMap[provider.providerBaseId].provider,
+//     model: model.model,
+//     file: data,
+//     settings,
+//     auth: provider.auth,
+//     config: provider.config,
+//   });
+
+//   const responseMessage: MessageProps = {
+//     id: `${newId}:r`,
+//     senderId: model.id,
+//     timestamp: Date.now(),
+//     origin: "received",
+//     type: response.type,
+//     content: response.content,
+//     raw: response.raw,
+//   } as MessageProps;
+//   setChats((prev) => ({
+//     ...prev,
+//     [model.id]: [...prev[model.id], responseMessage],
+//   }));
+//   return responseMessage;
+// }
