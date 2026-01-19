@@ -148,7 +148,7 @@ export default function TestChat({
           }
         />
       }
-      MessagePane={
+      messagePane={
         !state.selected ? (
           <EmptyMessagesPane />
         ) : (

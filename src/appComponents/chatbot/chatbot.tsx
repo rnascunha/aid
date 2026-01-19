@@ -30,7 +30,7 @@ interface ChatBotProps {
   user: string;
   onMessage?: (
     message: MessageProps | MessageProps[],
-    contactId: string
+    contactId: string,
   ) => Promise<void> | void;
   onAddRemoveSession?: (session: string | SessionType) => Promise<void> | void;
 }
@@ -44,7 +44,7 @@ export default function ChatBot({
 }: ChatBotProps) {
   const [sessions, setSessions] = useState<SessionType[]>(initSessions);
   const [selectedSession, setSelectedSession] = useState<SessionType | null>(
-    null
+    null,
   );
   const [chats, setChats] = useState<ChatMessagesProps>(initChats);
   const [isPending, startTransition] = useTransition();
@@ -58,7 +58,7 @@ export default function ChatBot({
   const onEditSession = async <K extends keyof SessionType>(
     session: SessionType,
     field: K,
-    value: SessionType[K]
+    value: SessionType[K],
   ) => {
     const fSession = sessions.find((s) => s.id === session.id);
     if (!fSession) return;
@@ -79,7 +79,7 @@ export default function ChatBot({
 
   const onMessageHandler = async (
     messages: InputOutput | MessageContentStatus,
-    type: TypeMessage
+    type: TypeMessage,
   ) => {
     if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
       return;
@@ -88,7 +88,7 @@ export default function ChatBot({
       messages,
       type,
       selectedSession!.id,
-      setChats
+      setChats,
     );
 
     await onMessage?.(newMessage, selectedSession!.id);
@@ -102,7 +102,7 @@ export default function ChatBot({
           newId: newMessage.id,
           session: selectedSession as SessionType,
         },
-        setChats
+        setChats,
       );
       await onMessage?.(response, selectedSession!.id);
     });
@@ -136,7 +136,7 @@ export default function ChatBot({
           }
         />
       }
-      MessagePane={
+      messagePane={
         !selectedSession ? (
           <EmptyMessagesPane />
         ) : (

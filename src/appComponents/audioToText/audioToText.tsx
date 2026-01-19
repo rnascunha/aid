@@ -54,7 +54,7 @@ interface AudioToTextPros {
   settings: AudioToTextSettings;
   onMessage?: (
     message: MessageProps,
-    contactId: string
+    contactId: string,
   ) => Promise<void> | void;
   onDeleteMessages?: (modelId?: string) => Promise<void> | void;
   onSettingsChange?: (settings: AudioToTextSettings) => Promise<void> | void;
@@ -88,7 +88,7 @@ export function AudioToText({
   const { providers } = useContext(aIContext);
   const audioToTextProviders = useMemo(() => {
     const cp = providers.filter((p) =>
-      providerBaseMap[p.providerBaseId].type.includes("audioToText")
+      providerBaseMap[p.providerBaseId].type.includes("audioToText"),
     );
     // Remove models from removed providers
     removeModelsFromRemovedProviders(cp, setModels);
@@ -114,7 +114,7 @@ export function AudioToText({
 
   const onMessageHandler = async (
     messages: InputOutput | MessageContentStatus,
-    type: TypeMessage
+    type: TypeMessage,
   ) => {
     if (
       type === TypeMessage.MESSAGE &&
@@ -126,7 +126,7 @@ export function AudioToText({
       messages,
       type,
       selectedModel!.id,
-      setChats
+      setChats,
     );
     await onMessage?.(newMessage, selectedModel!.id);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
@@ -150,7 +150,7 @@ export function AudioToText({
       models,
       setModels as Dispatch<SetStateAction<BaseSender[]>>,
       setChats,
-      setSelectedModel as Dispatch<SetStateAction<BaseSender | null>>
+      setSelectedModel as Dispatch<SetStateAction<BaseSender | null>>,
     );
     await onAddRemoveModel?.(model);
   };
@@ -218,7 +218,7 @@ export function AudioToText({
           }
         />
       }
-      MessagePane={
+      messagePane={
         !selectedModel || !selectedProvider ? (
           <EmptyMessagesPane />
         ) : (

@@ -56,7 +56,7 @@ export interface ChatProps {
   settings: ChatSettings;
   onMessage?: (
     message: MessageProps,
-    contactId: string
+    contactId: string,
   ) => Promise<void> | void;
   onDeleteMessages?: (modelId?: string) => Promise<void> | void;
   onAddRemoveModel?: (model: string | ModelProps) => Promise<void> | void;
@@ -81,7 +81,7 @@ export function Chat({
   const { providers, tools } = useContext(aIContext);
   const chatProviders = useMemo(() => {
     const cp = providers.filter((p) =>
-      providerBaseMap[p.providerBaseId].type.includes("chat")
+      providerBaseMap[p.providerBaseId].type.includes("chat"),
     );
     // Remove models from removed providers
     removeModelsFromRemovedProviders(cp, setModels);
@@ -107,7 +107,7 @@ export function Chat({
 
   const onMessageHandler = async (
     message: InputOutput | MessageContentStatus,
-    type: TypeMessage
+    type: TypeMessage,
   ) => {
     if (type === TypeMessage.MESSAGE && !(message as InputOutput).text.trim()) {
       return;
@@ -117,7 +117,7 @@ export function Chat({
       message,
       type,
       selectedModel!.id,
-      setChats
+      setChats,
     );
     await onMessage?.(newMessage, selectedModel!.id);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
@@ -132,7 +132,7 @@ export function Chat({
         setChats,
         settings,
         chats[selectedModel!.id],
-        tools
+        tools,
       );
       await onMessage?.(response, selectedModel!.id);
     });
@@ -152,7 +152,7 @@ export function Chat({
       models,
       setModels as Dispatch<SetStateAction<BaseSender[]>>,
       setChats,
-      setSelectedModel as Dispatch<SetStateAction<BaseSender | null>>
+      setSelectedModel as Dispatch<SetStateAction<BaseSender | null>>,
     );
     await onAddRemoveModel?.(model);
   };
@@ -202,7 +202,7 @@ export function Chat({
           }
         />
       }
-      MessagePane={
+      messagePane={
         !selectedModel || !selectedProvider ? (
           <EmptyMessagesPane />
         ) : (

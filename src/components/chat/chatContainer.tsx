@@ -7,13 +7,13 @@ import { openMessagesPane } from "./utils";
 interface ChatContainer {
   chatHeader: ReactNode;
   chatsPane: ReactNode;
-  MessagePane: ReactNode;
+  messagePane: ReactNode;
 }
 
 export function ChatContainer({
   chatHeader,
   chatsPane,
-  MessagePane,
+  messagePane,
 }: ChatContainer) {
   useEffect(() => {
     openMessagesPane();
@@ -63,7 +63,7 @@ export function ChatContainer({
         {chatHeader}
         {chatsPane}
       </Container>
-      {MessagePane}
+      {messagePane}
     </Container>
   );
 }
