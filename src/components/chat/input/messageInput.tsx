@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 import { Stack } from "@mui/material";
 import { InputOptions } from "./inputOptions";
@@ -21,6 +21,11 @@ export interface MessageInputProps {
   submit?: InputSubmitProps;
   attachment?: InputFilesProps | false;
   record?: MicInputProps | false;
+  otherOptions?: (
+    value: InputOutput,
+    clear: () => void,
+    disabled: boolean,
+  ) => ReactNode | ReactNode[];
   onInputChange?: (data: InputOutput) => void;
 }
 
@@ -30,6 +35,7 @@ export function MessageInput({
   submit,
   attachment,
   record,
+  otherOptions,
   onInputChange,
 }: MessageInputProps) {
   const [text, setText] = useState("");
@@ -40,6 +46,11 @@ export function MessageInput({
       ? !submit.disabled
       : text.trim().length > 0 || files.length > 0;
 
+  const clearData = () => {
+    setText("");
+    setFiles([]);
+  };
+
   const onSubmitData = async () => {
     if (!canSubmit) return;
 
@@ -48,16 +59,15 @@ export function MessageInput({
         text: text.trim(),
         files,
       },
-      TypeMessage.MESSAGE
+      TypeMessage.MESSAGE,
     );
 
-    setText("");
-    setFiles([]);
+    clearData();
   };
 
   const addFiles = async (
     parts: PartInlineData[] | PartInlineData | MessageContentStatus,
-    type: TypeMessage
+    type: TypeMessage,
   ) => {
     if (type === TypeMessage.MESSAGE) {
       let nf: PartInlineData[] = [];
@@ -109,13 +119,14 @@ export function MessageInput({
         removeFile={removeFile}
         files={files}
         submit={{
-          onClick: onSubmitData,
+          onClick: () => onSubmitData(),
           disabled: !canSubmit,
           ...submit,
         }}
         attachment={attachment}
         record={record}
         disabled={disabled}
+        others={otherOptions?.({ text, files }, clearData, !canSubmit)}
       />
     </Stack>
   );

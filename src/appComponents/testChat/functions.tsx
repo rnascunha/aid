@@ -36,7 +36,7 @@ async function getFakeData(
   session: SessionType,
   message: string
 ): Promise<MessageProps[]> {
-  const delayMs = 1000 + Math.floor(Math.random() * 100);
+  const delayMs = 5000 + Math.floor(Math.random() * 100);
   await delay(delayMs);
   return [
     {
@@ -96,6 +96,7 @@ export function reducer(state: ChatState, action: ChatActionArgs): ChatState {
       };
     case Actions.ADD_SESSION: {
       return {
+        ...state,
         chats: {
           ...state.chats,
           [action.session.id]: [],
@@ -108,6 +109,7 @@ export function reducer(state: ChatState, action: ChatActionArgs): ChatState {
       const newChats = { ...state.chats };
       delete newChats[action.sessionId];
       return {
+        ...state,
         chats: newChats,
         sessions: state.sessions.filter((s) => s.id !== action.sessionId),
         selected:
@@ -147,6 +149,18 @@ export function reducer(state: ChatState, action: ChatActionArgs): ChatState {
             (m) => m.id !== action.messageId
           ),
         },
+      };
+    }
+    case Actions.ADD_PENDING: {
+      return {
+        ...state,
+        pending: [...state.pending, action.sessionId],
+      };
+    }
+    case Actions.REMOVE_PENDING: {
+      return {
+        ...state,
+        pending: state.pending.filter((p) => p !== action.sessionId),
       };
     }
   }

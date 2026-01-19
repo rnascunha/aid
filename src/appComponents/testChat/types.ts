@@ -6,6 +6,7 @@ export interface ChatState {
   sessions: SessionType[];
   chats: ChatMessagesProps;
   selected: SessionType | null;
+  pending: string[];
 }
 
 export enum Actions {
@@ -19,6 +20,9 @@ export enum Actions {
   // Messages
   ADD_MESSAGE = "add_message",
   DELETE_MESSAGE = "delete_message",
+  // Pending
+  ADD_PENDING = "add_pending",
+  REMOVE_PENDING = "remove_pending",
 }
 
 interface SelectSessionArgs {
@@ -47,6 +51,12 @@ interface DeleteMessageArgs {
   messageId: string;
 }
 
+interface AddPendingArgs {
+  sessionId: string;
+}
+
+type RemovePendingArgs = AddPendingArgs;
+
 export type ChatActionArgs =
   | ({
       action: Actions.SELECT_SESSION;
@@ -66,4 +76,10 @@ export type ChatActionArgs =
     } & AddMessageArgs)
   | ({
       action: Actions.DELETE_MESSAGE;
-    } & DeleteMessageArgs);
+    } & DeleteMessageArgs)
+  | ({
+      action: Actions.ADD_PENDING;
+    } & AddPendingArgs)
+  | ({
+      action: Actions.REMOVE_PENDING;
+    } & RemovePendingArgs);

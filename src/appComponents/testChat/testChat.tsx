@@ -4,13 +4,11 @@ import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { ChatList, EmptyChatList } from "@/components/chat/chatList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
-import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatHeader } from "@/components/chat/chatHeader";
-import { useReducer, useTransition } from "react";
+import { useReducer } from "react";
 import { AddSession } from "./components/addSession";
 import { Actions, SessionType } from "./types";
 import { createNewSession, messageResponse, reducer } from "./functions";
-import { MessageList } from "@/components/chat/messageList";
 import {
   ChatMessagesProps,
   MessageContentStatus,
@@ -18,10 +16,14 @@ import {
   TypeMessage,
 } from "@/libs/chat/types";
 import { sendMessageHandler } from "@/libs/chat/functions";
+import { InputOutput } from "@/components/chat/input/types";
+import { Stack } from "@mui/material";
+import { MultipleMessage } from "./components/multipleMessages";
 import { MessagesHeader } from "@/components/chat/messagesHeader";
 import { ChatbotOptions } from "./components/sessionOptions";
 import { MessageInput } from "@/components/chat/input/messageInput";
-import { InputOutput } from "@/components/chat/input/types";
+import { MessageList } from "@/components/chat/messageList";
+import { BouncingLoader } from "@/components/bouncingLoader";
 
 interface ChatTestProps {
   sessions: SessionType[];
@@ -29,7 +31,7 @@ interface ChatTestProps {
   user: string;
   onMessage?: (
     message: MessageProps | MessageProps[],
-    contactId: string
+    contactId: string,
   ) => Promise<void> | void;
   onAddRemoveSession?: (session: string | SessionType) => Promise<void> | void;
 }
@@ -44,9 +46,8 @@ export default function TestChat({
     chats: initChats,
     sessions: initSessions,
     selected: null,
+    pending: [],
   });
-  const [isPending, startTransition] = useTransition();
-
   const onDeleteSession = async (session: SessionType) => {
     dispatch({ action: Actions.DELETE_SESSION, sessionId: session.id });
     await onAddRemoveSession?.(session.id);
@@ -55,7 +56,7 @@ export default function TestChat({
   const onEditSession = async <K extends keyof SessionType>(
     session: SessionType,
     field: K,
-    value: SessionType[K]
+    value: SessionType[K],
   ) => {
     const newSession = {
       ...session,
@@ -77,47 +78,58 @@ export default function TestChat({
     else dispatch({ action: Actions.UNSELECT_SESSION });
   };
 
-  const onMessageHandler = async (
+  const sendMessage = async (
+    session: SessionType,
     messages: InputOutput | MessageContentStatus,
-    type: TypeMessage
+    type: TypeMessage,
   ) => {
-    const selected = state.selected;
-    if (!selected) return;
-
     if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
       return;
 
-    const newMessage = sendMessageHandler(messages, type, selected.id);
+    const newMessage = sendMessageHandler(messages, type, session.id);
     dispatch({
       action: Actions.ADD_MESSAGE,
       message: newMessage,
-      sessionId: selected.id,
+      sessionId: session.id,
     });
 
-    await onMessage?.(newMessage, selected.id);
+    await onMessage?.(newMessage, session.id);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
-    startTransition(async () => {
+    dispatch({ action: Actions.ADD_PENDING, sessionId: session.id });
+    try {
       const response = await messageResponse({
         message: messages.text,
         newId: newMessage.id,
-        session: selected,
+        session: session,
       });
       dispatch({
         action: Actions.ADD_MESSAGE,
         message: response,
-        sessionId: selected.id,
+        sessionId: session.id,
       });
-      await onMessage?.(response, selected.id);
-    });
+      await onMessage?.(response, session.id);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      dispatch({ action: Actions.REMOVE_PENDING, sessionId: session.id });
+    }
   };
+
+  const isPending = state.selected?.id
+    ? state.pending.includes(state.selected.id)
+    : false;
 
   return (
     <ChatContainer
       chatHeader={
         <ChatHeader
           chatTitle="Sessions"
-          chatOptions={<AddSession onAddSession={onAddSession} />}
+          chatOptions={
+            <Stack direction="row">
+              <AddSession onAddSession={onAddSession} />
+            </Stack>
+          }
         />
       }
       chatsPane={
@@ -141,12 +153,13 @@ export default function TestChat({
           <EmptyMessagesPane />
         ) : (
           <MessagesPane
+            key={state.selected.id}
             header={
               <MessagesHeader
-                sender={state.selected}
+                sender={state.selected as SessionType}
                 options={
                   <ChatbotOptions
-                    session={state.selected}
+                    session={state.selected as SessionType}
                     onDeleteSession={onDeleteSession}
                     onEditSession={onEditSession}
                   />
@@ -154,17 +167,25 @@ export default function TestChat({
               />
             }
             loader={isPending && <BouncingLoader />}
-            messages={
-              <MessageList
-                messages={state.chats[state.selected.id] as MessageProps[]}
-              />
-            }
+            messages={<MessageList messages={state.chats[state.selected.id]} />}
             input={
               <MessageInput
-                onSubmit={onMessageHandler}
+                onSubmit={(value, type) =>
+                  sendMessage(state.selected as SessionType, value, type)
+                }
                 disabled={isPending}
                 attachment={false}
                 record={false}
+                otherOptions={(value, clear, disabled) => (
+                  <MultipleMessage
+                    disabled={disabled || state.sessions.length < 2}
+                    sessions={state.sessions}
+                    sendMessage={async (session) => {
+                      clear();
+                      await sendMessage(session, value, TypeMessage.MESSAGE);
+                    }}
+                  />
+                )}
               />
             }
           />

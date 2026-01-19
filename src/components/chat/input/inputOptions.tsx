@@ -9,6 +9,7 @@ import {
 import { AttachFilesList } from "./attachFilesList";
 import { InputFile, InputFilesProps } from "./inputFile";
 import { InputSubmit, InputSubmitProps } from "./inputSubmitButton";
+import { ReactNode } from "react";
 
 export interface InputOptionsProps {
   onSubmit: () => Promise<void>;
@@ -16,12 +17,13 @@ export interface InputOptionsProps {
   files: PartInlineData[];
   addFiles: (
     parts: PartInlineData[] | PartInlineData | MessageContentStatus,
-    type: TypeMessage
+    type: TypeMessage,
   ) => Promise<void>;
   removeFile: (file: PartInlineData, index: number) => void;
   submit?: InputSubmitProps;
   attachment?: InputFilesProps | false;
   record?: MicInputProps | false;
+  others?: ReactNode | ReactNode[];
 }
 
 export function InputOptions({
@@ -32,6 +34,7 @@ export function InputOptions({
   submit,
   attachment,
   record,
+  others,
 }: InputOptionsProps) {
   return (
     <Stack
@@ -62,6 +65,7 @@ export function InputOptions({
           />
         )}
         <InputSubmit {...submit} disabled={submit?.disabled || disabled} />
+        {others}
       </Stack>
     </Stack>
   );
