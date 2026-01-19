@@ -15,11 +15,12 @@ import {
 } from "@mui/material";
 
 import { Dispatch, ReactNode, SetStateAction, useState } from "react";
-import { SessionType } from "../types";
+// import { SessionType } from "../types";
 
 import ForumIcon from "@mui/icons-material/Forum";
 import SendIcon from "@mui/icons-material/Send";
 import { InputOutput } from "@/components/chat/input/types";
+import { BaseSender } from "@/libs/chat/types";
 
 interface MultipleMessageFabProps extends FabProps {
   icon?: ReactNode;
@@ -54,7 +55,7 @@ function SessionList({
   checked,
   setChecked,
 }: {
-  sessions: SessionType[];
+  sessions: BaseSender[];
   checked: string[];
   setChecked: Dispatch<SetStateAction<string[]>>;
 }) {
@@ -87,10 +88,10 @@ function MultipleMessageDialog({
   sessions,
   sendMessage,
 }: {
-  sessions: SessionType[];
+  sessions: BaseSender[];
   open: boolean;
   onClose: () => void;
-  sendMessage: (session: SessionType, messages: InputOutput) => Promise<void>;
+  sendMessage: (session: BaseSender, messages: InputOutput) => Promise<void>;
 }) {
   const [checked, setChecked] = useState<string[]>([]);
 
@@ -136,8 +137,8 @@ function MultipleMessageDialog({
 
 interface MultipleMessageProps {
   disabled?: boolean;
-  sessions: SessionType[];
-  sendMessage: (session: SessionType, messages: InputOutput) => Promise<void>;
+  sessions: BaseSender[];
+  sendMessage: (session: BaseSender, messages: InputOutput) => Promise<void>;
 }
 
 export function MultipleMessage({

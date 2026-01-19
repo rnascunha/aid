@@ -7,8 +7,8 @@ import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { useReducer } from "react";
 import { AddSession } from "./components/addSession";
-import { Actions, SessionType } from "./types";
-import { createNewSession, messageResponse, reducer } from "./functions";
+import { SessionType } from "./types";
+import { createNewSession, messageResponse } from "./functions";
 import {
   ChatMessagesProps,
   MessageContentStatus,
@@ -18,12 +18,14 @@ import {
 import { sendMessageHandler } from "@/libs/chat/functions";
 import { InputOutput } from "@/components/chat/input/types";
 import { Stack } from "@mui/material";
-import { MultipleMessage } from "./components/multipleMessages";
+import { MultipleMessage } from "../../components/chat/input/multipleMessages";
 import { MessagesHeader } from "@/components/chat/messagesHeader";
 import { ChatbotOptions } from "./components/sessionOptions";
 import { MessageInput } from "@/components/chat/input/messageInput";
 import { MessageList } from "@/components/chat/messageList";
 import { BouncingLoader } from "@/components/bouncingLoader";
+import { Actions } from "@/libs/chat/state/types";
+import { reducer } from "@/libs/chat/state/functions";
 
 interface ChatTestProps {
   sessions: SessionType[];
