@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import {
   ChatMessagesProps,
   MessageContentStatus,
@@ -48,20 +47,6 @@ export function sortedSenders(chats: ChatMessagesProps) {
   });
   return list;
 }
-
-// function flattenMessages(messages: MessageProps[]): MessageFlattenProps[] {
-//   return messages.reduce((acc, m) => {
-//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     const { content, ...other } = m;
-//     const allm = m.content.map((mm) => ({
-//       ...other,
-//       content: mm,
-//     }));
-
-//     acc.push(...allm);
-//     return acc;
-//   }, [] as MessageFlattenProps[]);
-// }
 
 interface ContextMessageFilter {
   max?: number;
@@ -162,53 +147,6 @@ export function makeMessageStatusSend({
   } as MessageProps;
 }
 
-export function messageSendSubmit(
-  content: Part[],
-  newId: string,
-  senderId: string,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-) {
-  const newMessage = makeMessageSend(content, newId, senderId);
-  setChats((prev) => ({
-    ...prev,
-    [senderId]: [...prev[senderId], newMessage],
-  }));
-  return newMessage;
-}
-
-export function messageStatusReceive({
-  id,
-  type,
-  content,
-  senderId,
-  setChats,
-  raw,
-}: {
-  id?: string;
-  type: TypeMessage;
-  content: MessageContentStatus;
-  senderId: string;
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>;
-  raw?: object;
-}) {
-  const newId = id ?? generateUUID();
-  const responseMessage: MessageProps = {
-    id: `${newId}:r`,
-    senderId,
-    timestamp: Date.now(),
-    origin: "received",
-    type: type,
-    content,
-    raw: raw ?? content,
-  } as MessageProps;
-  setChats((prev) => ({
-    ...prev,
-    [senderId]: [...prev[senderId], responseMessage],
-  }));
-
-  return responseMessage;
-}
-
 export function sendMessageHandler(
   messages: InputOutput | MessageContentStatus,
   type: TypeMessage,
@@ -248,57 +186,6 @@ export function sendMessageHandler(
 
   const newId = generateUUID();
   const newMessage = makeMessageSend(parts as Part[], newId, senderId);
-
-  return newMessage;
-}
-
-export function onMessageSendHandler(
-  messages: InputOutput | MessageContentStatus,
-  type: TypeMessage,
-  senderId: string,
-  setChats: Dispatch<SetStateAction<ChatMessagesProps>>,
-) {
-  if (isStatusType(type)) {
-    const msg = messageStatusReceive({
-      type,
-      content: messages as MessageContentStatus,
-      senderId,
-      setChats,
-    });
-    return msg;
-  }
-
-  const parts = makeInputParts(messages as InputOutput);
-  const partFiltered = parts.find(
-    (p) =>
-      PartType.INLINE_DATA in p &&
-      (p[PartType.INLINE_DATA]?.size ?? 0) > serverActionBodySizeLimit,
-  );
-
-  if (partFiltered) {
-    const msg = messageStatusReceive({
-      type: TypeMessage.WARNING,
-      content: {
-        name: "File Size Exceeded",
-        text: `File '${
-          partFiltered[PartType.INLINE_DATA]?.displayName
-        }' is bigger than allowed size (${formatBytes(
-          serverActionBodySizeLimit,
-        )})`,
-      },
-      senderId,
-      setChats,
-    });
-    return msg;
-  }
-
-  const newId = generateUUID();
-  const newMessage = messageSendSubmit(
-    parts as Part[],
-    newId,
-    senderId,
-    setChats,
-  );
 
   return newMessage;
 }

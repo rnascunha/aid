@@ -27,52 +27,52 @@ export enum Actions {
   REMOVE_PENDING = "remove_pending",
 }
 
-interface SelectSessionArgs {
+export interface SelectSessionArgs {
   sessionId: string;
 }
 
-interface DeleteSessionArgs {
+export interface DeleteSessionArgs {
   sessionId: string;
 }
 
-interface AddSessionArgs {
+export interface AddSessionArgs {
   session: BaseSender;
 }
 
-interface EditSessionArgs {
+export interface EditSessionArgs {
   newSession: BaseSender;
 }
 
-interface AddMessageArgs {
+export interface AddMessageArgs {
   sessionId: string;
   message: MessageProps[] | MessageProps;
 }
 
-interface SetMessagesArgs {
+export interface SetMessagesArgs {
   sessionId: string;
   messages: MessageProps[];
 }
 
-interface SliceAddMessagesArgs {
+export interface SliceAddMessagesArgs {
   sessionId: string;
   slice: [number, number];
   messages: MessageProps[];
 }
 
-interface DeleteMessageArgs {
+export interface DeleteMessageArgs {
   sessionId: string;
   messageId: string;
 }
 
-interface DeleteAllSenderMessagesArgs {
+export interface DeleteAllSenderMessagesArgs {
   sessionId: string;
 }
 
-interface AddPendingArgs {
+export interface AddPendingArgs {
   sessionId: string;
 }
 
-type RemovePendingArgs = AddPendingArgs;
+export type RemovePendingArgs = AddPendingArgs;
 
 export type ChatActionArgs =
   | ({
