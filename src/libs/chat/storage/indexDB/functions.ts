@@ -19,14 +19,14 @@ export async function getAllMessages(
 ): Promise<ChatMessagesProps> {
   const messages = await table.orderBy("timestamp").toArray();
 
-  const baseChats = senders.reduce((acc, m) => {
-    acc[m.id] = [];
+  const baseChats = senders.reduce((acc, s) => {
+    acc[s.id] = [];
     return acc;
   }, {} as ChatMessagesProps);
 
-  const chats = messages.reduce((acc, m) => {
-    if (!acc[m.senderId]) return acc;
-    acc[m.senderId].push(m);
+  const chats = messages.reduce((acc, s) => {
+    if (!acc[s.senderId]) return acc;
+    acc[s.senderId].push(s);
     return acc;
   }, baseChats);
 

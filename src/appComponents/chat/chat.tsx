@@ -79,16 +79,15 @@ export function Chat({
     removeModelsFromRemovedProviders(
       cp,
       state.sessions as ModelProps[],
-      (mId) => dispatch({ action: Actions.DELETE_SESSION, sessionId: mId }),
+      async (mId) => {
+        dispatch({ action: Actions.DELETE_SESSION, sessionId: mId });
+        await onAddRemoveModel?.(mId);
+      },
     );
     return cp;
-  }, [providers, state.sessions]);
+  }, [providers, state.sessions, onAddRemoveModel]);
 
   const setSelectedModel = (modelId: string | null) => {
-    if (!modelId) {
-      dispatch({ action: Actions.UNSELECT_SESSION });
-      return;
-    }
     dispatch({ action: Actions.SELECT_SESSION, sessionId: modelId });
   };
 
@@ -213,11 +212,12 @@ export function Chat({
               />
             ) : (
               <ChatModelList
-                models={models}
+                models={state.sessions as ModelProps[]}
                 chats={state.chats}
                 selectedModel={state.selected as ModelProps}
                 setSelectedModel={setSelectedModel}
-                providers={providers}
+                // providers={providers}
+                providers={chatProviders}
               />
             )
           }
@@ -249,7 +249,8 @@ export function Chat({
                 avatar={
                   <ModelAvatar
                     sender={state.selected as ModelProps}
-                    providers={providers}
+                    // providers={providers}
+                    providers={chatProviders}
                   />
                 }
               />

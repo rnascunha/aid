@@ -86,16 +86,15 @@ export function AudioToText({
     removeModelsFromRemovedProviders(
       cp,
       state.sessions as ModelProps[],
-      (mId) => dispatch({ action: Actions.DELETE_SESSION, sessionId: mId }),
+      async (mId) => {
+        dispatch({ action: Actions.DELETE_SESSION, sessionId: mId });
+        await onAddRemoveModel?.(mId);
+      },
     );
     return cp;
-  }, [providers, state.sessions]);
+  }, [providers, state.sessions, onAddRemoveModel]);
 
   const setSelectedModel = (modelId: string | null) => {
-    if (!modelId) {
-      dispatch({ action: Actions.UNSELECT_SESSION });
-      return;
-    }
     dispatch({ action: Actions.SELECT_SESSION, sessionId: modelId });
   };
 

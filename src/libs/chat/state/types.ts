@@ -28,7 +28,7 @@ export enum Actions {
 }
 
 export interface SelectSessionArgs {
-  sessionId: string;
+  sessionId: string | null;
 }
 
 export interface DeleteSessionArgs {

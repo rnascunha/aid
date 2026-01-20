@@ -5,8 +5,8 @@
   - Other options of storage (MongoDB...)
   - Security. Users can not access other user data
 - Messages
-  - Allow send question concurrent
-  - Send data to many user at once (previous point needs to be completed)
+  - ~~Allow send question concurrent~~
+  - ~~Send data to many user at once (previous point needs to be completed)~~
   - Context configuration
   - Virtualize output
   - Delete messages

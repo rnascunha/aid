@@ -14,7 +14,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import dayjs from "dayjs";
+import dayjs from "@/libs/dayjs";
 import { useEffect, useState } from "react";
 import { toggleMessagesPane } from "@/components/chat/utils";
 import { getPartType, isStatusMessage } from "@/libs/chat/functions";
@@ -22,9 +22,8 @@ import { StaticAvatar } from "./staticAvatar";
 import { StaticImageData } from "next/image";
 
 function getFormatedTimestamp(messages: MessageProps[]) {
-  return messages.at(-1)?.timestamp
-    ? dayjs().to(messages.at(-1)?.timestamp)
-    : "";
+  const ts = messages.at(-1)?.timestamp;
+  return ts ? dayjs().to(ts) : "";
 }
 
 function getDetailMessage(message?: MessageProps): string {

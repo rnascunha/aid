@@ -45,8 +45,8 @@ function addSession(state: ChatState, action: AddSessionArgs): ChatState {
 }
 
 function deleteSession(state: ChatState, action: DeleteSessionArgs): ChatState {
-  const newChats = { ...state.chats };
-  delete newChats[action.sessionId];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { [action.sessionId]: removed, ...newChats } = state.chats;
   return {
     ...state,
     chats: newChats,

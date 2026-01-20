@@ -46,7 +46,7 @@ export function ChatList({
 }: ChatListProps) {
   const sortSendersId = sortedSenders(chats);
   const sortSenders = sortSendersId.map((id) =>
-    senders.find((p) => p.id === id)
+    senders.find((p) => p.id === id),
   ) as BaseSender[];
 
   return (

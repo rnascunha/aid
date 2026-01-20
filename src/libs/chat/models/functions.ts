@@ -19,13 +19,13 @@ export function getProviderBase(
   return providerBaseMap[provider.providerBaseId];
 }
 
-export function removeModelsFromRemovedProviders(
+export async function removeModelsFromRemovedProviders(
   providers: ProviderProps[],
   models: ModelProps[],
-  removeModel: (modelId: string) => void,
+  removeModel: (modelId: string) => Promise<void>,
 ) {
   const providerIds = providers.map((p) => p.id);
-  models.forEach((m) => {
-    if (providerIds.includes(m.id)) removeModel(m.id);
+  models.forEach(async (m) => {
+    if (!providerIds.includes(m.providerId)) await removeModel(m.id);
   });
 }
