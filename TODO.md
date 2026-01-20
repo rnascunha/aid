@@ -8,8 +8,9 @@
   - ~~Allow send question concurrent~~
   - ~~Send data to many user at once (previous point needs to be completed)~~
   - Context configuration
-  - Virtualize output
+  - ~~Virtualize output~~
   - Delete messages
+  - Messages detail (show formated and/or in tabs)
 - Tools
   - RAG
   - Weather

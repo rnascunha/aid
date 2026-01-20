@@ -76,7 +76,7 @@ export const chats: ChatMessagesProps = {
               name: "file.json",
               descrition: "This is a fake file",
               data: [1, 1, 2, 3, 5, 8, 11],
-            })
+            }),
           );
           const size = calculateBase64SizeInBytes(data);
           return {
@@ -94,5 +94,14 @@ export const chats: ChatMessagesProps = {
       ],
     },
   ],
-  [sessions[1].id]: [],
+  [sessions[1].id]: Array.from({ length: 1000 }).map((d, i) => ({
+    id: generateUUID(),
+    origin: "received",
+    senderId: sessions[0].id,
+    timestamp: Date.now() - (1000 - i) * 10000,
+    type: TypeMessage.MESSAGE,
+    content: [{
+      text: `Message ${i}`,
+    }],
+  })),
 };

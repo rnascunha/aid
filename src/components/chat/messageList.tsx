@@ -1,16 +1,19 @@
 import {
+  Badge,
   Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Fab,
   Stack,
 } from "@mui/material";
 import { MessageProps } from "../../libs/chat/types";
 import { MessageBubble } from "./messageBubble";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import JSONOutput from "../JSONOutput";
+import { VList, VListHandle } from "virtua";
 
 function MessageDetail({ message }: { message: MessageProps }) {
   return <JSONOutput src={message} name={null} />;
@@ -54,16 +57,57 @@ interface MessageListProps {
   avatar?: ReactNode;
 }
 
-export function MessageList({ messages, avatar }: MessageListProps) {
-  const el = useRef<HTMLDivElement>(null);
-  const [message, setMessage] = useState<MessageProps | null>(null);
+import ExpandCircleDownIcon from "@mui/icons-material/ExpandCircleDown";
 
+function ScrollDownButton({
+  unseen,
+  onClick,
+}: {
+  unseen: number;
+  onClick: () => void;
+}) {
+  return (
+    <Badge
+      sx={{
+        position: "absolute",
+        bottom: "15px",
+        right: "15px",
+        // zIndex: 10,
+      }}
+      badgeContent={unseen}
+      color="primary"
+    >
+      <Fab size="small" onClick={onClick}>
+        <ExpandCircleDownIcon />
+      </Fab>
+    </Badge>
+  );
+}
+
+export function MessageList({ messages, avatar }: MessageListProps) {
+  const el = useRef<VListHandle | null>(null);
+  const [message, setMessage] = useState<MessageProps | null>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [unseen, setUnseen] = useState(0);
+
+  // Initiate scroll at the end
   useEffect(() => {
     const elem = el.current;
     if (!elem) return;
-    setTimeout(() => {
-      elem.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 300);
+    elem.scrollToIndex(messages.length, { align: "end" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Scroll when a new message is received
+  useEffect(() => {
+    if (!isAtBottom) {
+      setUnseen((prev) => prev + 1);
+      return;
+    }
+    const elem = el.current;
+    if (!elem) return;
+    elem.scrollToIndex(messages.length, { align: "end" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   return (
@@ -73,24 +117,40 @@ export function MessageList({ messages, avatar }: MessageListProps) {
         minHeight: 0,
         px: 2,
         py: 3,
-        overflowY: "auto",
         position: "relative",
       }}
     >
-      <Stack
-        spacing={2}
+      {!isAtBottom && (
+        <ScrollDownButton
+          unseen={unseen}
+          onClick={() =>
+            el.current?.scrollToIndex(messages.length, { align: "end" })
+          }
+        />
+      )}
+      <VList
         ref={el}
-        sx={{
-          justifyContent: "flex-end",
+        style={{
           position: "absolute",
           top: 0,
           left: 0,
-          width: "100%",
-          p: 0.5,
-          overflowX: "hidden",
+          // scrollBehavior: el.current ? "smooth" : "auto",
+          padding: "0px 0px 8px 0px",
+        }}
+        data={messages}
+        bufferSize={1000}
+        onScrollEnd={() => {
+          const elem = el.current;
+          if (!elem) return;
+          if (elem.scrollOffset - elem.scrollSize + elem.viewportSize >= -1.5) {
+            setIsAtBottom(true);
+            setUnseen(0);
+          } else {
+            setIsAtBottom(false);
+          }
         }}
       >
-        {messages.map((message: MessageProps, index: number) => {
+        {(message, index) => {
           const isYou = message.origin === "sent";
           return (
             <Stack
@@ -106,8 +166,8 @@ export function MessageList({ messages, avatar }: MessageListProps) {
               />
             </Stack>
           );
-        })}
-      </Stack>
+        }}
+      </VList>
       <MessageDetailDialog message={message} onClose={() => setMessage(null)} />
     </Box>
   );
