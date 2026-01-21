@@ -211,7 +211,6 @@ export function Chat({
                 chats={state.chats}
                 selectedModel={state.selected as ModelProps}
                 setSelectedModel={setSelectedModel}
-                // providers={providers}
                 providers={chatProviders}
               />
             )

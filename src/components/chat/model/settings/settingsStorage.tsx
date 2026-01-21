@@ -3,15 +3,11 @@ import { Button, Divider, Stack, Typography } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useRef, useState } from "react";
-import {
-  clearData,
-  exportData,
-  importData,
-} from "@/libs/chat/storage/indexDB/general";
+import { useContext, useRef, useState } from "react";
 import { DeleteDialog } from "@/components/dialogs/deleteDialog";
 import { download } from "@/libs/download";
 import { VisuallyHiddenInput } from "@/components/fileUpload";
+import { aIContext } from "../../context";
 
 type State = "save" | "load" | "clear";
 
@@ -19,6 +15,7 @@ export function SettingStorage() {
   const [state, setState] = useState<State | undefined>(undefined);
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { storage } = useContext(aIContext);
 
   const click = async (s: State, exec: () => Promise<void>) => {
     setState(s);
@@ -27,18 +24,19 @@ export function SettingStorage() {
   };
 
   const clearDataDB = async () => {
-    await clearData();
+    await storage?.clear();
   };
 
   const downloadData = async () => {
-    const blob = await exportData();
+    const blob = await storage?.export();
+    if (!blob) return;
     download(blob, "text/json", "aid.json");
   };
 
   const loadData = async (file: File | undefined) => {
     if (!file) return;
     try {
-      await importData(file);
+      await storage?.import(file);
       window.location.reload();
     } catch (e) {
       console.error(e);

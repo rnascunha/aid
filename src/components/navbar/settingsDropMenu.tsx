@@ -18,15 +18,11 @@ import { UserHeader } from "./userHeader";
 import { Session } from "next-auth";
 import { SettingsDialog } from "../chat/model/settings";
 import { aIContext } from "../chat/context";
-import {
-  updateProvider,
-  updateTools,
-} from "@/libs/chat/storage/indexDB/general";
 
 export function SettingsDropMenu({ session }: { session: Session }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const { openSettings, setOpenSettings } = useContext(aIContext);
+  const { openSettings, setOpenSettings, storage } = useContext(aIContext);
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -90,8 +86,12 @@ export function SettingsDropMenu({ session }: { session: Session }) {
       <SettingsDialog
         open={openSettings}
         onClose={() => setOpenSettings(false)}
-        updateProvider={(provider) => updateProvider(provider)}
-        updateTool={updateTools}
+        updateProvider={(provider) =>
+          typeof provider === "string"
+            ? storage?.deleteProvider(provider)
+            : storage?.addProvider(provider)
+        }
+        updateTool={(tool) => storage?.updateTools(tool)}
       />
     </>
   );

@@ -1,34 +1,13 @@
-import Dexie, { Table } from "dexie";
-import {
-  TableAudioToTextSettings,
-  TableChatSettings,
-  TableMessages,
-  TableSenders,
-  ToolsDB,
-} from "./types";
-import { ProviderProps } from "@/libs/chat/models/types";
+import Dexie from "dexie";
+import { StorageStoreType } from "./types";
 import {
   ChatbotStorageIndexDB,
   StorageAudioToTextIndexDB,
   StorageChatIndexDB,
+  StorageGeneralIndexDB,
 } from "./storageIndexDB";
 
-export const aISettings = new Dexie("AISettings") as Dexie & {
-  // General
-  providers: Table<ProviderProps, string>;
-  tools: Table<ToolsDB, string>;
-  // Chat
-  chatMessages: TableMessages;
-  chatModels: TableSenders;
-  chatSettings: TableChatSettings;
-  // Audio to Text
-  audioToTextMessages: TableMessages;
-  audioToTextModels: TableSenders;
-  audioToTextSettings: TableAudioToTextSettings;
-  // Chatbot
-  chatbotMessages: TableMessages;
-  chatbotSessions: TableSenders;
-};
+export const aISettings = new Dexie("AISettings") as StorageStoreType;
 
 aISettings.version(1).stores({
   // General
@@ -47,11 +26,21 @@ aISettings.version(1).stores({
   chatbotSessions: "id",
 });
 
+export let generalStorage: StorageGeneralIndexDB | null = null;
 export let chatStorage: StorageChatIndexDB | null = null;
 export let audioToTextStorage: StorageAudioToTextIndexDB | null = null;
 export let chatbotStorage: ChatbotStorageIndexDB | null = null;
 
 aISettings.open().then(() => {
+  generalStorage = new StorageGeneralIndexDB(
+    aISettings,
+    aISettings.providers,
+    aISettings.tools,
+    aISettings.chatModels,
+    aISettings.chatMessages,
+    aISettings.audioToTextModels,
+    aISettings.audioToTextMessages,
+  );
   chatStorage = new StorageChatIndexDB(
     aISettings.chatMessages,
     aISettings.chatModels,

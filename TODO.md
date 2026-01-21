@@ -11,6 +11,8 @@
   - ~~Virtualize output~~
   - Delete messages
   - Messages detail (show formated and/or in tabs)
+  - Filter images by type
+  - Search message by content
 - Tools
   - RAG
   - Weather

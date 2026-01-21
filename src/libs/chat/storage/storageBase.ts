@@ -1,6 +1,51 @@
 import { ChatSettings } from "@/appComponents/chat/types";
-import { BaseSender, ChatMessagesProps, MessageProps } from "../types";
+import {
+  BaseSender,
+  ChatMessagesProps,
+  MessageProps,
+  ToolsProps,
+} from "../types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
+import { ProviderProps } from "../models/types";
+import { ToolsDB } from "./indexDB/types";
+
+export abstract class StorageGeneralBase {
+  // GENERAL
+  abstract clear(): Promise<void>;
+  abstract export(): Promise<Blob>;
+  abstract import(blob: Blob): Promise<void>;
+
+  // PROVIDER
+  /**
+   * Get all providers
+   */
+  abstract getProviders(): Promise<ProviderProps[]>;
+
+  /**
+   * Add provider
+   *
+   * @param provider Provider to add
+   */
+  abstract addProvider(provider: ProviderProps): Promise<void>;
+  /**
+   * Delete provider
+   *
+   * @param providerId Id of provider to delete
+   */
+  abstract deleteProvider(providerId: string): Promise<void>;
+
+  // TOOLS
+  /**
+   * Get all tools and configurations
+   */
+  abstract getTools(): Promise<ToolsDB | undefined>;
+  /**
+   * Update tool info
+   *
+   * @param tools tool config to update
+   */
+  abstract updateTools(tools: ToolsProps): Promise<void>;
+}
 
 export abstract class StorageBase {
   // MESSAGES
