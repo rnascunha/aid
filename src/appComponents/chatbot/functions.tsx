@@ -1,11 +1,12 @@
-import { SessionType } from "./types";
-import { adk_api_events, app_name } from "./constants";
+import { ChatbotData, SessionType } from "./types";
+import { adk_api_events, app_name, defaultChatbotData } from "./constants";
 import { generateUUID } from "@/libs/uuid";
 import { MessageProps, TypeMessage } from "@/libs/chat/types";
 import { PartialDataAggregator, readQuerySSE } from "@/libs/adk/base";
 import { ADKEvent } from "@/libs/adk/types";
 import { ActionDispatch } from "react";
 import { Actions, ChatActionArgs } from "@/libs/chat/state/types";
+import { ChatbotStorageBase } from "@/libs/chat/storage/storageBase";
 
 export function createNewSession(name: string = ""): SessionType {
   return {
@@ -121,4 +122,21 @@ export async function messageResponse(
   });
 
   return msgs;
+}
+
+export async function getChatbotData({
+  storage,
+  defaultData = defaultChatbotData,
+}: {
+  storage?: ChatbotStorageBase;
+  defaultData?: ChatbotData;
+}): Promise<ChatbotData> {
+  if (!storage) return defaultData;
+
+  const sessions = (await storage.getSenders()) as SessionType[];
+  const chats = await storage.getMessages(sessions.map((m) => m.id));
+  return {
+    sessions,
+    chats,
+  };
 }

@@ -78,3 +78,6 @@ export abstract class AudioToTextStorageBase extends StorageBase {
    */
   abstract updateSettings(settings: AudioToTextSettings): Promise<void>;
 }
+
+export const ChatbotStorageBase = StorageBase;
+export type ChatbotStorageBase = StorageBase;

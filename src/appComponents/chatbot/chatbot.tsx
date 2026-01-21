@@ -26,24 +26,20 @@ import { InputOutput } from "@/components/chat/input/types";
 import { reducer } from "@/libs/chat/state/functions";
 import { Actions } from "@/libs/chat/state/types";
 import { MultipleMessage } from "@/components/chat/input/multipleMessages";
+import { ChatbotStorageBase } from "@/libs/chat/storage/storageBase";
 
 interface ChatBotProps {
   sessions: SessionType[];
   chats: ChatMessagesProps;
   user: string;
-  onMessage?: (
-    message: MessageProps | MessageProps[],
-    contactId: string,
-  ) => Promise<void> | void;
-  onAddRemoveSession?: (session: string | SessionType) => Promise<void> | void;
+  storage?: ChatbotStorageBase;
 }
 
 export default function ChatBot({
   chats: initChats,
   sessions: initSessions,
   user,
-  onMessage,
-  onAddRemoveSession,
+  storage,
 }: ChatBotProps) {
   const [state, dispatch] = useReducer(reducer, {
     selected: null,
@@ -54,7 +50,7 @@ export default function ChatBot({
 
   const onDeleteSession = async (session: SessionType) => {
     dispatch({ action: Actions.DELETE_SESSION, sessionId: session.id });
-    await onAddRemoveSession?.(session.id);
+    await storage?.deleteSender(session.id);
   };
 
   const onEditSession = async <K extends keyof SessionType>(
@@ -70,7 +66,7 @@ export default function ChatBot({
       action: Actions.EDIT_SESSION,
       newSession,
     });
-    await onAddRemoveSession?.(newSession);
+    await storage?.addSender(newSession);
   };
 
   const onAddSession = async (name: string = "") => {
@@ -79,7 +75,7 @@ export default function ChatBot({
       action: Actions.ADD_SESSION,
       session: newSession,
     });
-    await onAddRemoveSession?.(newSession);
+    await storage?.addSender(newSession);
   };
 
   const sendMessage = async (
@@ -96,8 +92,8 @@ export default function ChatBot({
       message: newMessage,
       sessionId: session.id,
     });
+    await storage?.addMessage(newMessage);
 
-    await onMessage?.(newMessage, session.id);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
     dispatch({ action: Actions.ADD_PENDING, sessionId: session.id });
@@ -111,7 +107,7 @@ export default function ChatBot({
         },
         dispatch,
       );
-      await onMessage?.(response, session.id);
+      await storage?.addMessage(response);
     } catch (e) {
       console.error(e);
     } finally {
@@ -120,11 +116,10 @@ export default function ChatBot({
   };
 
   const setSelectedSession = (session: SessionType | null) => {
-    if (!session) {
-      dispatch({ action: Actions.UNSELECT_SESSION });
-      return;
-    }
-    dispatch({ action: Actions.SELECT_SESSION, sessionId: session.id });
+    dispatch({
+      action: Actions.SELECT_SESSION,
+      sessionId: session?.id ?? null,
+    });
   };
 
   const isPending = state.selected?.id

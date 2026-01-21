@@ -162,3 +162,6 @@ export class StorageAudioToTextIndexDB extends AudioToTextStorageBase {
     await this._settingsTable.put(settings, defaultAudioToTextSettingsKey);
   }
 }
+
+export const ChatbotStorageIndexDB = StorageIndexDB;
+export type ChatbotStorageIndexDB = StorageIndexDB;

@@ -8,6 +8,7 @@ import {
 } from "./types";
 import { ProviderProps } from "@/libs/chat/models/types";
 import {
+  ChatbotStorageIndexDB,
   StorageAudioToTextIndexDB,
   StorageChatIndexDB,
 } from "./storageIndexDB";
@@ -48,6 +49,7 @@ aISettings.version(1).stores({
 
 export let chatStorage: StorageChatIndexDB | null = null;
 export let audioToTextStorage: StorageAudioToTextIndexDB | null = null;
+export let chatbotStorage: ChatbotStorageIndexDB | null = null;
 
 aISettings.open().then(() => {
   chatStorage = new StorageChatIndexDB(
@@ -59,5 +61,9 @@ aISettings.open().then(() => {
     aISettings.audioToTextMessages,
     aISettings.audioToTextModels,
     aISettings.audioToTextSettings,
+  );
+  chatbotStorage = new ChatbotStorageIndexDB(
+    aISettings.chatbotMessages,
+    aISettings.chatbotSessions,
   );
 });
