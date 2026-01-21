@@ -115,7 +115,7 @@ export function AudioToText({
     messages: InputOutput | MessageContentStatus,
     type: TypeMessage,
   ) => {
-    if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
+    if (type === TypeMessage.MESSAGE && !((messages as InputOutput).files.length > 0))
       return;
 
     console.log(messages);
