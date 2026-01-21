@@ -1,4 +1,5 @@
-import { ToolsProps } from "@/libs/chat/types";
+import { ModelProps } from "@/libs/chat/models/types";
+import { ChatMessagesProps, ToolsProps } from "@/libs/chat/types";
 
 export interface GeneralSettings {
   temperature: number;
@@ -16,7 +17,7 @@ export interface ToolNode {
   validade?: (
     id: string,
     toolInfo: ToolsProps,
-    tools: string[]
+    tools: string[],
   ) => { allowed: boolean; error: string | undefined };
 }
 
@@ -29,4 +30,10 @@ export interface ChatSettings {
   general: GeneralSettings;
   context: ContextSettings;
   tools: ToolsSettings;
+}
+
+export interface ChatData {
+  chats: ChatMessagesProps;
+  models: ModelProps[];
+  settings: ChatSettings;
 }

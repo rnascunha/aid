@@ -30,7 +30,6 @@ import { ModelProps } from "@/libs/chat/models/types";
 import {
   ChatMessagesProps,
   MessageContentStatus,
-  MessageProps,
   TypeMessage,
 } from "@/libs/chat/types";
 import { EmptyChatList } from "@/components/chat/chatList";
@@ -39,28 +38,20 @@ import { InputOutput } from "@/components/chat/input/types";
 import { reducer } from "@/libs/chat/state/functions";
 import { Actions } from "@/libs/chat/state/types";
 import { MultipleMessage } from "@/components/chat/input/multipleMessages";
+import { ChatStorageBase } from "@/libs/chat/storage/storageBase";
 
 export interface ChatProps {
   models: ModelProps[];
   chats: ChatMessagesProps;
   settings: ChatSettings;
-  onMessage?: (
-    message: MessageProps,
-    contactId: string,
-  ) => Promise<void> | void;
-  onDeleteMessages?: (modelId?: string) => Promise<void> | void;
-  onAddRemoveModel?: (model: string | ModelProps) => Promise<void> | void;
-  onSettingsChange?: (settings: ChatSettings) => Promise<void> | void;
+  storage?: ChatStorageBase;
 }
 
 export function Chat({
   models: allModels,
   chats: allChats,
   settings: initSettings,
-  onMessage,
-  onDeleteMessages,
-  onAddRemoveModel,
-  onSettingsChange,
+  storage,
 }: ChatProps) {
   const [state, dispatch] = useReducer(reducer, {
     chats: allChats,
@@ -81,11 +72,11 @@ export function Chat({
       state.sessions as ModelProps[],
       async (mId) => {
         dispatch({ action: Actions.DELETE_SESSION, sessionId: mId });
-        await onAddRemoveModel?.(mId);
+        await storage?.deleteSender(mId);
       },
     );
     return cp;
-  }, [providers, state.sessions, onAddRemoveModel]);
+  }, [providers, state.sessions, storage]);
 
   const setSelectedModel = (modelId: string | null) => {
     dispatch({ action: Actions.SELECT_SESSION, sessionId: modelId });
@@ -109,8 +100,8 @@ export function Chat({
   }
 
   useEffect(() => {
-    onSettingsChange?.(settings);
-  }, [settings, onSettingsChange]);
+    storage?.updateSettings(settings);
+  }, [settings, storage]);
 
   const sendMessage = async (
     session: ModelProps,
@@ -127,7 +118,7 @@ export function Chat({
       sessionId: session.id,
     });
 
-    await onMessage?.(newMessage, session.id);
+    await storage?.addMessage(newMessage);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
     dispatch({ action: Actions.ADD_PENDING, sessionId: session.id });
@@ -146,7 +137,7 @@ export function Chat({
         message: response,
         sessionId: session.id,
       });
-      await onMessage?.(response, session.id);
+      await storage?.addMessage(response);
     } catch (e) {
       console.error(e);
     } finally {
@@ -156,20 +147,24 @@ export function Chat({
 
   const onDeleteAllMessagesHandler = async () => {
     dispatch({ action: Actions.DELETE_ALL_MESSAGES });
-    await onDeleteMessages?.();
+    await storage?.deleteAllMessages();
   };
   const onDeleteModelMessagesHandler = async (modelId: string) => {
     dispatch({
       action: Actions.DELETE_ALL_SENDER_MESSAGES,
       sessionId: modelId,
     });
-    await onDeleteMessages?.(modelId);
+    await storage?.deleteSenderMessages(modelId);
   };
+
   const onAddRemoveModelHandler = async (model: string | ModelProps) => {
-    if (typeof model === "string")
+    if (typeof model === "string") {
       dispatch({ action: Actions.DELETE_SESSION, sessionId: model });
-    else dispatch({ action: Actions.ADD_SESSION, session: model });
-    await onAddRemoveModel?.(model);
+      await storage?.deleteSender(model);
+    } else {
+      dispatch({ action: Actions.ADD_SESSION, session: model });
+      await storage?.addSender(model);
+    }
   };
 
   const models = state.sessions as ModelProps[];

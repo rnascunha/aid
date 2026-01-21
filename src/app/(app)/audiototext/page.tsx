@@ -1,41 +1,20 @@
 "use client";
 
 import { AudioToText } from "@/appComponents/audioToText/audioToText";
-import { initAudioSettings } from "@/appComponents/audioToText/data";
-import { AudioToTextSettings } from "@/appComponents/audioToText/types";
-import { ModelProps } from "@/libs/chat/models/types";
+import { getAudioToTextData } from "@/appComponents/audioToText/functions";
+import { AudioToTextData } from "@/appComponents/audioToText/types";
 import CenterSpinner from "@/components/spinner/centerSpinner";
-import {
-  deleteAudioToTextMessages,
-  getAllAudioToTextMessages,
-  getAllAudioToTextModels,
-  getAudioToTextSettings,
-  onAddAudioToTextRemoveModel,
-  onAudioToTextMessage,
-  updateAudioToTextSettings,
-} from "@/libs/chat/storage/indexDB/audioToText";
+import { audioToTextStorage } from "@/libs/chat/storage/indexDB/store";
+import { AudioToTextStorageBase } from "@/libs/chat/storage/storageBase";
 import { useEffect, useState } from "react";
-import { ChatMessagesProps } from "@/libs/chat/types";
-
-interface DataDB {
-  models: ModelProps[];
-  chats: ChatMessagesProps;
-  settings?: AudioToTextSettings;
-}
 
 export default function AudioToTextPage() {
-  const [dbData, setDbData] = useState<null | DataDB>(null);
+  const [dbData, setDbData] = useState<null | AudioToTextData>(null);
 
   useEffect(() => {
-    async function getData() {
-      const [settings, models] = await Promise.all([
-        getAudioToTextSettings(),
-        getAllAudioToTextModels(),
-      ]);
-      const chats = await getAllAudioToTextMessages(models as ModelProps[]);
-      return { chats, settings, models };
-    }
-    getData().then((d) => setDbData(d as DataDB));
+    getAudioToTextData({
+      storage: audioToTextStorage as AudioToTextStorageBase,
+    }).then((d) => setDbData(d));
   }, []);
 
   return dbData === null ? (
@@ -44,11 +23,8 @@ export default function AudioToTextPage() {
     <AudioToText
       models={dbData.models}
       chats={dbData.chats}
-      settings={dbData.settings ?? initAudioSettings}
-      onMessage={onAudioToTextMessage}
-      onDeleteMessages={deleteAudioToTextMessages}
-      onSettingsChange={updateAudioToTextSettings}
-      onAddRemoveModel={onAddAudioToTextRemoveModel}
+      settings={dbData.settings}
+      storage={audioToTextStorage as AudioToTextStorageBase}
     />
   );
 }

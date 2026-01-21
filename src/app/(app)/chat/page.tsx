@@ -2,40 +2,19 @@
 
 import { useEffect, useState } from "react";
 import CenterSpinner from "@/components/spinner/centerSpinner";
-import { ChatSettings } from "@/appComponents/chat/types";
-import { defaultSettings } from "@/appComponents/chat/data";
 import { Chat } from "@/appComponents/chat/chat";
-import {
-  deleteChatMessages,
-  getAllChatMessages,
-  getAllChatModels,
-  getChatSettings,
-  onAddRemoveChatModel,
-  onChatMessage,
-  updateChatSettings,
-} from "@/libs/chat/storage/indexDB/chat";
-import { ModelProps } from "@/libs/chat/models/types";
-import { ChatMessagesProps } from "@/libs/chat/types";
-
-interface DataDB {
-  chats: ChatMessagesProps;
-  models: ModelProps[];
-  settings?: ChatSettings;
-}
+import { chatStorage } from "@/libs/chat/storage/indexDB/store";
+import { ChatData } from "@/appComponents/chat/types";
+import { getChatData } from "@/appComponents/chat/functions";
+import { ChatStorageBase } from "@/libs/chat/storage/storageBase";
 
 export default function ChatPage() {
-  const [dbData, setDbData] = useState<null | DataDB>(null);
+  const [dbData, setDbData] = useState<null | ChatData>(null);
 
   useEffect(() => {
-    async function getData() {
-      const [models, settings] = await Promise.all([
-        getAllChatModels(),
-        getChatSettings(),
-      ]);
-      const chats = await getAllChatMessages(models as ModelProps[]);
-      return { models, chats, settings };
-    }
-    getData().then((d) => setDbData(d as DataDB));
+    getChatData({ storage: chatStorage as ChatStorageBase }).then((data) =>
+      setDbData(data),
+    );
   }, []);
 
   return dbData === null ? (
@@ -44,11 +23,8 @@ export default function ChatPage() {
     <Chat
       models={dbData.models}
       chats={dbData.chats}
-      settings={dbData.settings ?? defaultSettings}
-      onMessage={onChatMessage}
-      onDeleteMessages={deleteChatMessages}
-      onAddRemoveModel={onAddRemoveChatModel}
-      onSettingsChange={updateChatSettings}
+      settings={dbData.settings}
+      storage={chatStorage as ChatStorageBase}
     />
   );
 }

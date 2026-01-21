@@ -112,21 +112,24 @@ export const toolsList: ToolNode[] = [
         error: allowed
           ? undefined
           : !requiredTools
-          ? "Must allow IP tool"
-          : toolInfo.geoLocationApiKey === ""
-          ? "Must configure Geolocation tool"
-          : "Error getting IP",
+            ? "Must allow IP tool"
+            : toolInfo.geoLocationApiKey === ""
+              ? "Must configure Geolocation tool"
+              : "Error getting IP",
       };
     },
   },
 ] as const;
 
-export const toolsMap = toolsList.reduce((acc, t) => {
-  acc[t.id] = t;
-  return acc;
-}, {} as Record<string, ToolNode>);
+export const toolsMap = toolsList.reduce(
+  (acc, t) => {
+    acc[t.id] = t;
+    return acc;
+  },
+  {} as Record<string, ToolNode>,
+);
 
-export const defaultSettings: ChatSettings = {
+const defaultSettings: ChatSettings = {
   general: { temperature: 0.75 },
   context: {
     systemPrompt: "You are a helpful assistant.",
@@ -137,4 +140,10 @@ export const defaultSettings: ChatSettings = {
     maxTurns: 2,
     tools: ["get_current_datetime"],
   },
+};
+
+export const defaultChatData = {
+  chats: {},
+  models: [],
+  settings: defaultSettings,
 };

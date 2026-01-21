@@ -1,8 +1,10 @@
-import { AudioToTextSettings } from "./types";
+import { AudioToTextData, AudioToTextSettings } from "./types";
 import { fetchAudioToText } from "@/actions/ai/audiototext";
 import { providerBaseMap } from "@/libs/chat/models/data";
 import { ModelProps, ProviderProps } from "@/libs/chat/models/types";
 import { MessageProps } from "@/libs/chat/types";
+import { defaultAudioToTextData } from "./data";
+import { AudioToTextStorageBase } from "@/libs/chat/storage/storageBase";
 
 export async function attachmentResponse({
   data,
@@ -36,4 +38,25 @@ export async function attachmentResponse({
     raw: response.raw,
   } as MessageProps;
   return responseMessage;
+}
+
+export async function getAudioToTextData({
+  storage,
+  defaultData = defaultAudioToTextData,
+}: {
+  storage?: AudioToTextStorageBase;
+  defaultData?: AudioToTextData;
+}): Promise<AudioToTextData> {
+  if (!storage) return defaultData;
+
+  const [models, settings] = await Promise.all([
+    storage.getSenders(),
+    storage.getSettings(),
+  ]);
+  const chats = await storage.getMessages(models.map((m) => m.id));
+  return {
+    models: models as ModelProps[],
+    chats,
+    settings: settings ?? defaultData.settings,
+  };
 }

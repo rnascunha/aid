@@ -10,7 +10,7 @@ import {
 } from "./types";
 import { ContextSettings } from "@/appComponents/chat/types";
 import { generateUUID } from "../uuid";
-import { serverActionBodySizeLimit } from "@/appComponents/audioToText/contants";
+import { serverActionBodySizeLimit } from "@/appComponents/audioToText/constants";
 import { formatBytes } from "../formatData";
 import { InputOutput } from "@/components/chat/input/types";
 import { makeInputParts } from "@/components/chat/input/function";

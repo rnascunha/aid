@@ -1,4 +1,5 @@
 import { ChatMessagesProps } from "@/libs/chat/types";
+import { AudioToTextData } from "./types";
 
 export const audioToTextProviderModel: Record<string, string[]> = {
   openai: ["whisper-1"],
@@ -44,8 +45,14 @@ export const audiToTextLanguageOptions: AudioToTextLanguage[] = [
   { value: "vi", label: "Vietnamese", flagCode: "vn" },
 ];
 
-export const initAudioSettings = {
+const defaultAudioSettings = {
   language: "en",
   temperature: 0.75,
   prompt: "",
+};
+
+export const defaultAudioToTextData: AudioToTextData = {
+  chats: {},
+  models: [],
+  settings: defaultAudioSettings,
 };

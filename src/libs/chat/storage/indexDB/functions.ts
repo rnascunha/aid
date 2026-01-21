@@ -7,7 +7,7 @@ import { BaseSender, ChatMessagesProps, MessageProps } from "../../types";
 
 export async function onMessage(
   table: TableMessages,
-  messages: MessageProps | MessageProps[]
+  messages: MessageProps | MessageProps[],
 ) {
   if (!Array.isArray(messages)) messages = [messages];
   await table.bulkAdd(messages);
@@ -15,7 +15,7 @@ export async function onMessage(
 
 export async function getAllMessages(
   table: TableMessages,
-  senders: BaseSender[]
+  senders: BaseSender[],
 ): Promise<ChatMessagesProps> {
   const messages = await table.orderBy("timestamp").toArray();
 
@@ -33,9 +33,29 @@ export async function getAllMessages(
   return chats;
 }
 
+export async function getAllMessagesByIds(
+  table: TableMessages,
+  senderIds: string[],
+): Promise<ChatMessagesProps> {
+  const messages = await table.orderBy("timestamp").toArray();
+
+  const baseChats = senderIds.reduce((acc, id) => {
+    acc[id] = [];
+    return acc;
+  }, {} as ChatMessagesProps);
+
+  const chats = messages.reduce((acc, m) => {
+    if (!acc[m.senderId]) return acc;
+    acc[m.senderId].push(m);
+    return acc;
+  }, baseChats);
+
+  return chats;
+}
+
 export async function deleteSenderMessages(
   table: TableMessages,
-  senderId: string
+  senderId: string,
 ) {
   await table.where("senderId").equals(senderId).delete();
 }
@@ -67,7 +87,7 @@ async function updateSender(table: TableSenders, sender: BaseSender) {
 async function removeSender(
   table: TableSenders,
   senderId: string,
-  tableMessages: TableMessages
+  tableMessages: TableMessages,
 ) {
   await Promise.all([
     table.delete(senderId),
@@ -78,7 +98,7 @@ async function removeSender(
 export async function onAddRemoveSender(
   table: TableSenders,
   sender: string | BaseSender,
-  tableMessages: TableMessages
+  tableMessages: TableMessages,
 ) {
   if (typeof sender === "string") {
     return await removeSender(table, sender, tableMessages);
@@ -93,7 +113,7 @@ export async function onAddRemoveSender(
 export async function deleteModelFromProviderId(
   table: TableSenders,
   providerId: string,
-  tableMessages: TableMessages
+  tableMessages: TableMessages,
 ) {
   const allModels = await table
     .where("providerId")

@@ -11,7 +11,6 @@ import { MessagesModelHeader } from "@/components/chat/model/messagesHeader";
 import {
   ChatMessagesProps,
   MessageContentStatus,
-  MessageProps,
   TypeMessage,
 } from "@/libs/chat/types";
 import { useContext, useEffect, useMemo, useReducer, useState } from "react";
@@ -37,18 +36,13 @@ import { InputOutput } from "@/components/chat/input/types";
 import { reducer } from "@/libs/chat/state/functions";
 import { Actions } from "@/libs/chat/state/types";
 import { MultipleMessage } from "@/components/chat/input/multipleMessages";
+import { AudioToTextStorageBase } from "@/libs/chat/storage/storageBase";
 
 interface AudioToTextPros {
   models: ModelProps[];
   chats: ChatMessagesProps;
   settings: AudioToTextSettings;
-  onMessage?: (
-    message: MessageProps,
-    contactId: string,
-  ) => Promise<void> | void;
-  onDeleteMessages?: (modelId?: string) => Promise<void> | void;
-  onSettingsChange?: (settings: AudioToTextSettings) => Promise<void> | void;
-  onAddRemoveModel?: (model: string | ModelProps) => Promise<void> | void;
+  storage?: AudioToTextStorageBase;
 }
 
 interface InputState {
@@ -60,10 +54,7 @@ export function AudioToText({
   models: allModel,
   chats: allChats,
   settings: initSettings,
-  onMessage,
-  onDeleteMessages,
-  onSettingsChange,
-  onAddRemoveModel,
+  storage,
 }: AudioToTextPros) {
   const [state, dispatch] = useReducer(reducer, {
     selected: null,
@@ -88,11 +79,11 @@ export function AudioToText({
       state.sessions as ModelProps[],
       async (mId) => {
         dispatch({ action: Actions.DELETE_SESSION, sessionId: mId });
-        await onAddRemoveModel?.(mId);
+        await storage?.deleteSender(mId);
       },
     );
     return cp;
-  }, [providers, state.sessions, onAddRemoveModel]);
+  }, [providers, state.sessions, storage]);
 
   const setSelectedModel = (modelId: string | null) => {
     dispatch({ action: Actions.SELECT_SESSION, sessionId: modelId });
@@ -116,8 +107,8 @@ export function AudioToText({
   }
 
   useEffect(() => {
-    onSettingsChange?.(settings);
-  }, [settings, onSettingsChange]);
+    storage?.updateSettings(settings);
+  }, [settings, storage]);
 
   const sendMessage = async (
     session: ModelProps,
@@ -127,6 +118,7 @@ export function AudioToText({
     if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
       return;
 
+    console.log(messages);
     const newMessage = sendMessageHandler(messages, type, session.id);
     dispatch({
       action: Actions.ADD_MESSAGE,
@@ -134,7 +126,7 @@ export function AudioToText({
       sessionId: session.id,
     });
 
-    await onMessage?.(newMessage, session.id);
+    await storage?.addMessage(newMessage);
     if (newMessage.type !== TypeMessage.MESSAGE) return;
 
     dispatch({ action: Actions.ADD_PENDING, sessionId: session.id });
@@ -151,7 +143,7 @@ export function AudioToText({
         message: response,
         sessionId: session.id,
       });
-      await onMessage?.(response, session.id);
+      await storage?.addMessage(response);
     } catch (e) {
       console.error(e);
     } finally {
@@ -160,22 +152,25 @@ export function AudioToText({
   };
 
   const onAddRemoveModelHandler = async (model: string | ModelProps) => {
-    if (typeof model === "string")
+    if (typeof model === "string") {
       dispatch({ action: Actions.DELETE_SESSION, sessionId: model });
-    else dispatch({ action: Actions.ADD_SESSION, session: model });
-    await onAddRemoveModel?.(model);
+      await storage?.deleteSender(model);
+    } else {
+      dispatch({ action: Actions.ADD_SESSION, session: model });
+      await storage?.addSender(model);
+    }
   };
 
   const onDeleteAllMessagesHandler = async () => {
     dispatch({ action: Actions.DELETE_ALL_MESSAGES });
-    await onDeleteMessages?.();
+    await storage?.deleteAllMessages();
   };
   const onDeleteModelMessagesHandler = async (modelId: string) => {
     dispatch({
       action: Actions.DELETE_ALL_SENDER_MESSAGES,
       sessionId: modelId,
     });
-    await onDeleteMessages?.(modelId);
+    await storage?.deleteSenderMessages(modelId);
   };
 
   const isPending = state.selected?.id

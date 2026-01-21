@@ -1,10 +1,11 @@
 import { MessageProps, ToolsProps } from "@/libs/chat/types";
-import { ChatSettings } from "./types";
+import { ChatData, ChatSettings } from "./types";
 import { mergeMessages } from "@/libs/chat/functions";
 import { fetchChatRequest } from "@/actions/ai/chat";
 import { providerBaseMap } from "@/libs/chat/models/data";
-import { toolsMap } from "./data";
+import { defaultChatData, toolsMap } from "./data";
 import { ModelProps, ProviderProps } from "@/libs/chat/models/types";
+import { ChatStorageBase } from "@/libs/chat/storage/storageBase";
 
 export async function messageResponse(
   message: string,
@@ -48,4 +49,25 @@ export async function messageResponse(
   } as MessageProps;
 
   return newMessage;
+}
+
+export async function getChatData({
+  storage,
+  defaultData = defaultChatData,
+}: {
+  storage?: ChatStorageBase;
+  defaultData?: ChatData;
+}): Promise<ChatData> {
+  if (!storage) return defaultData;
+
+  const [models, settings] = await Promise.all([
+    storage.getSenders(),
+    storage.getSettings(),
+  ]);
+  const chats = await storage.getMessages(models.map((m) => m.id));
+  return {
+    models: models as ModelProps[],
+    chats,
+    settings: settings ?? defaultData.settings,
+  };
 }
