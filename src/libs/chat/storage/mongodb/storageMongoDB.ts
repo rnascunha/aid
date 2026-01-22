@@ -1,14 +1,14 @@
 import {
-    BaseSender,
-    ChatMessagesProps,
-    MessageProps,
-    ToolsProps,
+  BaseSender,
+  ChatMessagesProps,
+  MessageProps,
+  ToolsProps,
 } from "../../types";
 import {
-    AudioToTextStorageBase,
-    ChatStorageBase,
-    StorageBase,
-    StorageGeneralBase,
+  AudioToTextStorageBase,
+  ChatStorageBase,
+  StorageBase,
+  StorageGeneralBase,
 } from "../storageBase";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
@@ -19,282 +19,315 @@ import { Document, MongoClient, ObjectId } from "mongodb";
 const defaultToolKey = "defaultKeyTool";
 
 interface StorageGeneralMongoDBProps {
-    dbName: string;
-    providers: string;
-    tools: string;
+  dbName: string;
+  providers: string;
+  tools: string;
 }
 
 export class StorageGeneralMongoDB extends StorageGeneralBase {
-    private _dbName: string;
-    private _providers: string;
-    private _tools: string;
+  private _dbName: string;
+  private _providers: string;
+  private _tools: string;
 
-    constructor(
-        private _client: MongoClient,
-        { dbName, providers, tools }: StorageGeneralMongoDBProps
-    ) {
-        super();
-        this._dbName = dbName;
-        this._providers = providers;
-        this._tools = tools;
-    }
+  constructor(
+    private _client: MongoClient,
+    { dbName, providers, tools }: StorageGeneralMongoDBProps,
+  ) {
+    super();
+    this._dbName = dbName;
+    this._providers = providers;
+    this._tools = tools;
+  }
 
-    private collection<T extends Document>(collection: string) {
-        return this._client.db(this._dbName).collection<T>(collection);
-    }
+  private collection<T extends Document>(collection: string) {
+    return this._client.db(this._dbName).collection<T>(collection);
+  }
 
-    // GENERAL
-    async clear(): Promise<void> {
-    }
+  // GENERAL
+  async clear(): Promise<void> {}
 
-    async export(): Promise<Blob> {
-        return new Blob();
-    }
+  async export(): Promise<Blob> {
+    return new Blob();
+  }
 
-    async import(blob: Blob): Promise<void> {
-    }
+  async import(blob: Blob): Promise<void> {}
 
-    // PROVIDER
-    async getProviders(): Promise<ProviderProps[]> {
-        return await this.collection<ProviderProps>(this._providers).find({}).toArray();
-    }
+  // PROVIDER
+  async getProviders(): Promise<ProviderProps[]> {
+    return await this.collection<ProviderProps>(this._providers)
+      .find({})
+      .toArray();
+  }
 
-    async addProvider(provider: ProviderProps): Promise<void> {
-        await this.collection<ProviderProps>(this._providers).findOneAndUpdate({ id: provider.id }, provider, { upsert: true })
-    }
+  async addProvider(provider: ProviderProps): Promise<void> {
+    await this.collection<ProviderProps>(this._providers).findOneAndUpdate(
+      { id: provider.id },
+      provider,
+      { upsert: true },
+    );
+  }
 
-    async deleteProvider(providerId: string): Promise<void> {
-        await Promise.all([
-            this.collection<ProviderProps>(this._providers).findOneAndDelete({ id: providerId })
-            // deleteModelFromProviderId(
-            //     this._chatModels,
-            //     providerId,
-            //     async (senderId) => {
-            //         await this._chatMessages.where("senderId").equals(senderId).delete();
-            //     },
-            // ),
-            // deleteModelFromProviderId(
-            //     this._audioToTextModels,
-            //     providerId,
-            //     async (senderId) => {
-            //         await this._audioToTextMessages
-            //             .where("senderId")
-            //             .equals(senderId)
-            //             .delete();
-            //     },
-            // ),
-        ]);
-    }
+  async deleteProvider(providerId: string): Promise<void> {
+    await Promise.all([
+      this.collection<ProviderProps>(this._providers).findOneAndDelete({
+        id: providerId,
+      }),
+      // deleteModelFromProviderId(
+      //     this._chatModels,
+      //     providerId,
+      //     async (senderId) => {
+      //         await this._chatMessages.where("senderId").equals(senderId).delete();
+      //     },
+      // ),
+      // deleteModelFromProviderId(
+      //     this._audioToTextModels,
+      //     providerId,
+      //     async (senderId) => {
+      //         await this._audioToTextMessages
+      //             .where("senderId")
+      //             .equals(senderId)
+      //             .delete();
+      //     },
+      // ),
+    ]);
+  }
 
-    // TOOLS
-    async getTools(): Promise<ToolsDB | undefined> {
-        return await this.collection<ToolsDB>(this._tools).findOne({ _id: new ObjectId(defaultToolKey) }) as ToolsDB
-    }
+  // TOOLS
+  async getTools(): Promise<ToolsDB | undefined> {
+    return (await this.collection<ToolsDB>(this._tools).findOne({
+      _id: new ObjectId(defaultToolKey),
+    })) as ToolsDB;
+  }
 
-    async updateTools(tools: ToolsProps): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { ip, ...others } = tools;
-        await this.collection<ToolsDB>(this._tools).findOneAndUpdate({ _id: new ObjectId(defaultToolKey) }, others);
-    }
+  async updateTools(tools: ToolsProps): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { ip, ...others } = tools;
+    await this.collection<ToolsDB>(this._tools).findOneAndUpdate(
+      { _id: new ObjectId(defaultToolKey) },
+      others,
+    );
+  }
 }
 
 interface StorageMongoDBProps {
-    dbName: string;
-    messages: string;
-    senders: string;
+  dbName: string;
+  messages: string;
+  senders: string;
 }
 
 export class StorageMongoDB extends StorageBase {
-    private _dbName: string;
-    private _messages: string;
-    private _senders: string;
+  private _dbName: string;
+  private _messages: string;
+  private _senders: string;
 
-    constructor(
-        private _client: MongoClient,
-        { dbName, messages, senders }: StorageMongoDBProps,
-    ) {
-        super();
-        this._dbName = dbName;
-        this._messages = messages;
-        this._senders = senders;
-    }
+  constructor(
+    private _client: MongoClient,
+    { dbName, messages, senders }: StorageMongoDBProps,
+  ) {
+    super();
+    this._dbName = dbName;
+    this._messages = messages;
+    this._senders = senders;
+  }
 
-    private collection<T extends Document>(collection: string) {
-        return this._client.db(this._dbName).collection<T>(collection);
-    }
+  private collection<T extends Document>(collection: string) {
+    return this._client.db(this._dbName).collection<T>(collection);
+  }
 
-    // Messages
-    async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-        const messages = await this.collection<MessageProps>(this._messages).find({}).toArray();
+  // Messages
+  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
+    const messages = await this.collection<MessageProps>(this._messages)
+      .find({})
+      .toArray();
 
-        const baseChats = senderIds.reduce((acc, id) => {
-            acc[id] = [];
-            return acc;
-        }, {} as ChatMessagesProps);
+    const baseChats = senderIds.reduce((acc, id) => {
+      acc[id] = [];
+      return acc;
+    }, {} as ChatMessagesProps);
 
-        const chats = messages.reduce((acc, m) => {
-            if (!acc[m.senderId]) return acc;
-            acc[m.senderId].push(m);
-            return acc;
-        }, baseChats);
+    const chats = messages.reduce((acc, m) => {
+      if (!acc[m.senderId]) return acc;
+      acc[m.senderId].push(m);
+      return acc;
+    }, baseChats);
 
-        return chats;
-    }
+    return chats;
+  }
 
-    async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-        if (Array.isArray(messages)) await this.collection<MessageProps>(this._messages).insertMany(messages);
-        else await this.collection<MessageProps>(this._messages).insertOne(messages);
-    }
+  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
+    if (Array.isArray(messages))
+      await this.collection<MessageProps>(this._messages).insertMany(messages);
+    else
+      await this.collection<MessageProps>(this._messages).insertOne(messages);
+  }
 
-    async deleteSenderMessages(senderId: string): Promise<void> {
-        await this.collection<MessageProps>(this._messages).deleteMany({ senderId });
-    }
+  async deleteSenderMessages(senderId: string): Promise<void> {
+    await this.collection<MessageProps>(this._messages).deleteMany({
+      senderId,
+    });
+  }
 
-    async deleteAllMessages(): Promise<void> {
-        await this.collection<MessageProps>(this._messages).deleteMany({});
-    }
+  async deleteAllMessages(): Promise<void> {
+    await this.collection<MessageProps>(this._messages).deleteMany({});
+  }
 
-    // Senders
-    async getSenders(): Promise<BaseSender[]> {
-        return await this.collection<BaseSender>(this._senders).find({}).toArray();
-    }
+  // Senders
+  async getSenders(): Promise<BaseSender[]> {
+    return await this.collection<BaseSender>(this._senders).find({}).toArray();
+  }
 
-    async addSender(sender: BaseSender): Promise<void> {
-        await this.collection<BaseSender>(this._senders).findOneAndUpdate({ id: sender.id }, sender, { upsert: true })
-    }
+  async addSender(sender: BaseSender): Promise<void> {
+    await this.collection<BaseSender>(this._senders).findOneAndUpdate(
+      { id: sender.id },
+      sender,
+      { upsert: true },
+    );
+  }
 
-    async deleteSender(senderId: string): Promise<void> {
-        await Promise.all([
-            this.collection<BaseSender>(this._senders).deleteOne({ id: senderId }),
-            this.deleteSenderMessages(senderId),
-        ]);
-    }
+  async deleteSender(senderId: string): Promise<void> {
+    await Promise.all([
+      this.collection<BaseSender>(this._senders).deleteOne({ id: senderId }),
+      this.deleteSenderMessages(senderId),
+    ]);
+  }
 }
 
 const defaultChatSettingsKey = "defaultChatKey";
 
 interface StorageChatMongoDBProps extends StorageMongoDBProps {
-    settings: string;
+  settings: string;
 }
 
 export class StorageChatMongoDB extends ChatStorageBase {
-    private _base: StorageMongoDB;
-    private _dbName: string;
-    private _settings: string;
+  private _base: StorageMongoDB;
+  private _dbName: string;
+  private _settings: string;
 
-    constructor(
-        private _client: MongoClient,
-        { dbName, messages, senders, settings }: StorageChatMongoDBProps
-    ) {
-        super();
-        this._base = new StorageMongoDB(_client, { dbName, messages, senders });
-        this._dbName = dbName;
-        this._settings = settings;
-    }
+  constructor(
+    private _client: MongoClient,
+    { dbName, messages, senders, settings }: StorageChatMongoDBProps,
+  ) {
+    super();
+    this._base = new StorageMongoDB(_client, { dbName, messages, senders });
+    this._dbName = dbName;
+    this._settings = settings;
+  }
 
-    private collection<T extends Document>(collection: string) {
-        return this._client.db(this._dbName).collection<T>(collection);
-    }
+  private collection<T extends Document>(collection: string) {
+    return this._client.db(this._dbName).collection<T>(collection);
+  }
 
-    // Messages
-    async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-        return await this._base.getMessages(senderIds);
-    }
+  // Messages
+  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
+    return await this._base.getMessages(senderIds);
+  }
 
-    async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-        await this._base.addMessage(messages);
-    }
+  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
+    await this._base.addMessage(messages);
+  }
 
-    async deleteSenderMessages(senderId: string): Promise<void> {
-        await this._base.deleteSenderMessages(senderId);
-    }
+  async deleteSenderMessages(senderId: string): Promise<void> {
+    await this._base.deleteSenderMessages(senderId);
+  }
 
-    async deleteAllMessages(): Promise<void> {
-        await this._base.deleteAllMessages();
-    }
+  async deleteAllMessages(): Promise<void> {
+    await this._base.deleteAllMessages();
+  }
 
-    // Senders
-    async getSenders(): Promise<BaseSender[]> {
-        return await this._base.getSenders();
-    }
+  // Senders
+  async getSenders(): Promise<BaseSender[]> {
+    return await this._base.getSenders();
+  }
 
-    async addSender(sender: BaseSender): Promise<void> {
-        await this._base.addSender(sender);
-    }
+  async addSender(sender: BaseSender): Promise<void> {
+    await this._base.addSender(sender);
+  }
 
-    async deleteSender(senderId: string): Promise<void> {
-        await this._base.deleteSender(senderId);
-    }
+  async deleteSender(senderId: string): Promise<void> {
+    await this._base.deleteSender(senderId);
+  }
 
-    async getSettings(): Promise<ChatSettings | undefined> {
-        return await this.collection<ChatSettings>(this._settings).findOne({ _id: new ObjectId(defaultChatSettingsKey) }) as ChatSettings;
-    }
+  async getSettings(): Promise<ChatSettings | undefined> {
+    return (await this.collection<ChatSettings>(this._settings).findOne({
+      _id: new ObjectId(defaultChatSettingsKey),
+    })) as ChatSettings;
+  }
 
-    async updateSettings(settings: ChatSettings): Promise<void> {
-        await this.collection<ChatSettings>(this._settings).findOneAndUpdate({ _id: new ObjectId(defaultChatSettingsKey) }, settings, { upsert: true })
-    }
+  async updateSettings(settings: ChatSettings): Promise<void> {
+    await this.collection<ChatSettings>(this._settings).findOneAndUpdate(
+      { _id: new ObjectId(defaultChatSettingsKey) },
+      settings,
+      { upsert: true },
+    );
+  }
 }
 
 const defaultAudioToTextSettingsKey = "defaultAudioToText";
 
-type StorageAudioToTextMongoDBProps = StorageChatMongoDBProps
+type StorageAudioToTextMongoDBProps = StorageChatMongoDBProps;
 
 export class StorageAudioToTextMongoDB extends AudioToTextStorageBase {
-    private _base: StorageMongoDB;
-    private _dbName: string;
-    private _settings: string;
+  private _base: StorageMongoDB;
+  private _dbName: string;
+  private _settings: string;
 
-    constructor(
-        private _client: MongoClient,
-        { dbName, messages, senders, settings }: StorageAudioToTextMongoDBProps
-    ) {
-        super();
-        this._base = new StorageMongoDB(_client, { dbName, messages, senders });
-        this._dbName = dbName;
-        this._settings = settings;
-    }
+  constructor(
+    private _client: MongoClient,
+    { dbName, messages, senders, settings }: StorageAudioToTextMongoDBProps,
+  ) {
+    super();
+    this._base = new StorageMongoDB(_client, { dbName, messages, senders });
+    this._dbName = dbName;
+    this._settings = settings;
+  }
 
-    private collection<T extends Document>(collection: string) {
-        return this._client.db(this._dbName).collection<T>(collection);
-    }
+  private collection<T extends Document>(collection: string) {
+    return this._client.db(this._dbName).collection<T>(collection);
+  }
 
-    // Messages
-    async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-        return await this._base.getMessages(senderIds);
-    }
+  // Messages
+  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
+    return await this._base.getMessages(senderIds);
+  }
 
-    async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-        await this._base.addMessage(messages);
-    }
+  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
+    await this._base.addMessage(messages);
+  }
 
-    async deleteSenderMessages(senderId: string): Promise<void> {
-        await this._base.deleteSenderMessages(senderId);
-    }
+  async deleteSenderMessages(senderId: string): Promise<void> {
+    await this._base.deleteSenderMessages(senderId);
+  }
 
-    async deleteAllMessages(): Promise<void> {
-        await this._base.deleteAllMessages();
-    }
+  async deleteAllMessages(): Promise<void> {
+    await this._base.deleteAllMessages();
+  }
 
-    // Senders
-    async getSenders(): Promise<BaseSender[]> {
-        return await this._base.getSenders();
-    }
+  // Senders
+  async getSenders(): Promise<BaseSender[]> {
+    return await this._base.getSenders();
+  }
 
-    async addSender(sender: BaseSender): Promise<void> {
-        await this._base.addSender(sender);
-    }
+  async addSender(sender: BaseSender): Promise<void> {
+    await this._base.addSender(sender);
+  }
 
-    async deleteSender(senderId: string): Promise<void> {
-        await this._base.deleteSender(senderId);
-    }
+  async deleteSender(senderId: string): Promise<void> {
+    await this._base.deleteSender(senderId);
+  }
 
-    async getSettings(): Promise<AudioToTextSettings | undefined> {
-        return await this.collection<AudioToTextSettings>(this._settings).findOne({ _id: new ObjectId(defaultChatSettingsKey) }) as AudioToTextSettings;
-    }
+  async getSettings(): Promise<AudioToTextSettings | undefined> {
+    return (await this.collection<AudioToTextSettings>(this._settings).findOne({
+      _id: new ObjectId(defaultChatSettingsKey),
+    })) as AudioToTextSettings;
+  }
 
-    async updateSettings(settings: AudioToTextSettings): Promise<void> {
-        await this.collection<AudioToTextSettings>(this._settings).findOneAndUpdate({ _id: new ObjectId(defaultChatSettingsKey) }, settings, { upsert: true })
-    }
+  async updateSettings(settings: AudioToTextSettings): Promise<void> {
+    await this.collection<AudioToTextSettings>(this._settings).findOneAndUpdate(
+      { _id: new ObjectId(defaultChatSettingsKey) },
+      settings,
+      { upsert: true },
+    );
+  }
 }
 
 export const ChatbotStorageIndexDB = StorageMongoDB;
