@@ -19,11 +19,11 @@ import {
   TableProviders,
   TableSenders,
   TableTools,
-  ToolsDB,
 } from "./types";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ProviderProps } from "../../models/types";
+import { ToolsDB } from "../types";
 
 const defaultToolKey = "defaultKeyTool";
 

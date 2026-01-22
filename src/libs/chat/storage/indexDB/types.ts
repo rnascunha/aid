@@ -1,10 +1,9 @@
 import Dexie, { Table } from "dexie";
-import { BaseSender, MessageProps, ToolsProps } from "../../types";
+import { BaseSender, MessageProps } from "../../types";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ProviderProps } from "../../models/types";
-
-export type ToolsDB = Omit<ToolsProps, "ip">;
+import { ToolsDB } from "../types";
 
 export type TableProviders = Table<ProviderProps, string>;
 export type TableTools = Table<ToolsDB, string>;

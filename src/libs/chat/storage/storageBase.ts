@@ -7,7 +7,7 @@ import {
 } from "../types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ProviderProps } from "../models/types";
-import { ToolsDB } from "./indexDB/types";
+import { ToolsDB } from "./types";
 
 export abstract class StorageGeneralBase {
   // GENERAL
