@@ -11,6 +11,13 @@ import {
   audioToTextUpdateSettings,
   chatAddMessage,
   chatAddSender,
+  chatbotAddMessage,
+  chatbotAddSender,
+  chatbotDeleteAllMessages,
+  chatbotDeleteSender,
+  chatbotDeleteSenderMessages,
+  chatbotGetMessages,
+  chatbotGetSenders,
   chatDeleteAllMessages,
   chatDeleteSender,
   chatDeleteSenderMessages,
@@ -27,6 +34,7 @@ import {
 import {
   AudioToTextStorageBase,
   ChatStorageBase,
+  StorageBase,
   StorageGeneralBase,
 } from "../storageBase";
 import { ProviderProps } from "../../models/types";
@@ -155,6 +163,39 @@ export class StorageAudioToTextMongoDB extends AudioToTextStorageBase {
   }
 }
 
+export class StorageChatbotMongoDB extends StorageBase {
+  // Messages
+  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
+    return await chatbotGetMessages(senderIds);
+  }
+
+  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
+    await chatbotAddMessage(messages);
+  }
+
+  async deleteSenderMessages(senderId: string): Promise<void> {
+    await chatbotDeleteSenderMessages(senderId);
+  }
+
+  async deleteAllMessages(): Promise<void> {
+    await chatbotDeleteAllMessages();
+  }
+
+  // Senders
+  async getSenders(): Promise<BaseSender[]> {
+    return await chatbotGetSenders();
+  }
+
+  async addSender(sender: BaseSender): Promise<void> {
+    await chatbotAddSender(sender);
+  }
+
+  async deleteSender(senderId: string): Promise<void> {
+    await chatbotDeleteSender(senderId);
+  }
+}
+
 export const generalStorage = new StorageGeneralMongoDB();
 export const chatStorage = new StorageChatMongoDB();
 export const audioToTextStorage = new StorageAudioToTextMongoDB();
+export const chatbotStorage = new StorageChatbotMongoDB();

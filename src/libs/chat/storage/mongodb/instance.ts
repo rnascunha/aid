@@ -1,10 +1,16 @@
 import { collections, dbName } from "./constants";
 import { connect } from "./connect";
-import { MongoDBAudioToTextServer, MongoDBChatServer, MongoDBGeneralServer } from "./server";
+import {
+  MongoDBAudioToTextServer,
+  MongoDBChatbotServer,
+  MongoDBChatServer,
+  MongoDBGeneralServer,
+} from "./server";
 
 export let generalStorage: MongoDBGeneralServer | undefined;
 export let chatStorage: MongoDBChatServer | undefined;
 export let audioToTextStorage: MongoDBAudioToTextServer | undefined;
+export let chatbotStorage: MongoDBChatbotServer | undefined;
 
 connect().then((c) => {
   generalStorage = new MongoDBGeneralServer(c, dbName, collections);
@@ -19,5 +25,10 @@ connect().then((c) => {
     messages: collections.audioToTextMessages,
     senders: collections.audioToTextSenders,
     settings: collections.audioToTextSettings,
+  });
+  chatbotStorage = new MongoDBChatbotServer(c, {
+    dbName,
+    messages: collections.chatbotMessages,
+    senders: collections.chatbotSenders,
   });
 });

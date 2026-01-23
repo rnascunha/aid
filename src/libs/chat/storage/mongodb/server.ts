@@ -327,5 +327,5 @@ export class MongoDBAudioToTextServer {
   }
 }
 
-export const ChatbotMongoDBServer = MongoDBServer;
-export type ChatbotMongoDBServer = MongoDBServer;
+export const MongoDBChatbotServer = MongoDBServer;
+export type MongoDBChatbotServer = MongoDBServer;

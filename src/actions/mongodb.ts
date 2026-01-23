@@ -7,6 +7,7 @@ import {
   generalStorage,
   chatStorage,
   audioToTextStorage,
+  chatbotStorage,
 } from "@/libs/chat/storage/mongodb/instance";
 import { ToolsDB } from "@/libs/chat/storage/types";
 import {
@@ -131,4 +132,39 @@ export async function audioToTextUpdateSettings(
   settings: AudioToTextSettings,
 ): Promise<void> {
   await audioToTextStorage?.updateSettings(settings);
+}
+
+// CHATBOT
+export async function chatbotGetMessages(
+  senderIds: string[],
+): Promise<ChatMessagesProps> {
+  return await chatbotStorage!.getMessages(senderIds);
+}
+
+export async function chatbotAddMessage(
+  messages: MessageProps | MessageProps[],
+): Promise<void> {
+  await chatbotStorage?.addMessage(messages);
+}
+
+export async function chatbotDeleteSenderMessages(
+  senderId: string,
+): Promise<void> {
+  await chatbotStorage?.deleteSenderMessages(senderId);
+}
+
+export async function chatbotDeleteAllMessages(): Promise<void> {
+  await chatbotStorage?.deleteAllMessages();
+}
+
+export async function chatbotGetSenders(): Promise<BaseSender[]> {
+  return await chatbotStorage!.getSenders();
+}
+
+export async function chatbotAddSender(sender: BaseSender): Promise<void> {
+  return await chatbotStorage?.addSender(sender);
+}
+
+export async function chatbotDeleteSender(senderId: string): Promise<void> {
+  return await chatbotStorage?.deleteSender(senderId);
 }
