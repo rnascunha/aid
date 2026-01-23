@@ -49,6 +49,10 @@ import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 
 export class StorageGeneralMongoDB extends StorageGeneralBase {
+  constructor(private _userId: string) {
+    super();
+  }
+
   // GENERAL
   async clear(): Promise<void> {
     await clear();
@@ -62,11 +66,11 @@ export class StorageGeneralMongoDB extends StorageGeneralBase {
 
   // PROVIDER
   async getProviders(): Promise<ProviderProps[]> {
-    return await getProviders();
+    return await getProviders(this._userId);
   }
 
   async addProvider(provider: ProviderProps): Promise<void> {
-    await addProvider(provider);
+    await addProvider(provider, this._userId);
   }
 
   async deleteProvider(providerId: string): Promise<void> {
@@ -75,22 +79,26 @@ export class StorageGeneralMongoDB extends StorageGeneralBase {
 
   // TOOLS
   async getTools(): Promise<ToolsDB | undefined> {
-    return await getTools();
+    return await getTools(this._userId);
   }
 
   async updateTools(tools: ToolsProps): Promise<void> {
-    return await updateTools(tools);
+    return await updateTools(tools, this._userId);
   }
 }
 
 export class StorageChatMongoDB extends ChatStorageBase {
+  constructor(private _userId: string) {
+    super();
+  }
+
   // Messages
   async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-    return await chatGetMessages(senderIds);
+    return await chatGetMessages(senderIds, this._userId);
   }
 
   async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-    await chatAddMessage(messages);
+    await chatAddMessage(messages, this._userId);
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
@@ -98,16 +106,16 @@ export class StorageChatMongoDB extends ChatStorageBase {
   }
 
   async deleteAllMessages(): Promise<void> {
-    await chatDeleteAllMessages();
+    await chatDeleteAllMessages(this._userId);
   }
 
   // Senders
   async getSenders(): Promise<BaseSender[]> {
-    return await chatGetSenders();
+    return await chatGetSenders(this._userId);
   }
 
   async addSender(sender: BaseSender): Promise<void> {
-    await chatAddSender(sender);
+    await chatAddSender(sender, this._userId);
   }
 
   async deleteSender(senderId: string): Promise<void> {
@@ -115,22 +123,26 @@ export class StorageChatMongoDB extends ChatStorageBase {
   }
 
   async getSettings(): Promise<ChatSettings | undefined> {
-    return await chatGetSettings();
+    return await chatGetSettings(this._userId);
   }
 
   async updateSettings(settings: ChatSettings): Promise<void> {
-    await chatUpdateSettings(settings);
+    await chatUpdateSettings(settings, this._userId);
   }
 }
 
 export class StorageAudioToTextMongoDB extends AudioToTextStorageBase {
+  constructor(private _userId: string) {
+    super();
+  }
+
   // Messages
   async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-    return await audioToTextGetMessages(senderIds);
+    return await audioToTextGetMessages(senderIds, this._userId);
   }
 
   async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-    await audioToTextAddMessage(messages);
+    await audioToTextAddMessage(messages, this._userId);
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
@@ -138,16 +150,16 @@ export class StorageAudioToTextMongoDB extends AudioToTextStorageBase {
   }
 
   async deleteAllMessages(): Promise<void> {
-    await audioToTextDeleteAllMessages();
+    await audioToTextDeleteAllMessages(this._userId);
   }
 
   // Senders
   async getSenders(): Promise<BaseSender[]> {
-    return await audioToTextGetSenders();
+    return await audioToTextGetSenders(this._userId);
   }
 
   async addSender(sender: BaseSender): Promise<void> {
-    await audioToTextAddSender(sender);
+    await audioToTextAddSender(sender, this._userId);
   }
 
   async deleteSender(senderId: string): Promise<void> {
@@ -155,22 +167,26 @@ export class StorageAudioToTextMongoDB extends AudioToTextStorageBase {
   }
 
   async getSettings(): Promise<AudioToTextSettings | undefined> {
-    return await audioToTextGetSettings();
+    return await audioToTextGetSettings(this._userId);
   }
 
   async updateSettings(settings: AudioToTextSettings): Promise<void> {
-    await audioToTextUpdateSettings(settings);
+    await audioToTextUpdateSettings(settings, this._userId);
   }
 }
 
 export class StorageChatbotMongoDB extends StorageBase {
+  constructor(private _userId: string) {
+    super();
+  }
+
   // Messages
   async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-    return await chatbotGetMessages(senderIds);
+    return await chatbotGetMessages(senderIds, this._userId);
   }
 
   async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-    await chatbotAddMessage(messages);
+    await chatbotAddMessage(messages, this._userId);
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
@@ -178,24 +194,19 @@ export class StorageChatbotMongoDB extends StorageBase {
   }
 
   async deleteAllMessages(): Promise<void> {
-    await chatbotDeleteAllMessages();
+    await chatbotDeleteAllMessages(this._userId);
   }
 
   // Senders
   async getSenders(): Promise<BaseSender[]> {
-    return await chatbotGetSenders();
+    return await chatbotGetSenders(this._userId);
   }
 
   async addSender(sender: BaseSender): Promise<void> {
-    await chatbotAddSender(sender);
+    await chatbotAddSender(sender, this._userId);
   }
 
   async deleteSender(senderId: string): Promise<void> {
     await chatbotDeleteSender(senderId);
   }
 }
-
-export const generalStorage = new StorageGeneralMongoDB();
-export const chatStorage = new StorageChatMongoDB();
-export const audioToTextStorage = new StorageAudioToTextMongoDB();
-export const chatbotStorage = new StorageChatbotMongoDB();

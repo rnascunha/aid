@@ -4,31 +4,31 @@ import {
   MessageProps,
   ToolsProps,
 } from "../../types";
-import {
-  AudioToTextStorageBase,
-  ChatStorageBase,
-  StorageBase,
-  StorageGeneralBase,
-} from "../storageBase";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ModelProps, ProviderProps } from "../../models/types";
 import { ToolsDB } from "../types";
 import { Document, MongoClient, ObjectId } from "mongodb";
 import { MongoDBCollecions } from "./constants";
+import {
+  DBAudioToTextSettings,
+  DBBaseSender,
+  DBChatSettings,
+  DBMessageProps,
+  DBProviderProps,
+  DBTools,
+} from "./types";
 
 const defaultToolKey = new ObjectId();
 
 const defaultProjection = { projection: { _id: 0 } };
 
-export class MongoDBGeneralServer extends StorageGeneralBase {
+export class MongoDBGeneralServer {
   constructor(
     private _client: MongoClient,
     private _dbName: string,
     private _collections: MongoDBCollecions,
-  ) {
-    super();
-  }
+  ) {}
 
   private collection<T extends Document>(collection: string) {
     return this._client.db(this._dbName).collection<T>(collection);
@@ -49,33 +49,33 @@ export class MongoDBGeneralServer extends StorageGeneralBase {
   async import(blob: Blob): Promise<void> {}
 
   // PROVIDER
-  async getProviders(): Promise<ProviderProps[]> {
-    return await this.collection<ProviderProps>(this._collections.providers)
-      .find({}, { ...defaultProjection })
+  async getProviders(userId: string): Promise<ProviderProps[]> {
+    return await this.collection<DBProviderProps>(this._collections.providers)
+      .find({ userId }, { projection: { _id: 0, userId: 0 } })
       .toArray();
   }
 
-  async addProvider(provider: ProviderProps): Promise<void> {
-    await this.collection<ProviderProps>(
+  async addProvider(provider: ProviderProps, userId: string): Promise<void> {
+    await this.collection<DBProviderProps>(
       this._collections.providers,
     ).findOneAndUpdate(
-      { id: provider.id },
-      { $set: provider },
+      { id: provider.id, userId },
+      { $set: { ...provider, userId } },
       { upsert: true },
     );
   }
 
   async deleteProvider(providerId: string): Promise<void> {
     await Promise.all([
-      this.collection<ProviderProps>(
+      this.collection<DBProviderProps>(
         this._collections.providers,
       ).findOneAndDelete({
         id: providerId,
       }),
-      this.collection<ModelProps>(this._collections.chatSenders).deleteMany({
+      this.collection<DBBaseSender>(this._collections.chatSenders).deleteMany({
         providerId,
       }),
-      this.collection<ModelProps>(
+      this.collection<DBBaseSender>(
         this._collections.audioToTextSenders,
       ).deleteMany({
         providerId,
@@ -84,17 +84,17 @@ export class MongoDBGeneralServer extends StorageGeneralBase {
   }
 
   // TOOLS
-  async getTools(): Promise<ToolsDB | undefined> {
-    return (await this.collection<ToolsDB>(this._collections.tools).findOne({
-      _id: new ObjectId(defaultToolKey),
+  async getTools(userId: string): Promise<ToolsDB | undefined> {
+    return (await this.collection<DBTools>(this._collections.tools).findOne({
+      userId,
     })) as ToolsDB;
   }
 
-  async updateTools(tools: ToolsProps): Promise<void> {
+  async updateTools(tools: ToolsProps, userId: string): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ip, ...others } = tools;
-    await this.collection<ToolsDB>(this._collections.tools).findOneAndUpdate(
-      { _id: new ObjectId(defaultToolKey) },
+    await this.collection<DBTools>(this._collections.tools).findOneAndUpdate(
+      { userId },
       others,
     );
   }
@@ -125,9 +125,12 @@ export class MongoDBServer {
   }
 
   // Messages
-  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-    const messages = await this.collection<MessageProps>(this._messages)
-      .find({}, { ...defaultProjection })
+  async getMessages(
+    senderIds: string[],
+    userId: string,
+  ): Promise<ChatMessagesProps> {
+    const messages = await this.collection<DBMessageProps>(this._messages)
+      .find({ userId }, { projection: { _id: 0, userId: 0 } })
       .toArray();
 
     const baseChats = senderIds.reduce((acc, id) => {
@@ -144,53 +147,61 @@ export class MongoDBServer {
     return chats;
   }
 
-  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
+  async addMessage(
+    messages: MessageProps | MessageProps[],
+    userId: string,
+  ): Promise<void> {
     if (Array.isArray(messages))
-      await this.collection<MessageProps>(this._messages).insertMany(messages);
+      await this.collection<DBMessageProps>(this._messages).insertMany(
+        messages.map((m) => ({ ...m, userId })),
+      );
     else
-      await this.collection<MessageProps>(this._messages).insertOne(messages);
+      await this.collection<DBMessageProps>(this._messages).insertOne({
+        ...messages,
+        userId,
+      });
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
-    await this.collection<MessageProps>(this._messages).deleteMany({
+    await this.collection<DBMessageProps>(this._messages).deleteMany({
       senderId,
     });
   }
 
-  async deleteAllMessages(): Promise<void> {
-    await this.collection<MessageProps>(this._messages).deleteMany({});
+  async deleteAllMessages(userId: string): Promise<void> {
+    await this.collection<DBMessageProps>(this._messages).deleteMany({
+      userId,
+    });
   }
 
   // Senders
-  async getSenders(): Promise<BaseSender[]> {
-    return await this.collection<BaseSender>(this._senders)
-      .find({}, { ...defaultProjection })
+  async getSenders(userId: string): Promise<BaseSender[]> {
+    return await this.collection<DBBaseSender>(this._senders)
+      .find({ userId }, { projection: { _id: 0, userId: 0 } })
       .toArray();
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
-    await this.collection<BaseSender>(this._senders).findOneAndUpdate(
-      { id: sender.id },
-      { $set: sender },
-      { upsert: true, ...defaultProjection },
+  async addSender(sender: BaseSender, userId: string): Promise<void> {
+    await this.collection<DBBaseSender>(this._senders).findOneAndUpdate(
+      { id: sender.id, userId },
+      { $set: { ...sender, userId } },
+      { upsert: true },
     );
   }
 
   async deleteSender(senderId: string): Promise<void> {
     await Promise.all([
-      this.collection<BaseSender>(this._senders).deleteOne({ id: senderId }),
+      this.collection<DBBaseSender>(this._senders).deleteOne({ id: senderId }),
       this.deleteSenderMessages(senderId),
     ]);
   }
 }
 
-const defaultChatSettingsKey = new ObjectId();
-
 interface MongoDBChatServerProps extends MongoDBServerProps {
   settings: string;
 }
 
-export class MongoDBChatServer extends ChatStorageBase {
+export class MongoDBChatServer {
   private _base: MongoDBServer;
   private _dbName: string;
   private _settings: string;
@@ -199,7 +210,6 @@ export class MongoDBChatServer extends ChatStorageBase {
     private _client: MongoClient,
     { dbName, messages, senders, settings }: MongoDBChatServerProps,
   ) {
-    super();
     this._base = new MongoDBServer(_client, { dbName, messages, senders });
     this._dbName = dbName;
     this._settings = settings;
@@ -210,54 +220,58 @@ export class MongoDBChatServer extends ChatStorageBase {
   }
 
   // Messages
-  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-    return await this._base.getMessages(senderIds);
+  async getMessages(
+    senderIds: string[],
+    userId: string,
+  ): Promise<ChatMessagesProps> {
+    return await this._base.getMessages(senderIds, userId);
   }
 
-  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-    await this._base.addMessage(messages);
+  async addMessage(
+    messages: MessageProps | MessageProps[],
+    userId: string,
+  ): Promise<void> {
+    await this._base.addMessage(messages, userId);
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
     await this._base.deleteSenderMessages(senderId);
   }
 
-  async deleteAllMessages(): Promise<void> {
-    await this._base.deleteAllMessages();
+  async deleteAllMessages(userId: string): Promise<void> {
+    await this._base.deleteAllMessages(userId);
   }
 
   // Senders
-  async getSenders(): Promise<BaseSender[]> {
-    return await this._base.getSenders();
+  async getSenders(userId: string): Promise<BaseSender[]> {
+    return await this._base.getSenders(userId);
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
-    await this._base.addSender(sender);
+  async addSender(sender: BaseSender, userId: string): Promise<void> {
+    await this._base.addSender(sender, userId);
   }
 
   async deleteSender(senderId: string): Promise<void> {
     await this._base.deleteSender(senderId);
   }
 
-  async getSettings(): Promise<ChatSettings | undefined> {
-    return (await this.collection<ChatSettings>(this._settings).findOne(
+  async getSettings(userId: string): Promise<ChatSettings | undefined> {
+    return (await this.collection<DBChatSettings>(this._settings).findOne(
       {
-        _id: new ObjectId(defaultChatSettingsKey),
+        userId,
       },
-      { ...defaultProjection },
+      { projection: { _id: 0, userId: 0 } },
     )) as ChatSettings;
   }
 
-  async updateSettings(settings: ChatSettings): Promise<void> {
-    await this.collection<ChatSettings>(this._settings).findOneAndUpdate(
-      { _id: new ObjectId(defaultChatSettingsKey) },
-      { $set: settings },
+  async updateSettings(settings: ChatSettings, userId: string): Promise<void> {
+    await this.collection<DBChatSettings>(this._settings).findOneAndUpdate(
+      { userId },
+      { $set: { ...settings, userId } },
       { upsert: true },
     );
   }
 }
-
-const defaultAudioToTextSettingsKey = "defaultAudioToText";
 
 type MongoDBAudioToTextServerProps = MongoDBChatServerProps;
 
@@ -280,48 +294,59 @@ export class MongoDBAudioToTextServer {
   }
 
   // Messages
-  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-    return await this._base.getMessages(senderIds);
+  async getMessages(
+    senderIds: string[],
+    userId: string,
+  ): Promise<ChatMessagesProps> {
+    return await this._base.getMessages(senderIds, userId);
   }
 
-  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-    await this._base.addMessage(messages);
+  async addMessage(
+    messages: MessageProps | MessageProps[],
+    userId: string,
+  ): Promise<void> {
+    await this._base.addMessage(messages, userId);
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
     await this._base.deleteSenderMessages(senderId);
   }
 
-  async deleteAllMessages(): Promise<void> {
-    await this._base.deleteAllMessages();
+  async deleteAllMessages(userId: string): Promise<void> {
+    await this._base.deleteAllMessages(userId);
   }
 
   // Senders
-  async getSenders(): Promise<BaseSender[]> {
-    return await this._base.getSenders();
+  async getSenders(userId: string): Promise<BaseSender[]> {
+    return await this._base.getSenders(userId);
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
-    await this._base.addSender(sender);
+  async addSender(sender: BaseSender, userId: string): Promise<void> {
+    await this._base.addSender(sender, userId);
   }
 
   async deleteSender(senderId: string): Promise<void> {
     await this._base.deleteSender(senderId);
   }
 
-  async getSettings(): Promise<AudioToTextSettings | undefined> {
-    return (await this.collection<AudioToTextSettings>(this._settings).findOne(
+  async getSettings(userId: string): Promise<AudioToTextSettings | undefined> {
+    return (await this.collection<DBAudioToTextSettings>(
+      this._settings,
+    ).findOne(
       {
-        _id: new ObjectId(defaultChatSettingsKey),
+        userId,
       },
-      { ...defaultProjection },
+      { projection: { _id: 0, userId: 0 } },
     )) as AudioToTextSettings;
   }
 
-  async updateSettings(settings: AudioToTextSettings): Promise<void> {
+  async updateSettings(
+    settings: AudioToTextSettings,
+    userId: string,
+  ): Promise<void> {
     await this.collection<AudioToTextSettings>(this._settings).findOneAndUpdate(
-      { _id: new ObjectId(defaultChatSettingsKey) },
-      { $set: settings },
+      { userId },
+      { $set: { ...settings, userId } },
       { upsert: true },
     );
   }

@@ -7,7 +7,7 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 export const restrictedPath = "/";
 export const loginPath = "/login";
 
-export const userListAllowed = new Set(["rnascunha@gmail.com"]);
+export const userListAllowed = new Set(["rnascunha@gmail.com", "rafaelnascunha@gmail.com"]);
 
 export interface Section {
   id: string;

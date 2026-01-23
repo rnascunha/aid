@@ -22,37 +22,45 @@ export async function clear(): Promise<void> {
   await generalStorage?.clear();
 }
 
-export async function getProviders(): Promise<ProviderProps[]> {
-  return await generalStorage!.getProviders();
+export async function getProviders(userId: string): Promise<ProviderProps[]> {
+  return await generalStorage!.getProviders(userId);
 }
 
-export async function addProvider(provider: ProviderProps): Promise<void> {
-  await generalStorage?.addProvider(provider);
+export async function addProvider(
+  provider: ProviderProps,
+  userId: string,
+): Promise<void> {
+  await generalStorage?.addProvider(provider, userId);
 }
 
 export async function deleteProvider(providerId: string): Promise<void> {
   await generalStorage?.deleteProvider(providerId);
 }
 
-export async function getTools(): Promise<ToolsDB | undefined> {
-  return await generalStorage?.getTools();
+export async function getTools(userId: string): Promise<ToolsDB | undefined> {
+  return await generalStorage?.getTools(userId);
 }
 
-export async function updateTools(tools: ToolsProps): Promise<void> {
-  await generalStorage?.updateTools(tools);
+export async function updateTools(
+  tools: ToolsProps,
+  userId: string,
+): Promise<void> {
+  await generalStorage?.updateTools(tools, userId);
 }
 
 // CHAT
 export async function chatGetMessages(
   senderIds: string[],
+  userId: string,
 ): Promise<ChatMessagesProps> {
-  return await chatStorage!.getMessages(senderIds);
+  return await chatStorage!.getMessages(senderIds, userId);
 }
 
 export async function chatAddMessage(
   messages: MessageProps | MessageProps[],
+  userId: string,
 ): Promise<void> {
-  await chatStorage?.addMessage(messages);
+  await chatStorage?.addMessage(messages, userId);
 }
 
 export async function chatDeleteSenderMessages(
@@ -61,43 +69,51 @@ export async function chatDeleteSenderMessages(
   await chatStorage?.deleteSenderMessages(senderId);
 }
 
-export async function chatDeleteAllMessages(): Promise<void> {
-  await chatStorage?.deleteAllMessages();
+export async function chatDeleteAllMessages(userId: string): Promise<void> {
+  await chatStorage?.deleteAllMessages(userId);
 }
 
-export async function chatGetSenders(): Promise<BaseSender[]> {
-  return await chatStorage!.getSenders();
+export async function chatGetSenders(userId: string): Promise<BaseSender[]> {
+  return await chatStorage!.getSenders(userId);
 }
 
-export async function chatAddSender(sender: BaseSender): Promise<void> {
-  return await chatStorage?.addSender(sender);
+export async function chatAddSender(
+  sender: BaseSender,
+  userId: string,
+): Promise<void> {
+  return await chatStorage?.addSender(sender, userId);
 }
 
 export async function chatDeleteSender(senderId: string): Promise<void> {
   return await chatStorage?.deleteSender(senderId);
 }
 
-export async function chatGetSettings(): Promise<ChatSettings | undefined> {
-  return await chatStorage?.getSettings();
+export async function chatGetSettings(
+  userId: string,
+): Promise<ChatSettings | undefined> {
+  return await chatStorage?.getSettings(userId);
 }
 
 export async function chatUpdateSettings(
   settings: ChatSettings,
+  userId: string,
 ): Promise<void> {
-  await chatStorage?.updateSettings(settings);
+  await chatStorage?.updateSettings(settings, userId);
 }
 
 // AUDIOTOTEXT
 export async function audioToTextGetMessages(
   senderIds: string[],
+  userId: string,
 ): Promise<ChatMessagesProps> {
-  return await audioToTextStorage!.getMessages(senderIds);
+  return await audioToTextStorage!.getMessages(senderIds, userId);
 }
 
 export async function audioToTextAddMessage(
   messages: MessageProps | MessageProps[],
+  userId: string,
 ): Promise<void> {
-  await audioToTextStorage?.addMessage(messages);
+  await audioToTextStorage?.addMessage(messages, userId);
 }
 
 export async function audioToTextDeleteSenderMessages(
@@ -106,45 +122,55 @@ export async function audioToTextDeleteSenderMessages(
   await audioToTextStorage?.deleteSenderMessages(senderId);
 }
 
-export async function audioToTextDeleteAllMessages(): Promise<void> {
-  await audioToTextStorage?.deleteAllMessages();
+export async function audioToTextDeleteAllMessages(
+  userId: string,
+): Promise<void> {
+  await audioToTextStorage?.deleteAllMessages(userId);
 }
 
-export async function audioToTextGetSenders(): Promise<BaseSender[]> {
-  return await audioToTextStorage!.getSenders();
+export async function audioToTextGetSenders(
+  userId: string,
+): Promise<BaseSender[]> {
+  return await audioToTextStorage!.getSenders(userId);
 }
 
-export async function audioToTextAddSender(sender: BaseSender): Promise<void> {
-  return await audioToTextStorage?.addSender(sender);
+export async function audioToTextAddSender(
+  sender: BaseSender,
+  userId: string,
+): Promise<void> {
+  return await audioToTextStorage?.addSender(sender, userId);
 }
 
 export async function audioToTextDeleteSender(senderId: string): Promise<void> {
   return await audioToTextStorage?.deleteSender(senderId);
 }
 
-export async function audioToTextGetSettings(): Promise<
-  AudioToTextSettings | undefined
-> {
-  return await audioToTextStorage?.getSettings();
+export async function audioToTextGetSettings(
+  userId: string,
+): Promise<AudioToTextSettings | undefined> {
+  return await audioToTextStorage?.getSettings(userId);
 }
 
 export async function audioToTextUpdateSettings(
   settings: AudioToTextSettings,
+  userId: string,
 ): Promise<void> {
-  await audioToTextStorage?.updateSettings(settings);
+  await audioToTextStorage?.updateSettings(settings, userId);
 }
 
 // CHATBOT
 export async function chatbotGetMessages(
   senderIds: string[],
+  userId: string,
 ): Promise<ChatMessagesProps> {
-  return await chatbotStorage!.getMessages(senderIds);
+  return await chatbotStorage!.getMessages(senderIds, userId);
 }
 
 export async function chatbotAddMessage(
   messages: MessageProps | MessageProps[],
+  userId: string,
 ): Promise<void> {
-  await chatbotStorage?.addMessage(messages);
+  await chatbotStorage?.addMessage(messages, userId);
 }
 
 export async function chatbotDeleteSenderMessages(
@@ -153,16 +179,19 @@ export async function chatbotDeleteSenderMessages(
   await chatbotStorage?.deleteSenderMessages(senderId);
 }
 
-export async function chatbotDeleteAllMessages(): Promise<void> {
-  await chatbotStorage?.deleteAllMessages();
+export async function chatbotDeleteAllMessages(userId: string): Promise<void> {
+  await chatbotStorage?.deleteAllMessages(userId);
 }
 
-export async function chatbotGetSenders(): Promise<BaseSender[]> {
-  return await chatbotStorage!.getSenders();
+export async function chatbotGetSenders(userId: string): Promise<BaseSender[]> {
+  return await chatbotStorage!.getSenders(userId);
 }
 
-export async function chatbotAddSender(sender: BaseSender): Promise<void> {
-  return await chatbotStorage?.addSender(sender);
+export async function chatbotAddSender(
+  sender: BaseSender,
+  userId: string,
+): Promise<void> {
+  return await chatbotStorage?.addSender(sender, userId);
 }
 
 export async function chatbotDeleteSender(senderId: string): Promise<void> {

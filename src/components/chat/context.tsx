@@ -15,9 +15,11 @@ import {
 } from "react";
 import { ProviderProps } from "../../libs/chat/models/types";
 import { StorageGeneralBase } from "@/libs/chat/storage/storageBase";
+import { useSession } from "next-auth/react";
+import { StorageGeneralMongoDB } from "@/libs/chat/storage/mongodb/storageMongoDB";
 
 // import { generalStorage } from "@/libs/chat/storage/indexDB/store";
-import { generalStorage } from "@/libs/chat/storage/mongodb/storageMongoDB";
+// import { generalStorage } from "@/libs/chat/storage/mongodb/storageMongoDB";
 
 interface AIContext {
   providers: ProviderProps[];
@@ -69,15 +71,18 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
     defaultAIContext.openSettings,
   );
   const [tools, setTools] = useState<ToolsProps>(initTools);
-  const storage = useRef<StorageGeneralBase>(generalStorage);
+  const { data: session, status } = useSession();
+  const storage = useRef<StorageGeneralBase | null>(null);
 
   useEffect(() => {
+    if (status === "authenticated")
+      storage.current = new StorageGeneralMongoDB(session.user!.email!);
     Promise.all([
-      getUserProviders(setProviders, storage.current),
-      getUserTools(setTools, storage.current),
-      // import("dexie-export-import"),
+      getUserProviders(setProviders, storage.current ?? undefined),
+      getUserTools(setTools, storage.current ?? undefined),
+      import("dexie-export-import"),
     ]);
-  }, []);
+  }, [status]);
 
   return (
     <aIContext.Provider

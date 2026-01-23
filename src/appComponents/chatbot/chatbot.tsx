@@ -35,7 +35,7 @@ interface ChatBotProps {
   storage?: ChatbotStorageBase;
 }
 
-export default function ChatBot({
+export function Chatbot({
   chats: initChats,
   sessions: initSessions,
   user,
