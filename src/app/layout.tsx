@@ -11,6 +11,8 @@ import "./global.css";
 import { Metadata } from "next";
 // import { LocalizerProvider } from "@/components/localizerProvider";
 
+import "@/libs/chat/storage/mongodb/connect";
+
 const description = "Test site for AI features";
 const name = "AId";
 const template = `%s | ${name}`;

@@ -17,7 +17,7 @@ import { ToolsDB } from "../types";
 import { Document, MongoClient, ObjectId } from "mongodb";
 import { MongoDBCollecions } from "./constants";
 
-const defaultToolKey = "defaultKeyTool";
+const defaultToolKey = new ObjectId();
 
 export class StorageGeneralMongoDB extends StorageGeneralBase {
   constructor(
@@ -186,7 +186,7 @@ export class StorageMongoDB extends StorageBase {
   }
 }
 
-const defaultChatSettingsKey = "defaultChatKey";
+const defaultChatSettingsKey = new ObjectId();
 
 interface StorageChatMongoDBProps extends StorageMongoDBProps {
   settings: string;
@@ -250,7 +250,7 @@ export class StorageChatMongoDB extends ChatStorageBase {
   async updateSettings(settings: ChatSettings): Promise<void> {
     await this.collection<ChatSettings>(this._settings).findOneAndUpdate(
       { _id: new ObjectId(defaultChatSettingsKey) },
-      settings,
+      { $set: settings },
       { upsert: true },
     );
   }

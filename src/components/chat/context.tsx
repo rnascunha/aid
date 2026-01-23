@@ -9,11 +9,14 @@ import {
   ReactNode,
   SetStateAction,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { ProviderProps } from "../../libs/chat/models/types";
 import { StorageGeneralBase } from "@/libs/chat/storage/storageBase";
-import { generalStorage } from "@/libs/chat/storage/indexDB/store";
+
+// import { generalStorage } from "@/libs/chat/storage/indexDB/store";
+import { generalStorage } from "@/libs/chat/storage/mongodb/storageMongoDBBrowser";
 
 interface AIContext {
   providers: ProviderProps[];
@@ -34,10 +37,13 @@ const defaultAIContext: AIContext = {
   setTools: () => {},
 };
 
-async function getUserTools(setTools: Dispatch<SetStateAction<ToolsProps>>) {
+async function getUserTools(
+  setTools: Dispatch<SetStateAction<ToolsProps>>,
+  storage?: StorageGeneralBase,
+) {
   const [ip, tools] = await Promise.all([
     getIpiFyIP().catch(() => ""),
-    generalStorage?.getTools(),
+    storage?.getTools(),
   ]);
 
   setTools({ ...initTools, ip, ...(tools ?? {}) });
@@ -45,8 +51,9 @@ async function getUserTools(setTools: Dispatch<SetStateAction<ToolsProps>>) {
 
 async function getUserProviders(
   setProviders: Dispatch<SetStateAction<ProviderProps[]>>,
+  storage?: StorageGeneralBase,
 ) {
-  const ps = await generalStorage?.getProviders();
+  const ps = await storage?.getProviders();
   if (!ps) return;
   setProviders(ps);
 }
@@ -61,6 +68,7 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
     defaultAIContext.openSettings,
   );
   const [tools, setTools] = useState<ToolsProps>(initTools);
+  const storage = useRef<StorageGeneralBase>(generalStorage);
 
   useEffect(() => {
     Promise.all([
@@ -79,7 +87,7 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
         setOpenSettings,
         tools,
         setTools,
-        storage: generalStorage as StorageGeneralBase,
+        storage: storage.current as StorageGeneralBase,
       }}
     >
       {children}
