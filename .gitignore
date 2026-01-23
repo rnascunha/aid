@@ -45,3 +45,5 @@ next-env.d.ts
 
 certificates
 /container/keys
+
+/test/data.json
