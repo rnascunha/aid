@@ -15,28 +15,17 @@ import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ProviderProps } from "../../models/types";
 import { ToolsDB } from "../types";
 import { Document, MongoClient, ObjectId } from "mongodb";
+import { MongoDBCollecions } from "./constants";
 
 const defaultToolKey = "defaultKeyTool";
 
-interface StorageGeneralMongoDBProps {
-  dbName: string;
-  providers: string;
-  tools: string;
-}
-
 export class StorageGeneralMongoDB extends StorageGeneralBase {
-  private _dbName: string;
-  private _providers: string;
-  private _tools: string;
-
   constructor(
     private _client: MongoClient,
-    { dbName, providers, tools }: StorageGeneralMongoDBProps,
+    private _dbName: string,
+    private _collections: MongoDBCollecions,
   ) {
     super();
-    this._dbName = dbName;
-    this._providers = providers;
-    this._tools = tools;
   }
 
   private collection<T extends Document>(collection: string) {
@@ -44,7 +33,12 @@ export class StorageGeneralMongoDB extends StorageGeneralBase {
   }
 
   // GENERAL
-  async clear(): Promise<void> {}
+  async clear(): Promise<void> {
+    const promises = Object.values(this._collections).map((c) =>
+      this.collection(c).deleteMany({}),
+    );
+    await Promise.all(promises);
+  }
 
   async export(): Promise<Blob> {
     return new Blob();
@@ -54,22 +48,22 @@ export class StorageGeneralMongoDB extends StorageGeneralBase {
 
   // PROVIDER
   async getProviders(): Promise<ProviderProps[]> {
-    return await this.collection<ProviderProps>(this._providers)
+    return await this.collection<ProviderProps>(this._collections.providers)
       .find({})
       .toArray();
   }
 
   async addProvider(provider: ProviderProps): Promise<void> {
-    await this.collection<ProviderProps>(this._providers).findOneAndUpdate(
-      { id: provider.id },
-      provider,
-      { upsert: true },
-    );
+    await this.collection<ProviderProps>(
+      this._collections.providers,
+    ).findOneAndUpdate({ id: provider.id }, provider, { upsert: true });
   }
 
   async deleteProvider(providerId: string): Promise<void> {
     await Promise.all([
-      this.collection<ProviderProps>(this._providers).findOneAndDelete({
+      this.collection<ProviderProps>(
+        this._collections.providers,
+      ).findOneAndDelete({
         id: providerId,
       }),
       // deleteModelFromProviderId(
@@ -94,7 +88,7 @@ export class StorageGeneralMongoDB extends StorageGeneralBase {
 
   // TOOLS
   async getTools(): Promise<ToolsDB | undefined> {
-    return (await this.collection<ToolsDB>(this._tools).findOne({
+    return (await this.collection<ToolsDB>(this._collections.tools).findOne({
       _id: new ObjectId(defaultToolKey),
     })) as ToolsDB;
   }
@@ -102,7 +96,7 @@ export class StorageGeneralMongoDB extends StorageGeneralBase {
   async updateTools(tools: ToolsProps): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ip, ...others } = tools;
-    await this.collection<ToolsDB>(this._tools).findOneAndUpdate(
+    await this.collection<ToolsDB>(this._collections.tools).findOneAndUpdate(
       { _id: new ObjectId(defaultToolKey) },
       others,
     );
@@ -179,7 +173,7 @@ export class StorageMongoDB extends StorageBase {
   async addSender(sender: BaseSender): Promise<void> {
     await this.collection<BaseSender>(this._senders).findOneAndUpdate(
       { id: sender.id },
-      sender,
+      { $set: sender },
       { upsert: true },
     );
   }
