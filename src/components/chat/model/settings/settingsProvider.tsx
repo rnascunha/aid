@@ -62,6 +62,12 @@ function APIKeyConfig({
       size="small"
       defaultValue={(provider.auth as ProviderAuthAPIKey).key}
       onBlur={(ev) => updateAuthProvider(ev.target.value.trim())}
+      focused
+      slotProps={{
+        htmlInput: {
+          autoFocus: true,
+        },
+      }}
     />
   );
 }
@@ -87,8 +93,8 @@ async function readAppCredentialsFile(file: File) {
         e instanceof DOMException
           ? "Error reading file"
           : e instanceof SyntaxError
-          ? "Error parsing file"
-          : "Unknow error",
+            ? "Error parsing file"
+            : "Unknow error",
       details: e,
     };
   }
@@ -117,7 +123,7 @@ function GoogleConfig({
   provider: ProviderProps;
   updateAuthProvider: (
     k: string,
-    field: keyof ProviderAuthGoogle
+    field: keyof ProviderAuthGoogle,
   ) => Promise<void> | void;
 }) {
   const [file, setFile] = useState(getAppCredentialsName(provider));
@@ -134,6 +140,12 @@ function GoogleConfig({
         onBlur={(ev) =>
           updateAuthProvider(ev.target.value.trim(), "project_id")
         }
+        focused
+        slotProps={{
+          htmlInput: {
+            autoFocus: true,
+          },
+        }}
       />
       <TextField
         label="Region"
@@ -183,7 +195,7 @@ function GoogleConfig({
                           input.current!.value = "";
                           await updateAuthProvider(
                             "",
-                            "application_credentials"
+                            "application_credentials",
                           );
                           return;
                         }
@@ -191,7 +203,7 @@ function GoogleConfig({
                         setFile(d.name!);
                         await updateAuthProvider(
                           d.data as string,
-                          "application_credentials"
+                          "application_credentials",
                         );
                       }}
                     />
@@ -213,7 +225,7 @@ function IBMWatsonXConfig({
   provider: ProviderProps;
   updateAuthProvider: (
     k: string,
-    field: keyof ProviderAuthIBMWatsonX
+    field: keyof ProviderAuthIBMWatsonX,
   ) => Promise<void> | void;
 }) {
   return (
@@ -226,6 +238,12 @@ function IBMWatsonXConfig({
         onBlur={(ev) =>
           updateAuthProvider(ev.target.value.trim(), "project_id")
         }
+        focused
+        slotProps={{
+          htmlInput: {
+            autoFocus: true,
+          },
+        }}
       />
       <TextField
         label="Service URL"
@@ -254,7 +272,7 @@ function AWSProviderConfig({
   provider: ProviderProps;
   updateAuthProvider: (
     k: string,
-    field: keyof ProviderAuthAWS
+    field: keyof ProviderAuthAWS,
   ) => Promise<void> | void;
 }) {
   return (
@@ -267,6 +285,12 @@ function AWSProviderConfig({
         onBlur={(ev) =>
           updateAuthProvider(ev.target.value.trim(), "access_key")
         }
+        focused
+        slotProps={{
+          htmlInput: {
+            autoFocus: true,
+          },
+        }}
       />
       <TextField
         label="Secret Key"
@@ -295,7 +319,7 @@ function AzureProviderConfig({
   provider: ProviderProps;
   updateAuthProvider: (
     k: string,
-    field: keyof ProviderAuthAzure
+    field: keyof ProviderAuthAzure,
   ) => Promise<void> | void;
 }) {
   return (
@@ -306,6 +330,12 @@ function AzureProviderConfig({
         size="small"
         defaultValue={(provider.auth as ProviderAuthAzure).key}
         onBlur={(ev) => updateAuthProvider(ev.target.value.trim(), "key")}
+        focused
+        slotProps={{
+          htmlInput: {
+            autoFocus: true,
+          },
+        }}
       />
       <TextField
         label="Base URL"
@@ -329,7 +359,7 @@ function AzureProviderConfig({
 
 type UpdateProviderAuthCallback = (
   auth: Partial<ProviderAuth>,
-  id: string
+  id: string,
 ) => Promise<void> | void;
 
 interface ProviderAuthDataConfig {
@@ -340,7 +370,7 @@ interface ProviderAuthDataConfig {
 const providerAuthMap = {
   [ProviderAuthType.AUTH_API_KEY]: (
     provider: ProviderProps,
-    updateAuthProvider: UpdateProviderAuthCallback
+    updateAuthProvider: UpdateProviderAuthCallback,
   ) => (
     <APIKeyConfig
       provider={provider}
@@ -351,7 +381,7 @@ const providerAuthMap = {
   ),
   [ProviderAuthType.AUTH_GOOGLE]: (
     provider: ProviderProps,
-    updateAuthProvider: UpdateProviderAuthCallback
+    updateAuthProvider: UpdateProviderAuthCallback,
   ) => (
     <GoogleConfig
       provider={provider}
@@ -362,7 +392,7 @@ const providerAuthMap = {
   ),
   [ProviderAuthType.AUTH_IBM_WATSONX]: (
     provider: ProviderProps,
-    updateAuthProvider: UpdateProviderAuthCallback
+    updateAuthProvider: UpdateProviderAuthCallback,
   ) => (
     <IBMWatsonXConfig
       provider={provider}
@@ -373,7 +403,7 @@ const providerAuthMap = {
   ),
   [ProviderAuthType.AUTH_AWS]: (
     provider: ProviderProps,
-    updateAuthProvider: UpdateProviderAuthCallback
+    updateAuthProvider: UpdateProviderAuthCallback,
   ) => (
     <AWSProviderConfig
       provider={provider}
@@ -384,7 +414,7 @@ const providerAuthMap = {
   ),
   [ProviderAuthType.AUTH_AZURE]: (
     provider: ProviderProps,
-    updateAuthProvider: UpdateProviderAuthCallback
+    updateAuthProvider: UpdateProviderAuthCallback,
   ) => (
     <AzureProviderConfig
       provider={provider}
@@ -397,7 +427,7 @@ const providerAuthMap = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     provider: ProviderProps,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateAuthProvider: UpdateProviderAuthCallback
+    updateAuthProvider: UpdateProviderAuthCallback,
   ) => undefined,
 };
 
@@ -420,7 +450,7 @@ function ProviderConfigAPIUrl({
   provider: ProviderProps;
   updateConfigProvider: (
     k: string | number,
-    field: keyof ProviderConfig
+    field: keyof ProviderConfig,
   ) => Promise<void> | void;
 }) {
   return (
@@ -454,7 +484,7 @@ function ProviderConfigAPIUrl({
 
 type UpdateProviderConfigCallback = (
   auth: Partial<ProviderConfig>,
-  id: string
+  id: string,
 ) => Promise<void> | void;
 
 interface ProviderConfigDataConfig {
@@ -465,7 +495,7 @@ interface ProviderConfigDataConfig {
 const providerConfigMap = {
   [ProviderConfigType.CONFIG_API_URL]: (
     provider: ProviderProps,
-    updateConfigProvider: UpdateProviderConfigCallback
+    updateConfigProvider: UpdateProviderConfigCallback,
   ) => (
     <ProviderConfigAPIUrl
       provider={provider}
@@ -478,7 +508,7 @@ const providerConfigMap = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     provider: ProviderProps,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateConfigProvider: UpdateProviderConfigCallback
+    updateConfigProvider: UpdateProviderConfigCallback,
   ) => undefined,
 } as const;
 
@@ -538,7 +568,7 @@ interface SettingsProvidersProps {
 export function SettingsProviders({ updateProvider }: SettingsProvidersProps) {
   const { providers, setProviders } = useContext(aIContext);
   const [deleteProvider, setDeleteProvider] = useState<ProviderProps | null>(
-    null
+    null,
   );
 
   const updateName = async (name: string, id: string) => {
@@ -554,7 +584,7 @@ export function SettingsProviders({ updateProvider }: SettingsProvidersProps) {
 
   const updateProvidersAuthAll = async (
     auth: Partial<ProviderAuth>,
-    id: string
+    id: string,
   ) => {
     const provider = providers.find((p) => p.id === id);
     if (!provider) return;
@@ -568,7 +598,7 @@ export function SettingsProviders({ updateProvider }: SettingsProvidersProps) {
 
   const updateProvidersConfigAll = async (
     config: Partial<ProviderConfig>,
-    id: string
+    id: string,
   ) => {
     const provider = providers.find((p) => p.id === id);
     if (!provider) return;

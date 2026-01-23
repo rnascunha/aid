@@ -11,12 +11,13 @@ import {
   useEffect,
   useRef,
   useState,
+  useTransition,
 } from "react";
 import { ProviderProps } from "../../libs/chat/models/types";
 import { StorageGeneralBase } from "@/libs/chat/storage/storageBase";
 
 // import { generalStorage } from "@/libs/chat/storage/indexDB/store";
-import { generalStorage } from "@/libs/chat/storage/mongodb/storageMongoDBBrowser";
+import { generalStorage } from "@/libs/chat/storage/mongodb/storageMongoDB";
 
 interface AIContext {
   providers: ProviderProps[];
@@ -72,9 +73,9 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     Promise.all([
-      getUserProviders(setProviders),
-      getUserTools(setTools),
-      import("dexie-export-import"),
+      getUserProviders(setProviders, storage.current),
+      getUserTools(setTools, storage.current),
+      // import("dexie-export-import"),
     ]);
   }, []);
 

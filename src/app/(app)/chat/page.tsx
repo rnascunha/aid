@@ -8,16 +8,17 @@ import { getChatData } from "@/appComponents/chat/functions";
 import { ChatStorageBase } from "@/libs/chat/storage/storageBase";
 
 // import { chatStorage } from "@/libs/chat/storage/indexDB/store";
-import { chatStorage } from "@/libs/chat/storage/mongodb/storageMongoDBBrowser";
+import { chatStorage } from "@/libs/chat/storage/mongodb/storageMongoDB";
 
 export default function ChatPage() {
   const [dbData, setDbData] = useState<null | ChatData>(null);
 
   useEffect(() => {
+    if (!chatStorage) return;
     getChatData({ storage: chatStorage as ChatStorageBase }).then((data) =>
       setDbData(data),
     );
-  }, []);
+  }, [chatStorage]);
 
   return dbData === null ? (
     <CenterSpinner />

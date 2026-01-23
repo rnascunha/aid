@@ -60,9 +60,14 @@ export function Chat({
     pending: [],
   });
   const [settings, setSettings] = useState(initSettings);
-
   const { providers, tools } = useContext(aIContext);
-  const chatProviders = useMemo(() => {
+  const [chatProviders, setChatProviders] = useState(
+    providers.filter((p) =>
+      providerBaseMap[p.providerBaseId].type.includes("chat"),
+    ),
+  );
+
+  useEffect(() => {
     const cp = providers.filter((p) =>
       providerBaseMap[p.providerBaseId].type.includes("chat"),
     );
@@ -75,8 +80,8 @@ export function Chat({
         await storage?.deleteSender(mId);
       },
     );
-    return cp;
-  }, [providers, state.sessions, storage]);
+    setChatProviders(cp);
+  }, [providers]);
 
   const setSelectedModel = (modelId: string | null) => {
     dispatch({ action: Actions.SELECT_SESSION, sessionId: modelId });

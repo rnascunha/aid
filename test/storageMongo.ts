@@ -5,17 +5,17 @@
 import { chats, sessions } from "@/app/(app)/test/init";
 import { connect } from "@/libs/chat/storage/mongodb/connect";
 import {
-  StorageChatMongoDB,
-  StorageGeneralMongoDB,
-} from "@/libs/chat/storage/mongodb/storageMongoDB";
+  MongoDBGeneralServer,
+  MongoDBChatServer,
+} from "@/libs/chat/storage/mongodb/server";
 import { dbName, collections } from "@/libs/chat/storage/mongodb/constants";
 
 async function main() {
   let client;
   try {
     client = await connect();
-    const general = new StorageGeneralMongoDB(client, dbName, collections);
-    const storage = new StorageChatMongoDB(client, {
+    const general = new MongoDBGeneralServer(client, dbName, collections);
+    const storage = new MongoDBChatServer(client, {
       dbName,
       messages: collections.chatMessages,
       senders: collections.chatSenders,

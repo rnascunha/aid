@@ -1,10 +1,12 @@
 "use server";
 
+import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { ProviderProps } from "@/libs/chat/models/types";
 import {
   generalStorage,
   chatStorage,
+  audioToTextStorage,
 } from "@/libs/chat/storage/mongodb/instance";
 import { ToolsDB } from "@/libs/chat/storage/types";
 import {
@@ -63,7 +65,6 @@ export async function chatDeleteAllMessages(): Promise<void> {
 }
 
 export async function chatGetSenders(): Promise<BaseSender[]> {
-  console.log(chatStorage);
   return await chatStorage!.getSenders();
 }
 
@@ -83,4 +84,51 @@ export async function chatUpdateSettings(
   settings: ChatSettings,
 ): Promise<void> {
   await chatStorage?.updateSettings(settings);
+}
+
+// AUDIOTOTEXT
+export async function audioToTextGetMessages(
+  senderIds: string[],
+): Promise<ChatMessagesProps> {
+  return await audioToTextStorage!.getMessages(senderIds);
+}
+
+export async function audioToTextAddMessage(
+  messages: MessageProps | MessageProps[],
+): Promise<void> {
+  await audioToTextStorage?.addMessage(messages);
+}
+
+export async function audioToTextDeleteSenderMessages(
+  senderId: string,
+): Promise<void> {
+  await audioToTextStorage?.deleteSenderMessages(senderId);
+}
+
+export async function audioToTextDeleteAllMessages(): Promise<void> {
+  await audioToTextStorage?.deleteAllMessages();
+}
+
+export async function audioToTextGetSenders(): Promise<BaseSender[]> {
+  return await audioToTextStorage!.getSenders();
+}
+
+export async function audioToTextAddSender(sender: BaseSender): Promise<void> {
+  return await audioToTextStorage?.addSender(sender);
+}
+
+export async function audioToTextDeleteSender(senderId: string): Promise<void> {
+  return await audioToTextStorage?.deleteSender(senderId);
+}
+
+export async function audioToTextGetSettings(): Promise<
+  AudioToTextSettings | undefined
+> {
+  return await audioToTextStorage?.getSettings();
+}
+
+export async function audioToTextUpdateSettings(
+  settings: AudioToTextSettings,
+): Promise<void> {
+  await audioToTextStorage?.updateSettings(settings);
 }

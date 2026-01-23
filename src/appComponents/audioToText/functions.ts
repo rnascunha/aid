@@ -54,6 +54,7 @@ export async function getAudioToTextData({
     storage.getSettings(),
   ]);
   const chats = await storage.getMessages(models.map((m) => m.id));
+
   return {
     models: models as ModelProps[],
     chats,

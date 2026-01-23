@@ -3,14 +3,14 @@
  *    npx tsx --env-file=".env" test/clearMongo.ts
  */
 import { connect } from "@/libs/chat/storage/mongodb/connect";
-import { StorageGeneralMongoDB } from "@/libs/chat/storage/mongodb/storageMongoDB";
+import { MongoDBGeneralServer } from "@/libs/chat/storage/mongodb/server";
 import { dbName, collections } from "@/libs/chat/storage/mongodb/constants";
 
 async function main() {
   let client;
   try {
     client = await connect();
-    const general = new StorageGeneralMongoDB(client, dbName, collections);
+    const general = new MongoDBGeneralServer(client, dbName, collections);
 
     process.stdout.write("Deleting database ... ");
     await general.clear();

@@ -69,7 +69,13 @@ export function AudioToText({
   });
 
   const { providers } = useContext(aIContext);
-  const audioToTextProviders = useMemo(() => {
+  const [audioToTextProviders, setaudioToTextProviders] = useState(
+    providers.filter((p) =>
+      providerBaseMap[p.providerBaseId].type.includes("audioToText"),
+    ),
+  );
+
+  useEffect(() => {
     const cp = providers.filter((p) =>
       providerBaseMap[p.providerBaseId].type.includes("audioToText"),
     );
@@ -82,8 +88,8 @@ export function AudioToText({
         await storage?.deleteSender(mId);
       },
     );
-    return cp;
-  }, [providers, state.sessions, storage]);
+    setaudioToTextProviders(cp);
+  }, [providers]);
 
   const setSelectedModel = (modelId: string | null) => {
     dispatch({ action: Actions.SELECT_SESSION, sessionId: modelId });
@@ -115,10 +121,12 @@ export function AudioToText({
     messages: InputOutput | MessageContentStatus,
     type: TypeMessage,
   ) => {
-    if (type === TypeMessage.MESSAGE && !((messages as InputOutput).files.length > 0))
+    if (
+      type === TypeMessage.MESSAGE &&
+      !((messages as InputOutput).files.length > 0)
+    )
       return;
 
-    console.log(messages);
     const newMessage = sendMessageHandler(messages, type, session.id);
     dispatch({
       action: Actions.ADD_MESSAGE,
