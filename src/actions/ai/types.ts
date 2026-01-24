@@ -129,5 +129,5 @@ export interface ChatInfo {
 export interface ChatResponse {
   type: TypeMessage;
   content: MessageContentStatus | Part[];
-  raw: ChatCompletionResponse | ChatErrorMessage | Error;
+  raw: ChatCompletionResponse | ChatErrorMessage | string;
 }

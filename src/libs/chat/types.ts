@@ -59,7 +59,7 @@ export interface MessageBaseProps {
   timestamp: number;
   senderId: string;
   origin: MessageOrigin;
-  raw?: object;
+  raw?: object | string;
 }
 
 export interface MessageStatus extends MessageBaseProps {

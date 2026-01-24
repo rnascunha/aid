@@ -8,7 +8,7 @@ import { MessageContentStatus, Part, TypeMessage } from "@/libs/chat/types";
 interface AudioToTextResponse {
   type: TypeMessage;
   content: MessageContentStatus | Part[];
-  raw: object;
+  raw: object | string;
 }
 
 export async function fetchAudioToText(data: {
@@ -55,7 +55,7 @@ export async function fetchAudioToText(data: {
         name: "Fetch Data Error",
         text: (e as Error).message,
       },
-      raw: e as Error,
+      raw: JSON.stringify(e as Error),
     };
   }
 }

@@ -7,7 +7,7 @@ import { ADKException, Part, SendQueryProps } from "../libs/adk/types";
 interface ChatbotResponse {
   type: TypeMessage;
   content: MessageContentStatus | Part[];
-  raw: object;
+  raw: object | string;
 }
 
 function errorResponse(message: Awaited<ReturnType<typeof adk.sendQuery>>) {
@@ -22,14 +22,14 @@ function errorResponse(message: Awaited<ReturnType<typeof adk.sendQuery>>) {
 }
 
 function mergeContentResponses(
-  message: Awaited<ReturnType<typeof adk.sendQuery>>
+  message: Awaited<ReturnType<typeof adk.sendQuery>>,
 ) {
   return message.data.reduce(
     (acc: Part[], c: { content: { parts: Part[] } }) => {
       acc.push(...c.content!.parts);
       return acc;
     },
-    [] as Part[]
+    [] as Part[],
   );
 }
 
@@ -109,7 +109,7 @@ export async function sendQuery({
         name: error.name,
         text: error.message,
       },
-      raw: error,
+      raw: JSON.stringify(error),
     };
   }
 }

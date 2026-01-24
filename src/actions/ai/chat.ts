@@ -40,11 +40,6 @@ export async function fetchChatRequest(data: {
     return {
       type: TypeMessage.MESSAGE,
       content: getResponseParts(raw.data),
-      // content: [
-      //   {
-      //     text: raw.data.choices[0].message.content,
-      //   },
-      // ],
       raw: raw,
     };
   } catch (e) {
@@ -54,7 +49,7 @@ export async function fetchChatRequest(data: {
         name: "Fetch Data Error",
         text: (e as Error).message,
       },
-      raw: e as Error,
+      raw: JSON.stringify(e as Error),
     };
   }
 }
