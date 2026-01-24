@@ -189,45 +189,16 @@ export class StorageIndexDB extends StorageBase {
 
 const defaultChatSettingsKey = "defaultChatKey";
 
-export class StorageChatIndexDB extends ChatStorageBase {
-  private _indexDb: StorageIndexDB;
+export class StorageChatIndexDB
+  extends StorageIndexDB
+  implements ChatStorageBase
+{
   constructor(
     messageTable: TableMessages,
     senderTable: TableSenders,
     private _settingsTable: TableChatSettings,
   ) {
-    super();
-    this._indexDb = new StorageIndexDB(messageTable, senderTable);
-  }
-
-  // Messages
-  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-    return await this._indexDb.getMessages(senderIds);
-  }
-
-  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-    await this._indexDb.addMessage(messages);
-  }
-
-  async deleteSenderMessages(senderId: string): Promise<void> {
-    await this._indexDb.deleteSenderMessages(senderId);
-  }
-
-  async deleteAllMessages(): Promise<void> {
-    await this._indexDb.deleteAllMessages();
-  }
-
-  // Senders
-  async getSenders(): Promise<BaseSender[]> {
-    return await this._indexDb.getSenders();
-  }
-
-  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
-    await this._indexDb.addSender(sender);
-  }
-
-  async deleteSender(senderId: string): Promise<void> {
-    await this._indexDb.deleteSender(senderId);
+    super(messageTable, senderTable);
   }
 
   async getSettings(): Promise<ChatSettings | undefined> {
@@ -241,45 +212,16 @@ export class StorageChatIndexDB extends ChatStorageBase {
 
 const defaultAudioToTextSettingsKey = "defaultAudioToText";
 
-export class StorageAudioToTextIndexDB extends AudioToTextStorageBase {
-  private _indexDb: StorageIndexDB;
+export class StorageAudioToTextIndexDB
+  extends StorageIndexDB
+  implements AudioToTextStorageBase
+{
   constructor(
     messageTable: TableMessages,
     senderTable: TableSenders,
     private _settingsTable: TableAudioToTextSettings,
   ) {
-    super();
-    this._indexDb = new StorageIndexDB(messageTable, senderTable);
-  }
-
-  // Messages
-  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
-    return await this._indexDb.getMessages(senderIds);
-  }
-
-  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
-    await this._indexDb.addMessage(messages);
-  }
-
-  async deleteSenderMessages(senderId: string): Promise<void> {
-    await this._indexDb.deleteSenderMessages(senderId);
-  }
-
-  async deleteAllMessages(): Promise<void> {
-    await this._indexDb.deleteAllMessages();
-  }
-
-  // Senders
-  async getSenders(): Promise<BaseSender[]> {
-    return await this._indexDb.getSenders();
-  }
-
-  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
-    await this._indexDb.addSender(sender);
-  }
-
-  async deleteSender(senderId: string): Promise<void> {
-    await this._indexDb.deleteSender(senderId);
+    super(messageTable, senderTable);
   }
 
   async getSettings(): Promise<AudioToTextSettings | undefined> {
