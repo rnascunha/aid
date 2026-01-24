@@ -34,8 +34,11 @@ export async function addProvider(
   await generalStorage?.addProvider(provider, userId);
 }
 
-export async function deleteProvider(providerId: string): Promise<void> {
-  await generalStorage?.deleteProvider(providerId);
+export async function deleteProvider(
+  providerId: string,
+  userId: string,
+): Promise<void> {
+  await generalStorage?.deleteProvider(providerId, userId);
 }
 
 // TOOLS
@@ -67,8 +70,9 @@ export async function chatAddMessage(
 
 export async function chatDeleteSenderMessages(
   senderId: string,
+  userId: string,
 ): Promise<void> {
-  await chatStorage?.deleteSenderMessages(senderId);
+  await chatStorage?.deleteSenderMessages(senderId, userId);
 }
 
 export async function chatDeleteAllMessages(userId: string): Promise<void> {
@@ -86,8 +90,11 @@ export async function chatAddSender(
   return await chatStorage?.addSender(sender, userId);
 }
 
-export async function chatDeleteSender(senderId: string): Promise<void> {
-  return await chatStorage?.deleteSender(senderId);
+export async function chatDeleteSender(
+  senderId: string,
+  userId: string,
+): Promise<void> {
+  return await chatStorage?.deleteSender(senderId, userId);
 }
 
 export async function chatGetSettings(
@@ -120,8 +127,9 @@ export async function audioToTextAddMessage(
 
 export async function audioToTextDeleteSenderMessages(
   senderId: string,
+  userId: string,
 ): Promise<void> {
-  await audioToTextStorage?.deleteSenderMessages(senderId);
+  await audioToTextStorage?.deleteSenderMessages(senderId, userId);
 }
 
 export async function audioToTextDeleteAllMessages(
@@ -143,8 +151,11 @@ export async function audioToTextAddSender(
   return await audioToTextStorage?.addSender(sender, userId);
 }
 
-export async function audioToTextDeleteSender(senderId: string): Promise<void> {
-  return await audioToTextStorage?.deleteSender(senderId);
+export async function audioToTextDeleteSender(
+  senderId: string,
+  userId: string,
+): Promise<void> {
+  return await audioToTextStorage?.deleteSender(senderId, userId);
 }
 
 export async function audioToTextGetSettings(
@@ -177,8 +188,9 @@ export async function chatbotAddMessage(
 
 export async function chatbotDeleteSenderMessages(
   senderId: string,
+  userId: string,
 ): Promise<void> {
-  await chatbotStorage?.deleteSenderMessages(senderId);
+  await chatbotStorage?.deleteSenderMessages(senderId, userId);
 }
 
 export async function chatbotDeleteAllMessages(userId: string): Promise<void> {
@@ -196,6 +208,9 @@ export async function chatbotAddSender(
   return await chatbotStorage?.addSender(sender, userId);
 }
 
-export async function chatbotDeleteSender(senderId: string): Promise<void> {
-  return await chatbotStorage?.deleteSender(senderId);
+export async function chatbotDeleteSender(
+  senderId: string,
+  userId: string,
+): Promise<void> {
+  return await chatbotStorage?.deleteSender(senderId, userId);
 }

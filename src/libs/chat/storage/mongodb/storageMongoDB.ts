@@ -90,7 +90,7 @@ export class StorageGeneralMongoDB extends StorageGeneralBase {
   }
 
   async deleteProvider(providerId: string): Promise<void> {
-    await deleteProvider(providerId);
+    await deleteProvider(providerId, this._userId);
   }
 
   // TOOLS
@@ -118,7 +118,7 @@ export class StorageChatMongoDB extends ChatStorageBase {
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
-    await chatDeleteSenderMessages(senderId);
+    await chatDeleteSenderMessages(senderId, this._userId);
   }
 
   async deleteAllMessages(): Promise<void> {
@@ -135,7 +135,7 @@ export class StorageChatMongoDB extends ChatStorageBase {
   }
 
   async deleteSender(senderId: string): Promise<void> {
-    await chatDeleteSender(senderId);
+    await chatDeleteSender(senderId, this._userId);
   }
 
   async getSettings(): Promise<ChatSettings | undefined> {
@@ -162,7 +162,7 @@ export class StorageAudioToTextMongoDB extends AudioToTextStorageBase {
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
-    await audioToTextDeleteSenderMessages(senderId);
+    await audioToTextDeleteSenderMessages(senderId, this._userId);
   }
 
   async deleteAllMessages(): Promise<void> {
@@ -179,7 +179,7 @@ export class StorageAudioToTextMongoDB extends AudioToTextStorageBase {
   }
 
   async deleteSender(senderId: string): Promise<void> {
-    await audioToTextDeleteSender(senderId);
+    await audioToTextDeleteSender(senderId, this._userId);
   }
 
   async getSettings(): Promise<AudioToTextSettings | undefined> {
@@ -206,7 +206,7 @@ export class StorageChatbotMongoDB extends StorageBase {
   }
 
   async deleteSenderMessages(senderId: string): Promise<void> {
-    await chatbotDeleteSenderMessages(senderId);
+    await chatbotDeleteSenderMessages(senderId, this._userId);
   }
 
   async deleteAllMessages(): Promise<void> {
@@ -223,6 +223,6 @@ export class StorageChatbotMongoDB extends StorageBase {
   }
 
   async deleteSender(senderId: string): Promise<void> {
-    await chatbotDeleteSender(senderId);
+    await chatbotDeleteSender(senderId, this._userId);
   }
 }

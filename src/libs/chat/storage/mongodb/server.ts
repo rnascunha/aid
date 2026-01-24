@@ -70,20 +70,23 @@ export class MongoDBGeneralServer {
       );
   }
 
-  async deleteProvider(providerId: string): Promise<void> {
+  async deleteProvider(providerId: string, userId: string): Promise<void> {
     await Promise.all([
       this.collection<DBProviderProps>(
         this._collections.providers,
       ).findOneAndDelete({
         id: providerId,
+        userId,
       }),
       this.collection<DBBaseSender>(this._collections.chatSenders).deleteMany({
         providerId,
+        userId,
       }),
       this.collection<DBBaseSender>(
         this._collections.audioToTextSenders,
       ).deleteMany({
         providerId,
+        userId,
       }),
     ]);
   }
@@ -168,9 +171,10 @@ export class MongoDBServer {
       });
   }
 
-  async deleteSenderMessages(senderId: string): Promise<void> {
+  async deleteSenderMessages(senderId: string, userId: string): Promise<void> {
     await this.collection<DBMessageProps>(this._messages).deleteMany({
       senderId,
+      userId,
     });
   }
 
@@ -204,10 +208,13 @@ export class MongoDBServer {
       );
   }
 
-  async deleteSender(senderId: string): Promise<void> {
+  async deleteSender(senderId: string, userId: string): Promise<void> {
     await Promise.all([
-      this.collection<DBBaseSender>(this._senders).deleteOne({ id: senderId }),
-      this.deleteSenderMessages(senderId),
+      this.collection<DBBaseSender>(this._senders).deleteOne({
+        id: senderId,
+        userId,
+      }),
+      this.deleteSenderMessages(senderId, userId),
     ]);
   }
 }
@@ -249,8 +256,8 @@ export class MongoDBChatServer {
     await this._base.addMessage(messages, userId);
   }
 
-  async deleteSenderMessages(senderId: string): Promise<void> {
-    await this._base.deleteSenderMessages(senderId);
+  async deleteSenderMessages(senderId: string, userId: string): Promise<void> {
+    await this._base.deleteSenderMessages(senderId, userId);
   }
 
   async deleteAllMessages(userId: string): Promise<void> {
@@ -269,8 +276,8 @@ export class MongoDBChatServer {
     await this._base.addSender(sender, userId);
   }
 
-  async deleteSender(senderId: string): Promise<void> {
-    await this._base.deleteSender(senderId);
+  async deleteSender(senderId: string, userId: string): Promise<void> {
+    await this._base.deleteSender(senderId, userId);
   }
 
   async getSettings(userId: string): Promise<ChatSettings | undefined> {
@@ -326,8 +333,8 @@ export class MongoDBAudioToTextServer {
     await this._base.addMessage(messages, userId);
   }
 
-  async deleteSenderMessages(senderId: string): Promise<void> {
-    await this._base.deleteSenderMessages(senderId);
+  async deleteSenderMessages(senderId: string, userId: string): Promise<void> {
+    await this._base.deleteSenderMessages(senderId, userId);
   }
 
   async deleteAllMessages(userId: string): Promise<void> {
@@ -346,8 +353,8 @@ export class MongoDBAudioToTextServer {
     await this._base.addSender(sender, userId);
   }
 
-  async deleteSender(senderId: string): Promise<void> {
-    await this._base.deleteSender(senderId);
+  async deleteSender(senderId: string, userId: string): Promise<void> {
+    await this._base.deleteSender(senderId, userId);
   }
 
   async getSettings(userId: string): Promise<AudioToTextSettings | undefined> {
