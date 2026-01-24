@@ -6,6 +6,8 @@ import { connect } from "@/libs/chat/storage/mongodb/connect";
 import { MongoDBGeneralServer } from "@/libs/chat/storage/mongodb/server";
 import { dbName, collections } from "@/libs/chat/storage/mongodb/constants";
 
+const userId = "guest";
+
 async function main() {
   let client;
   try {
@@ -13,7 +15,7 @@ async function main() {
     const general = new MongoDBGeneralServer(client, dbName, collections);
 
     process.stdout.write("Deleting database ... ");
-    await general.clear();
+    await general.clear(userId);
     console.log("OK");
   } catch (e) {
     console.log("ERROR");

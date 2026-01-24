@@ -23,20 +23,13 @@ import {
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ProviderProps } from "../../models/types";
-import { ToolsDB } from "../types";
+import { DBExpotFormat, ToolsDB } from "../types";
+import { exportStorage, importStorage } from "../functions";
 
 const defaultToolKey = "defaultKeyTool";
 
 export class StorageGeneralIndexDB extends StorageGeneralBase {
-  constructor(
-    private _store: StorageStoreType,
-    private _providerTable: TableProviders,
-    private _toolsTable: TableTools,
-    private _chatModels: TableSenders,
-    private _chatMessages: TableMessages,
-    private _audioToTextModels: TableSenders,
-    private _audioToTextMessages: TableMessages,
-  ) {
+  constructor(private _store: StorageStoreType) {
     super();
   }
 
@@ -46,39 +39,77 @@ export class StorageGeneralIndexDB extends StorageGeneralBase {
     await this._store.open();
   }
 
-  async export(): Promise<Blob> {
-    return this._store.export();
+  async export(): Promise<DBExpotFormat> {
+    return await exportStorage({
+      general: this,
+      chat: new StorageChatIndexDB(
+        this._store.chatMessages,
+        this._store.chatModels,
+        this._store.chatSettings,
+      ),
+      audioToText: new StorageAudioToTextIndexDB(
+        this._store.audioToTextMessages,
+        this._store.audioToTextModels,
+        this._store.audioToTextSettings,
+      ),
+      chatbot: new StorageChatbotIndexDB(
+        this._store.chatbotMessages,
+        this._store.chatbotSessions,
+      ),
+    });
   }
 
-  async import(blob: Blob): Promise<void> {
-    await this.clear();
-    await this._store.import(blob);
+  async import(data: DBExpotFormat): Promise<void> {
+    await importStorage(
+      {
+        general: this,
+        chat: new StorageChatIndexDB(
+          this._store.chatMessages,
+          this._store.chatModels,
+          this._store.chatSettings,
+        ),
+        audioToText: new StorageAudioToTextIndexDB(
+          this._store.audioToTextMessages,
+          this._store.audioToTextModels,
+          this._store.audioToTextSettings,
+        ),
+        chatbot: new StorageChatbotIndexDB(
+          this._store.chatbotMessages,
+          this._store.chatbotSessions,
+        ),
+      },
+      data,
+    );
   }
 
   // PROVIDER
   async getProviders(): Promise<ProviderProps[]> {
-    return await this._providerTable.toArray();
+    return await this._store.providers.toArray();
   }
 
-  async addProvider(provider: ProviderProps): Promise<void> {
-    await this._providerTable.put(provider);
+  async addProvider(provider: ProviderProps | ProviderProps[]): Promise<void> {
+    if (Array.isArray(provider)) await this._store.providers.bulkAdd(provider);
+    else await this._store.providers.put(provider);
   }
 
   async deleteProvider(providerId: string): Promise<void> {
     await Promise.all([
-      this._providerTable.delete(providerId),
+      this._store.providers.delete(providerId),
       deleteModelFromProviderId(
-        this._chatModels,
+        this._store.chatModels,
         providerId,
         async (senderId) => {
-          await this._chatMessages.where("senderId").equals(senderId).delete();
+          await this._store.chatMessages
+            .where("senderId")
+            .equals(senderId)
+            .delete();
         },
       ),
       deleteModelFromProviderId(
-        this._audioToTextModels,
+        this._store.audioToTextModels,
         providerId,
         async (senderId) => {
-          await this._audioToTextMessages
+          await this._store.audioToTextMessages
             .where("senderId")
             .equals(senderId)
             .delete();
@@ -89,13 +120,13 @@ export class StorageGeneralIndexDB extends StorageGeneralBase {
 
   // TOOLS
   async getTools(): Promise<ToolsDB | undefined> {
-    return await this._toolsTable.get(defaultToolKey);
+    return await this._store.tools.get(defaultToolKey);
   }
 
   async updateTools(tools: ToolsProps): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ip, ...others } = tools;
-    await this._toolsTable.put(others, defaultToolKey);
+    await this._store.tools.put(others, defaultToolKey);
   }
 }
 
@@ -143,8 +174,9 @@ export class StorageIndexDB extends StorageBase {
     return await this._senderTable.toArray();
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
-    await this._senderTable.put(sender);
+  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
+    if (Array.isArray(sender)) await this._senderTable.bulkAdd(sender);
+    else await this._senderTable.put(sender);
   }
 
   async deleteSender(senderId: string): Promise<void> {
@@ -190,7 +222,7 @@ export class StorageChatIndexDB extends ChatStorageBase {
     return await this._indexDb.getSenders();
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
+  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
     await this._indexDb.addSender(sender);
   }
 
@@ -242,7 +274,7 @@ export class StorageAudioToTextIndexDB extends AudioToTextStorageBase {
     return await this._indexDb.getSenders();
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
+  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
     await this._indexDb.addSender(sender);
   }
 
@@ -259,5 +291,5 @@ export class StorageAudioToTextIndexDB extends AudioToTextStorageBase {
   }
 }
 
-export const ChatbotStorageIndexDB = StorageIndexDB;
-export type ChatbotStorageIndexDB = StorageIndexDB;
+export const StorageChatbotIndexDB = StorageIndexDB;
+export type StorageChatbotIndexDB = StorageIndexDB;

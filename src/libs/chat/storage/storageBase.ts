@@ -7,13 +7,27 @@ import {
 } from "../types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { ProviderProps } from "../models/types";
-import { ToolsDB } from "./types";
+import { DBExpotFormat, ToolsDB } from "./types";
 
 export abstract class StorageGeneralBase {
   // GENERAL
+
+  /**
+   * Clear all data from database
+   */
   abstract clear(): Promise<void>;
-  abstract export(): Promise<Blob>;
-  abstract import(blob: Blob): Promise<void>;
+
+  /**
+   * Export data from database
+   */
+  abstract export(): Promise<DBExpotFormat>;
+
+  /**
+   * Import data to database
+   *
+   * @param json data to be imported
+   */
+  abstract import(json: DBExpotFormat): Promise<void>;
 
   // PROVIDER
   /**
@@ -26,7 +40,9 @@ export abstract class StorageGeneralBase {
    *
    * @param provider Provider to add
    */
-  abstract addProvider(provider: ProviderProps): Promise<void>;
+  abstract addProvider(
+    provider: ProviderProps | ProviderProps[],
+  ): Promise<void>;
   /**
    * Delete provider
    *
@@ -82,11 +98,11 @@ export abstract class StorageBase {
   abstract getSenders(): Promise<BaseSender[]>;
 
   /**
-   * Add new sender
+   * Add ore or many new senders
    *
-   * @param sender sender to be added
+   * @param sender sender(s) to be added
    */
-  abstract addSender(sender: BaseSender): Promise<void>;
+  abstract addSender(sender: BaseSender | BaseSender[]): Promise<void>;
 
   /**
    * Delete sender

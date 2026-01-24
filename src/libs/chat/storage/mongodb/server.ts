@@ -6,9 +6,9 @@ import {
 } from "../../types";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
-import { ModelProps, ProviderProps } from "../../models/types";
+import { ProviderProps } from "../../models/types";
 import { ToolsDB } from "../types";
-import { Document, MongoClient, ObjectId } from "mongodb";
+import { Document, MongoClient } from "mongodb";
 import { MongoDBCollecions } from "./constants";
 import {
   DBAudioToTextSettings,
@@ -18,10 +18,6 @@ import {
   DBProviderProps,
   DBTools,
 } from "./types";
-
-const defaultToolKey = new ObjectId();
-
-const defaultProjection = { projection: { _id: 0 } };
 
 export class MongoDBGeneralServer {
   constructor(
@@ -35,9 +31,9 @@ export class MongoDBGeneralServer {
   }
 
   // GENERAL
-  async clear(): Promise<void> {
+  async clear(userId: string): Promise<void> {
     const promises = Object.values(this._collections).map((c) =>
-      this.collection(c).deleteMany({}),
+      this.collection(c).deleteMany({ userId }),
     );
     await Promise.all(promises);
   }
@@ -55,14 +51,23 @@ export class MongoDBGeneralServer {
       .toArray();
   }
 
-  async addProvider(provider: ProviderProps, userId: string): Promise<void> {
-    await this.collection<DBProviderProps>(
-      this._collections.providers,
-    ).findOneAndUpdate(
-      { id: provider.id, userId },
-      { $set: { ...provider, userId } },
-      { upsert: true },
-    );
+  async addProvider(
+    provider: ProviderProps | ProviderProps[],
+    userId: string,
+  ): Promise<void> {
+    if (Array.isArray(provider)) {
+      if (provider.length > 0)
+        await this.collection<DBProviderProps>(
+          this._collections.providers,
+        ).insertMany(provider.map((p) => ({ ...p, userId })));
+    } else
+      await this.collection<DBProviderProps>(
+        this._collections.providers,
+      ).findOneAndUpdate(
+        { id: provider.id, userId },
+        { $set: { ...provider, userId } },
+        { upsert: true },
+      );
   }
 
   async deleteProvider(providerId: string): Promise<void> {
@@ -151,11 +156,12 @@ export class MongoDBServer {
     messages: MessageProps | MessageProps[],
     userId: string,
   ): Promise<void> {
-    if (Array.isArray(messages))
-      await this.collection<DBMessageProps>(this._messages).insertMany(
-        messages.map((m) => ({ ...m, userId })),
-      );
-    else
+    if (Array.isArray(messages)) {
+      if (messages.length > 0)
+        await this.collection<DBMessageProps>(this._messages).insertMany(
+          messages.map((m) => ({ ...m, userId })),
+        );
+    } else
       await this.collection<DBMessageProps>(this._messages).insertOne({
         ...messages,
         userId,
@@ -181,12 +187,21 @@ export class MongoDBServer {
       .toArray();
   }
 
-  async addSender(sender: BaseSender, userId: string): Promise<void> {
-    await this.collection<DBBaseSender>(this._senders).findOneAndUpdate(
-      { id: sender.id, userId },
-      { $set: { ...sender, userId } },
-      { upsert: true },
-    );
+  async addSender(
+    sender: BaseSender | BaseSender[],
+    userId: string,
+  ): Promise<void> {
+    if (Array.isArray(sender)) {
+      if (sender.length > 0)
+        await this.collection<DBBaseSender>(this._senders).insertMany(
+          sender.map((s) => ({ ...s, userId })),
+        );
+    } else
+      await this.collection<DBBaseSender>(this._senders).findOneAndUpdate(
+        { id: sender.id, userId },
+        { $set: { ...sender, userId } },
+        { upsert: true },
+      );
   }
 
   async deleteSender(senderId: string): Promise<void> {
@@ -247,7 +262,10 @@ export class MongoDBChatServer {
     return await this._base.getSenders(userId);
   }
 
-  async addSender(sender: BaseSender, userId: string): Promise<void> {
+  async addSender(
+    sender: BaseSender | BaseSender[],
+    userId: string,
+  ): Promise<void> {
     await this._base.addSender(sender, userId);
   }
 
@@ -321,7 +339,10 @@ export class MongoDBAudioToTextServer {
     return await this._base.getSenders(userId);
   }
 
-  async addSender(sender: BaseSender, userId: string): Promise<void> {
+  async addSender(
+    sender: BaseSender | BaseSender[],
+    userId: string,
+  ): Promise<void> {
     await this._base.addSender(sender, userId);
   }
 

@@ -1,8 +1,11 @@
-export function readFileText(file: File, encoding: string = "UTF-8") {
+export function readFileText(
+  file: File,
+  encoding: string = "UTF-8",
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      resolve(e.target?.result);
+      resolve(e.target?.result as string);
     };
 
     reader.onerror = (e) => {
@@ -12,4 +15,3 @@ export function readFileText(file: File, encoding: string = "UTF-8") {
     reader.readAsText(file, encoding);
   });
 }
-

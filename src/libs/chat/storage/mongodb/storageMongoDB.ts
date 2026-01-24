@@ -38,7 +38,7 @@ import {
   StorageGeneralBase,
 } from "../storageBase";
 import { ProviderProps } from "../../models/types";
-import { ToolsDB } from "../types";
+import { DBExpotFormat, ToolsDB } from "../types";
 import {
   BaseSender,
   ChatMessagesProps,
@@ -47,6 +47,7 @@ import {
 } from "../../types";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
+import { exportStorage, importStorage } from "../functions";
 
 export class StorageGeneralMongoDB extends StorageGeneralBase {
   constructor(private _userId: string) {
@@ -55,21 +56,36 @@ export class StorageGeneralMongoDB extends StorageGeneralBase {
 
   // GENERAL
   async clear(): Promise<void> {
-    await clear();
+    await clear(this._userId);
   }
 
-  async export(): Promise<Blob> {
-    return new Blob();
+  async export(): Promise<DBExpotFormat> {
+    return await exportStorage({
+      general: this,
+      chat: new StorageChatMongoDB(this._userId),
+      audioToText: new StorageAudioToTextMongoDB(this._userId),
+      chatbot: new StorageChatbotMongoDB(this._userId),
+    });
   }
 
-  async import(blob: Blob): Promise<void> {}
+  async import(data: DBExpotFormat): Promise<void> {
+    await importStorage(
+      {
+        general: this,
+        chat: new StorageChatMongoDB(this._userId),
+        audioToText: new StorageAudioToTextMongoDB(this._userId),
+        chatbot: new StorageChatbotMongoDB(this._userId),
+      },
+      data,
+    );
+  }
 
   // PROVIDER
   async getProviders(): Promise<ProviderProps[]> {
     return await getProviders(this._userId);
   }
 
-  async addProvider(provider: ProviderProps): Promise<void> {
+  async addProvider(provider: ProviderProps | ProviderProps[]): Promise<void> {
     await addProvider(provider, this._userId);
   }
 
@@ -114,7 +130,7 @@ export class StorageChatMongoDB extends ChatStorageBase {
     return await chatGetSenders(this._userId);
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
+  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
     await chatAddSender(sender, this._userId);
   }
 
@@ -158,7 +174,7 @@ export class StorageAudioToTextMongoDB extends AudioToTextStorageBase {
     return await audioToTextGetSenders(this._userId);
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
+  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
     await audioToTextAddSender(sender, this._userId);
   }
 
@@ -202,7 +218,7 @@ export class StorageChatbotMongoDB extends StorageBase {
     return await chatbotGetSenders(this._userId);
   }
 
-  async addSender(sender: BaseSender): Promise<void> {
+  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
     await chatbotAddSender(sender, this._userId);
   }
 

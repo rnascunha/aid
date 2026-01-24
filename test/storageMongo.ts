@@ -25,7 +25,7 @@ async function main() {
     });
 
     process.stdout.write("Deleting database ... ");
-    await general.clear();
+    await general.clear(userId);
     console.log("OK");
 
     // Senders

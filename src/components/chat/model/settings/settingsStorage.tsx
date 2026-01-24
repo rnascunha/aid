@@ -5,9 +5,10 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useContext, useRef, useState } from "react";
 import { DeleteDialog } from "@/components/dialogs/deleteDialog";
-import { download } from "@/libs/download";
+import { download, downloadString } from "@/libs/download";
 import { VisuallyHiddenInput } from "@/components/fileUpload";
 import { aIContext } from "../../context";
+import { readFileText } from "@/libs/fileBrowser";
 
 type State = "save" | "load" | "clear";
 
@@ -28,15 +29,16 @@ export function SettingStorage() {
   };
 
   const downloadData = async () => {
-    const blob = await storage?.export();
-    if (!blob) return;
-    download(blob, "text/json", "aid.json");
+    const data = await storage?.export();
+    if (!data) return;
+    downloadString(JSON.stringify(data), "aid.json", "text/json");
   };
 
   const loadData = async (file: File | undefined) => {
     if (!file) return;
     try {
-      await storage?.import(file);
+      const data = JSON.parse(await readFileText(file, "utf-8"));
+      await storage?.import(data);
       window.location.reload();
     } catch (e) {
       console.error(e);

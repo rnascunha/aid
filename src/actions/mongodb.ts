@@ -18,16 +18,17 @@ import {
 } from "@/libs/chat/types";
 
 // GENERAL
-export async function clear(): Promise<void> {
-  await generalStorage?.clear();
+export async function clear(userId: string): Promise<void> {
+  await generalStorage?.clear(userId);
 }
 
+// PROVIDERS
 export async function getProviders(userId: string): Promise<ProviderProps[]> {
   return await generalStorage!.getProviders(userId);
 }
 
 export async function addProvider(
-  provider: ProviderProps,
+  provider: ProviderProps | ProviderProps[],
   userId: string,
 ): Promise<void> {
   await generalStorage?.addProvider(provider, userId);
@@ -37,6 +38,7 @@ export async function deleteProvider(providerId: string): Promise<void> {
   await generalStorage?.deleteProvider(providerId);
 }
 
+// TOOLS
 export async function getTools(userId: string): Promise<ToolsDB | undefined> {
   return await generalStorage?.getTools(userId);
 }
@@ -78,7 +80,7 @@ export async function chatGetSenders(userId: string): Promise<BaseSender[]> {
 }
 
 export async function chatAddSender(
-  sender: BaseSender,
+  sender: BaseSender | BaseSender[],
   userId: string,
 ): Promise<void> {
   return await chatStorage?.addSender(sender, userId);
@@ -135,7 +137,7 @@ export async function audioToTextGetSenders(
 }
 
 export async function audioToTextAddSender(
-  sender: BaseSender,
+  sender: BaseSender | BaseSender[],
   userId: string,
 ): Promise<void> {
   return await audioToTextStorage?.addSender(sender, userId);
@@ -188,7 +190,7 @@ export async function chatbotGetSenders(userId: string): Promise<BaseSender[]> {
 }
 
 export async function chatbotAddSender(
-  sender: BaseSender,
+  sender: BaseSender | BaseSender[],
   userId: string,
 ): Promise<void> {
   return await chatbotStorage?.addSender(sender, userId);

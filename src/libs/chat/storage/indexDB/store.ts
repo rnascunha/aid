@@ -1,7 +1,7 @@
 import Dexie from "dexie";
 import { StorageStoreType } from "./types";
 import {
-  ChatbotStorageIndexDB,
+  StorageChatbotIndexDB,
   StorageAudioToTextIndexDB,
   StorageChatIndexDB,
   StorageGeneralIndexDB,
@@ -29,18 +29,10 @@ aISettings.version(1).stores({
 export let generalStorage: StorageGeneralIndexDB | null = null;
 export let chatStorage: StorageChatIndexDB | null = null;
 export let audioToTextStorage: StorageAudioToTextIndexDB | null = null;
-export let chatbotStorage: ChatbotStorageIndexDB | null = null;
+export let chatbotStorage: StorageChatbotIndexDB | null = null;
 
 aISettings.open().then(() => {
-  generalStorage = new StorageGeneralIndexDB(
-    aISettings,
-    aISettings.providers,
-    aISettings.tools,
-    aISettings.chatModels,
-    aISettings.chatMessages,
-    aISettings.audioToTextModels,
-    aISettings.audioToTextMessages,
-  );
+  generalStorage = new StorageGeneralIndexDB(aISettings);
   chatStorage = new StorageChatIndexDB(
     aISettings.chatMessages,
     aISettings.chatModels,
@@ -51,7 +43,7 @@ aISettings.open().then(() => {
     aISettings.audioToTextModels,
     aISettings.audioToTextSettings,
   );
-  chatbotStorage = new ChatbotStorageIndexDB(
+  chatbotStorage = new StorageChatbotIndexDB(
     aISettings.chatbotMessages,
     aISettings.chatbotSessions,
   );
