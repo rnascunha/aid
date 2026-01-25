@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const BaseSender = z.object({
+export const BaseSender = z.object({
   id: z.string(),
   name: z.string(),
 });
@@ -88,7 +88,7 @@ const MessageExachange = MessageBaseProps.extend({
 });
 export type MessageExachange = z.infer<typeof MessageExachange>;
 
-const MessageProps = z.union([MessageStatus, MessageExachange] as const);
+export const MessageProps = z.union([MessageStatus, MessageExachange] as const);
 export type MessageProps = z.infer<typeof MessageProps>;
 
 const MessageContent = z.union([Part, MessageStatus] as const);
@@ -116,7 +116,7 @@ const MessageContext = z.object({
 });
 export type MessageContext = z.infer<typeof MessageContext>;
 
-const ToolsProps = z.object({
+export const ToolsProps = z.object({
   ip: z.string(),
   geoLocationApiKey: z.string(),
 });

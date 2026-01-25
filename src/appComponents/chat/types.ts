@@ -1,15 +1,18 @@
 import { ModelProps } from "@/libs/chat/models/types";
 import { ChatMessagesProps, ToolsProps } from "@/libs/chat/types";
+import z from "zod";
 
-export interface GeneralSettings {
-  temperature: number;
-}
+const GeneralSettings = z.object({
+  temperature: z.number(),
+});
+export type GeneralSettings = z.infer<typeof GeneralSettings>;
 
-export interface ContextSettings {
-  systemPrompt: string;
-  maxContextMessages: number;
-  maxElapsedTimeMessages: number;
-}
+const ContextSettings = z.object({
+  systemPrompt: z.string(),
+  maxContextMessages: z.number(),
+  maxElapsedTimeMessages: z.number(),
+});
+export type ContextSettings = z.infer<typeof ContextSettings>;
 
 export interface ToolNode {
   id: string;
@@ -21,16 +24,18 @@ export interface ToolNode {
   ) => { allowed: boolean; error: string | undefined };
 }
 
-export interface ToolsSettings {
-  tools: string[];
-  maxTurns: number;
-}
+const ToolsSettings = z.object({
+  tools: z.array(z.string()),
+  maxTurns: z.number(),
+});
+export type ToolsSettings = z.infer<typeof ToolsSettings>;
 
-export interface ChatSettings {
-  general: GeneralSettings;
-  context: ContextSettings;
-  tools: ToolsSettings;
-}
+export const ChatSettings = z.object({
+  general: GeneralSettings,
+  context: ContextSettings,
+  tools: ToolsSettings,
+});
+export type ChatSettings = z.infer<typeof ChatSettings>;
 
 export interface ChatData {
   chats: ChatMessagesProps;

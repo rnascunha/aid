@@ -1,10 +1,10 @@
 import { BaseSender } from "@/libs/chat/types";
 
 import { StaticImageData } from "next/image";
+import { z } from "zod";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const providerType = ["chat", "audioToText"] as const;
-type ProviderType = (typeof providerType)[number];
+const ProviderType = z.enum(["chat", "audioToText"] as const);
+export type ProviderType = z.infer<typeof ProviderType>;
 
 export enum ProviderAuthType {
   NONE = "none",
@@ -14,52 +14,63 @@ export enum ProviderAuthType {
   AUTH_AWS = "aws",
   AUTH_AZURE = "azure",
 }
+const ProviderAuthTypeEnum = z.enum(ProviderAuthType);
 
-export interface ProviderAuthAPIKey {
-  key: string;
-}
+const ProviderAuthAPIKey = z.object({
+  key: z.string(),
+});
+export type ProviderAuthAPIKey = z.infer<typeof ProviderAuthAPIKey>;
 
-export interface ProviderAuthGoogle {
-  project_id: string;
-  region: string;
-  application_credentials: string;
-}
+const ProviderAuthGoogle = z.object({
+  project_id: z.string(),
+  region: z.string(),
+  application_credentials: z.string(),
+});
+export type ProviderAuthGoogle = z.infer<typeof ProviderAuthGoogle>;
 
-export interface ProviderAuthIBMWatsonX {
-  key: string;
-  service_url: string;
-  project_id: string;
-}
+const ProviderAuthIBMWatsonX = z.object({
+  key: z.string(),
+  service_url: z.string(),
+  project_id: z.string(),
+});
+export type ProviderAuthIBMWatsonX = z.infer<typeof ProviderAuthIBMWatsonX>;
 
-export interface ProviderAuthAWS {
-  access_key: string;
-  secret_key: string;
-  region: string;
-}
+const ProviderAuthAWS = z.object({
+  access_key: z.string(),
+  secret_key: z.string(),
+  region: z.string(),
+});
+export type ProviderAuthAWS = z.infer<typeof ProviderAuthAWS>;
 
-export interface ProviderAuthAzure {
-  key: string;
-  base_url: string;
-  api_version: string;
-}
+const ProviderAuthAzure = z.object({
+  key: z.string(),
+  base_url: z.string(),
+  api_version: z.string(),
+});
+export type ProviderAuthAzure = z.infer<typeof ProviderAuthAzure>;
 
-export type ProviderAuth =
-  | ProviderAuthAPIKey
-  | ProviderAuthGoogle
-  | ProviderAuthIBMWatsonX
-  | ProviderAuthAWS
-  | ProviderAuthAzure;
+const ProviderAuth = z.union([
+  ProviderAuthAPIKey,
+  ProviderAuthGoogle,
+  ProviderAuthIBMWatsonX,
+  ProviderAuthAWS,
+  ProviderAuthAzure,
+]);
+export type ProviderAuth = z.infer<typeof ProviderAuth>;
 
 export enum ProviderConfigType {
   CONFIG_NONE = "none",
   CONFIG_API_URL = "api_url",
 }
+const ProviderConfigTypeEnum = z.enum(ProviderConfigType);
 
-export interface ProviderAPIUrlConfig {
-  api_url: string;
-  timeout: number;
-}
+const ProviderAPIUrlConfig = z.object({
+  api_url: z.string(),
+  timeout: z.number(),
+});
+export type ProviderAPIUrlConfig = z.infer<typeof ProviderAPIUrlConfig>;
 
+const ProviderConfig = ProviderAPIUrlConfig;
 export type ProviderConfig = ProviderAPIUrlConfig;
 
 export interface ProviderBaseProps {
@@ -73,16 +84,18 @@ export interface ProviderBaseProps {
   configType: ProviderConfigType;
 }
 
-export interface ProviderProps {
-  id: string;
-  name: string;
-  providerBaseId: string;
-  createdDate: number;
-  config?: ProviderConfig;
-  auth?: ProviderAuth;
-}
+export const ProviderProps = z.object({
+  id: z.string(),
+  name: z.string(),
+  providerBaseId: z.string(),
+  createdDate: z.number(),
+  config: ProviderConfig.optional(),
+  auth: ProviderAuth.optional(),
+});
+export type ProviderProps = z.infer<typeof ProviderProps>;
 
-export interface ModelProps extends BaseSender {
-  providerId: string;
-  model: string;
-}
+export const ModelProps = BaseSender.extend({
+  providerId: z.string(),
+  model: z.string(),
+});
+export type ModelProps = z.infer<typeof ModelProps>;
