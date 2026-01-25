@@ -17,6 +17,7 @@ interface DeleteDialogProps extends DialogProps {
   title: string;
   description: ReactNode;
   action: () => void | Promise<void>;
+  extraContent?: ReactNode;
 }
 
 export function DeleteDialog({
@@ -25,6 +26,7 @@ export function DeleteDialog({
   action,
   open,
   handleClose,
+  extraContent,
 }: DeleteDialogProps) {
   return (
     <Dialog
@@ -38,6 +40,7 @@ export function DeleteDialog({
         <DialogContentText id="delete-dialog-description">
           {description}
         </DialogContentText>
+        {extraContent}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
