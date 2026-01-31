@@ -23,4 +23,4 @@
   - Image transition
   - Image generative
 - Create Python FastAPI container
-- Create types with Zod (and check inputs)
+- ~~Create types with Zod (and check inputs)~~(check data from DB?)

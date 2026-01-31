@@ -27,7 +27,7 @@ export interface ADKPartInlineData {
   thought?: boolean;
 }
 
-export type Part = ADKPartText | ADKPartInlineData;
+export type Part = ADKPartText | { inlineData: ADKPartInlineData };
 
 export interface FetchQueryProps extends GetSessionProps {
   parts: Part[];
@@ -41,7 +41,7 @@ export class ADKException extends Error {
   constructor(
     private _name: string,
     private _message: string,
-    private _err?: Error
+    private _err?: Error,
   ) {
     super(_message);
   }

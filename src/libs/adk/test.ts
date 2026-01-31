@@ -6,9 +6,9 @@ const app_name = "chatbot",
   session = uuidv4(),
   user = "rafaelo",
   question = "At Vitória, Brazil, what is the current weather?";
-  // question = "At Vitória, Brazil, what is the best restaurant to go?";
-  // question = "Is there aliens at other planets?";
-  // question = "When Pedro Alvares Cabral discovered Brasil?";
+// question = "At Vitória, Brazil, what is the best restaurant to go?";
+// question = "Is there aliens at other planets?";
+// question = "When Pedro Alvares Cabral discovered Brasil?";
 
 async function initiateSessionA() {
   try {
@@ -32,7 +32,6 @@ async function sendQueryA() {
         },
       ],
       streaming: false,
-      sse: true,
     });
 
     console.dir(response, { maxArrayLength: null, depth: null });
@@ -43,7 +42,7 @@ async function sendQueryA() {
 
 async function sendQuerySSE() {
   try {
-    await base.sendQuerySSE({
+    const response = await base.fetchQuery({
       app_name,
       user,
       session,
@@ -53,8 +52,9 @@ async function sendQuerySSE() {
         },
       ],
       streaming: false,
-      handler: (response) =>
-        console.dir(response, { maxArrayLength: null, depth: null }),
+    });
+    await base.readQuerySSE(response, (event, error) => {
+      console.dir(event, { maxArrayLength: null, depth: null });
     });
   } catch (e) {
     console.error(e);
