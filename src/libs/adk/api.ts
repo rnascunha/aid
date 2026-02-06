@@ -1,10 +1,8 @@
 import { fetchQuery, initiateSession } from "@/libs/adk/base";
 import { NextRequest } from "next/server";
 
-export const dynamic = "force-dynamic";
-
-export async function POST(req: NextRequest) {
-  const { app_name, user, session, parts, streaming } = await req.json();
+export async function api_post(req: NextRequest, app_name: string) {
+  const { user, session, parts, streaming } = await req.json();
 
   const response = await fetchQuery({
     app_name,

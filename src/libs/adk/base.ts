@@ -219,30 +219,68 @@ export async function sendQuery({
   }
 }
 
+class JoinData {
+  private _data: string[] = [];
+
+  getData() {
+    const d = this._data;
+    this._data = [];
+    return d;
+  }
+
+  addData(chunk: string) {
+    if (chunk.startsWith("data: ") || this._data.length === 0) {
+      this._data.push(...chunk.split("\n"));
+    } else {
+      const last = this._data.at(-1) + chunk;
+      this._data[this._data.length - 1] = last;
+    }
+  }
+
+  getLines(): string[] {
+    const reamining = this._data.slice(0, -1);
+    this._data = this._data.slice(-1);
+    return reamining;
+  }
+}
+
+function processLines(
+  lines: string[],
+  handler: (event: ADKEvent | Error, error: boolean) => void,
+) {
+  for (const line of lines) {
+    if (line.startsWith("data: ")) {
+      try {
+        const event = JSON.parse(line.replace("data: ", ""));
+        handler(event, false);
+      } catch (e) {
+        console.log(line);
+        console.log(e);
+        handler(e as Error, true);
+      }
+    }
+  }
+}
+
 export async function readQuerySSE(
   response: Response,
-  handler: (event: ADKEvent | Error, error: boolean) => void
+  handler: (event: ADKEvent | Error, error: boolean) => void,
 ) {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
+  const jdata = new JoinData();
 
   while (true) {
     const { done, value } = await reader.read();
-    if (done) break;
-
-    const chunk = decoder.decode(value);
-    const lines = chunk.split("\n");
-
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        try {
-          const event = JSON.parse(line.replace("data: ", ""));
-          handler(event, false);
-        } catch (e) {
-          handler(e as Error, true);
-        }
-      }
+    if (done) {
+      processLines(jdata.getData(), handler);
+      break;
     }
+
+    const chunk = decoder.decode(value, { stream: true });
+    jdata.addData(chunk);
+
+    processLines(jdata.getLines(), handler);
   }
 }
 

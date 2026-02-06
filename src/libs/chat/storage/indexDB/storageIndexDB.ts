@@ -16,9 +16,7 @@ import {
   TableAudioToTextSettings,
   TableChatSettings,
   TableMessages,
-  TableProviders,
   TableSenders,
-  TableTools,
 } from "./types";
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
@@ -235,3 +233,6 @@ export class StorageAudioToTextIndexDB
 
 export const StorageChatbotIndexDB = StorageIndexDB;
 export type StorageChatbotIndexDB = StorageIndexDB;
+
+export const StorageAgentTravelerIndexDB = StorageIndexDB;
+export type StorageAgentTravelerIndexDB = StorageIndexDB;

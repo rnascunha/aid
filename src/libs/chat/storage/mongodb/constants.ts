@@ -21,6 +21,10 @@ export const collections = {
   chatbotMessages: "chatbotMessages",
   chatbotSenders: "chatbotSenders",
   chatbotSettings: "chatbotSettings",
+  // Chatbot
+  agentTravelerMessages: "agentTravelerMessages",
+  agentTravelerSenders: "agentTravelerSenders",
+  agentTravelerSettings: "agentTravelerSettings",
 };
 
 export type MongoDBCollecions = typeof collections;

@@ -1,13 +1,16 @@
+"use client";
+
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { reducer } from "@/libs/chat/state/functions";
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import { SessionType } from "./types";
 import { Actions } from "@/libs/chat/state/types";
-import { ChatbotStorageBase } from "@/libs/chat/storage/storageBase";
+import { AgentTrevelerStorageBase } from "@/libs/chat/storage/storageBase";
 import {
   BaseSender,
+  ChatMessagesProps,
   MessageContentStatus,
   MessageProps,
   TypeMessage,
@@ -25,17 +28,25 @@ import { AddSession } from "./components/addSession";
 import { SessionOptions } from "./components/sessionOptions";
 
 interface AgentTravelerProps {
+  sessions: SessionType[];
+  chats: ChatMessagesProps;
   user: string;
-  storage?: ChatbotStorageBase;
+  storage?: AgentTrevelerStorageBase;
 }
 
-export function AgentTraveler({ storage, user }: AgentTravelerProps) {
+export function AgentTraveler({
+  chats: initChats,
+  sessions: initSessions,
+  user,
+  storage,
+}: AgentTravelerProps) {
   const [state, dispatch] = useReducer(reducer, {
     selected: null,
-    sessions: [] as SessionType[],
-    chats: {},
+    sessions: initSessions,
+    chats: initChats,
     pending: [],
   });
+  const [hasFiles, setHasFiles] = useState(false);
 
   const onDeleteSession = async (session: SessionType) => {
     dispatch({ action: Actions.DELETE_SESSION, sessionId: session.id });
@@ -72,7 +83,10 @@ export function AgentTraveler({ storage, user }: AgentTravelerProps) {
     messages: InputOutput | MessageContentStatus,
     type: TypeMessage,
   ) => {
-    if (type === TypeMessage.MESSAGE && !(messages as InputOutput).text.trim())
+    if (
+      type === TypeMessage.MESSAGE &&
+      (messages as InputOutput).files.length === 0
+    )
       return;
 
     const newMessage = sendMessageHandler(messages, type, session.id);
@@ -89,7 +103,7 @@ export function AgentTraveler({ storage, user }: AgentTravelerProps) {
     try {
       const response = await messageResponse(
         {
-          message: messages.text,
+          messages: messages as InputOutput,
           user,
           newId: newMessage.id,
           session: session,
@@ -101,6 +115,7 @@ export function AgentTraveler({ storage, user }: AgentTravelerProps) {
       console.error(e);
     } finally {
       dispatch({ action: Actions.REMOVE_PENDING, sessionId: session.id });
+      setHasFiles(false);
     }
   };
 
@@ -169,6 +184,10 @@ export function AgentTraveler({ storage, user }: AgentTravelerProps) {
                 onSubmit={(value, type) =>
                   sendMessage(state.selected as SessionType, value, type)
                 }
+                submit={{
+                  disabled: !hasFiles,
+                }}
+                onInputChange={(data) => setHasFiles(data.files.length !== 0)}
                 disabled={isPending}
                 attachment={{
                   multiple: true,

@@ -96,7 +96,7 @@ function FileIconType({ mimeType }: { mimeType: string }) {
 
 function PartInlineMessage({ indata }: { indata: PartInlineData }) {
   const size = formatBytes(
-    indata.size ?? calculateBase64SizeInBytes(indata.data)
+    indata.size ?? calculateBase64SizeInBytes(indata.data),
   );
   return (
     <Stack>
@@ -234,7 +234,7 @@ export function MessageBubble({ message, onClick }: MessageBubbleProps) {
   useEffect(() => {
     const handle = setInterval(
       () => setFormatTimestamp(dayjs().to(timestamp)),
-      30 * 1000
+      30 * 1000,
     );
     return () => clearInterval(handle);
   }, [timestamp]);
@@ -242,7 +242,7 @@ export function MessageBubble({ message, onClick }: MessageBubbleProps) {
   return (
     <Box
       sx={{
-        maxWidth: { sm: "60%", xs: "70%" },
+        maxWidth: { sm: "90%", md: "80%", lg: "70%" },
         minWidth: "auto",
         position: "relative",
         "&:hover .detail-message-icon": {

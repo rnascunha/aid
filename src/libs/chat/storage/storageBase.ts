@@ -142,3 +142,6 @@ export abstract class AudioToTextStorageBase extends StorageBase {
 
 export const ChatbotStorageBase = StorageBase;
 export type ChatbotStorageBase = StorageBase;
+
+export const AgentTrevelerStorageBase = StorageBase;
+export type AgentTrevelerStorageBase = StorageBase;

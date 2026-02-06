@@ -1,7 +1,7 @@
 import { AgentTravelerData } from "./types";
 
 export const app_name = "extract_data";
-export const adk_api_events = "/api/adk/events";
+export const adk_api_agenttraveler = "/api/adk/agenttraveler";
 
 export const defaultAgentTravelerData: AgentTravelerData = {
   chats: {},

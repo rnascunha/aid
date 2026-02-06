@@ -1,11 +1,12 @@
 import {
   MessageContentStatus,
   PartInlineData,
+  PartText,
   TypeMessage,
 } from "@/libs/chat/types";
 
 export interface InputOutput {
-  text: string;
+  text: PartText;
   files: PartInlineData[];
 }
 

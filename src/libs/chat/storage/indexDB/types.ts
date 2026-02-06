@@ -36,4 +36,7 @@ export type StorageStoreType = Dexie & {
   // Chatbot
   chatbotMessages: TableMessages;
   chatbotSessions: TableSenders;
+  // Agent Traveler
+  agentTravelerMessages: TableMessages;
+  agentTravelerSessions: TableSenders;
 };

@@ -47,7 +47,11 @@ export function InputOptions({
       }}
     >
       {(attachment || record) && (
-        <AttachFilesList files={files} removeFile={removeFile} />
+        <AttachFilesList
+          files={files}
+          removeFile={removeFile}
+          disabled={submit?.disabled || disabled}
+        />
       )}
       <Stack direction="row" gap={0.5}>
         {attachment && (

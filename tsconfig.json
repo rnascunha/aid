@@ -38,7 +38,7 @@
     "src/libs/chat/storage/indexDB",
     "dist/types/**/*.ts",
     "dist/dev/types/**/*.ts"
-  ],
+, "src/app/api/adk/chatbot"  ],
   "exclude": [
     "node_modules"
   ]

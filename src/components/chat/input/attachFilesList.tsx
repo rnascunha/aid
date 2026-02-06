@@ -15,19 +15,30 @@ import CloseIcon from "@mui/icons-material/Close";
 function AttachItem({
   file,
   removeFile,
+  disabled,
 }: {
   file: PartInlineData;
   removeFile: () => void;
+  disabled?: boolean;
 }) {
   return (
     <ListItem
       secondaryAction={
-        <IconButton size="small" onClick={removeFile}>
+        <IconButton disabled={disabled} size="small" onClick={removeFile}>
           <CloseIcon fontSize="small" />
         </IconButton>
       }
+      title={file.displayName}
     >
       <ListItemText
+        sx={{
+          display: "inline-block",
+          textOverflow: "ellipsis",
+          maxWidth: "100%",
+          width: "100%",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+        }}
         primary={file.displayName!}
         secondary={`${file.mimeType} ${formatBytes(file.size!)}`}
       />
@@ -38,16 +49,21 @@ function AttachItem({
 interface AttachFilesListProps {
   files: PartInlineData[];
   removeFile: (file: PartInlineData, index: number) => void;
+  disabled?: boolean;
 }
 
-export function AttachFilesList({ files, removeFile }: AttachFilesListProps) {
+export function AttachFilesList({
+  files,
+  removeFile,
+  disabled: disabledItem,
+}: AttachFilesListProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) =>
     setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
-  
+
   const disabled = files.length === 0;
 
   return (
@@ -77,12 +93,16 @@ export function AttachFilesList({ files, removeFile }: AttachFilesListProps) {
             "aria-labelledby": "files-list-button",
           },
         }}
+        sx={{
+          maxWidth: "500px",
+        }}
       >
         {files.map((f, i) => (
           <AttachItem
             key={f.displayName}
             file={f}
             removeFile={() => removeFile(f, i)}
+            disabled={disabledItem}
           />
         ))}
       </Menu>

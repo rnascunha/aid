@@ -3,7 +3,7 @@ import { basePath } from "@/constants";
 import { auth } from "@/auth";
 import { ChatbotPageMongoDB } from "./chatbotPages";
 
-export default async function ChatPage() {
+export default async function ChatbotPage() {
   const session = await auth();
 
   if (!session) return redirect(basePath);

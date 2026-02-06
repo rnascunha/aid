@@ -1,6 +1,7 @@
 import { collections, dbName } from "./constants";
 import { connect } from "./connect";
 import {
+  MongoDBAgentTravelerServer,
   MongoDBAudioToTextServer,
   MongoDBChatbotServer,
   MongoDBChatServer,
@@ -11,6 +12,7 @@ export let generalStorage: MongoDBGeneralServer | undefined;
 export let chatStorage: MongoDBChatServer | undefined;
 export let audioToTextStorage: MongoDBAudioToTextServer | undefined;
 export let chatbotStorage: MongoDBChatbotServer | undefined;
+export let agentTravelerStorage: MongoDBAgentTravelerServer | undefined;
 
 connect().then((c) => {
   generalStorage = new MongoDBGeneralServer(c, dbName, collections);
@@ -30,5 +32,10 @@ connect().then((c) => {
     dbName,
     messages: collections.chatbotMessages,
     senders: collections.chatbotSenders,
+  });
+  agentTravelerStorage = new MongoDBAgentTravelerServer(c, {
+    dbName,
+    messages: collections.agentTravelerMessages,
+    senders: collections.agentTravelerSenders,
   });
 });

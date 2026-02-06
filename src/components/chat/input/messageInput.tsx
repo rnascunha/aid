@@ -40,6 +40,7 @@ export function MessageInput({
 }: MessageInputProps) {
   const [text, setText] = useState("");
   const [files, setFiles] = useState<PartInlineData[]>([]);
+  const [isSubmiting, setIsSubmitting] = useState(false);
 
   const canSubmit =
     !disabled && submit?.disabled !== undefined
@@ -54,6 +55,7 @@ export function MessageInput({
   const onSubmitData = async () => {
     if (!canSubmit) return;
 
+    setIsSubmitting(true);
     await onSubmit(
       {
         text: text.trim(),
@@ -61,6 +63,7 @@ export function MessageInput({
       },
       TypeMessage.MESSAGE,
     );
+    setIsSubmitting(false);
 
     clearData();
   };
@@ -120,7 +123,7 @@ export function MessageInput({
         files={files}
         submit={{
           onClick: () => onSubmitData(),
-          disabled: !canSubmit,
+          disabled: !canSubmit || isSubmiting,
           ...submit,
         }}
         attachment={attachment}

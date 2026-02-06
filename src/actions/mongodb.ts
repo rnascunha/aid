@@ -8,6 +8,7 @@ import {
   chatStorage,
   audioToTextStorage,
   chatbotStorage,
+  agentTravelerStorage,
 } from "@/libs/chat/storage/mongodb/instance";
 import { ToolsDB } from "@/libs/chat/storage/types";
 import {
@@ -213,4 +214,48 @@ export async function chatbotDeleteSender(
   userId: string,
 ): Promise<void> {
   return await chatbotStorage?.deleteSender(senderId, userId);
+}
+
+// AGENT TRAVELER
+export async function agentTravelerGetMessages(
+  senderIds: string[],
+  userId: string,
+): Promise<ChatMessagesProps> {
+  return await agentTravelerStorage!.getMessages(senderIds, userId);
+}
+
+export async function agentTravelerAddMessage(
+  messages: MessageProps | MessageProps[],
+  userId: string,
+): Promise<void> {
+  await agentTravelerStorage?.addMessage(messages, userId);
+}
+
+export async function agentTravelerDeleteSenderMessages(
+  senderId: string,
+  userId: string,
+): Promise<void> {
+  await agentTravelerStorage?.deleteSenderMessages(senderId, userId);
+}
+
+export async function agentTravelerDeleteAllMessages(userId: string): Promise<void> {
+  await agentTravelerStorage?.deleteAllMessages(userId);
+}
+
+export async function agentTravelerGetSenders(userId: string): Promise<BaseSender[]> {
+  return await agentTravelerStorage!.getSenders(userId);
+}
+
+export async function agentTravelerAddSender(
+  sender: BaseSender | BaseSender[],
+  userId: string,
+): Promise<void> {
+  return await agentTravelerStorage?.addSender(sender, userId);
+}
+
+export async function agentTravelerDeleteSender(
+  senderId: string,
+  userId: string,
+): Promise<void> {
+  return await agentTravelerStorage?.deleteSender(senderId, userId);
 }

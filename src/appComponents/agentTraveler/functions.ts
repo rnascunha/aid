@@ -1,16 +1,19 @@
+"use client";
+
 import { AgentTravelerData, SessionType } from "./types";
 import { generateUUID } from "@/libs/uuid";
-import { MessageProps, TypeMessage } from "@/libs/chat/types";
+import { MessageProps, Part, PartType, TypeMessage } from "@/libs/chat/types";
 import { PartialDataAggregator, readQuerySSE } from "@/libs/adk/base";
 import { ADKEvent } from "@/libs/adk/types";
 import { ActionDispatch } from "react";
 import { Actions, ChatActionArgs } from "@/libs/chat/state/types";
 import { ChatbotStorageBase } from "@/libs/chat/storage/storageBase";
 import {
-  adk_api_events,
+  adk_api_agenttraveler,
   app_name,
   defaultAgentTravelerData,
 } from "./constants";
+import { InputOutput } from "@/components/chat/input/types";
 
 export function createNewSession(name: string = ""): SessionType {
   return {
@@ -34,27 +37,34 @@ async function getResponseBodyError(response: Response) {
 
 export async function messageResponse(
   {
-    message,
+    messages,
     newId,
     user,
     session,
   }: {
-    message: string;
+    messages: InputOutput;
     newId: string;
     user: string;
     session: SessionType;
   },
   dispatch: ActionDispatch<[action: ChatActionArgs]>,
 ) {
-  const response = await fetch(adk_api_events, {
+  const files = messages.files.map((f) => ({
+    [PartType.INLINE_DATA]: { mimeType: f.mimeType, data: f.data },
+  }));
+  const parts: Part[] = [
+    messages.text ? { [PartType.TEXT]: messages.text } : undefined,
+    ...files,
+  ].filter((f) => f) as Part[];
+
+  const response = await fetch(adk_api_agenttraveler, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       app_name,
       user,
       session: session.id,
-      url: adk_api_events,
-      parts: [{ text: message }],
+      parts,
       streaming: true,
     }),
   });
@@ -93,12 +103,15 @@ export async function messageResponse(
 
     const event = data as ADKEvent;
     const was_partial = partial.addMessage(event);
+    const content =
+      was_partial && event.partial ? partial.parts : event.content?.parts;
+
+    if (!content) return msgs;
 
     const newMessage: MessageProps = {
       id: `${newId}:r${count++}`,
       senderId: session.id,
-      content:
-        was_partial && event.partial ? partial.parts : event.content!.parts,
+      content,
       timestamp: Date.now(),
       type: TypeMessage.MESSAGE,
       raw: event,

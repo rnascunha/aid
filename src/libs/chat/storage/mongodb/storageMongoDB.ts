@@ -1,5 +1,12 @@
 import {
   addProvider,
+  agentTravelerAddMessage,
+  agentTravelerAddSender,
+  agentTravelerDeleteAllMessages,
+  agentTravelerDeleteSender,
+  agentTravelerDeleteSenderMessages,
+  agentTravelerGetMessages,
+  agentTravelerGetSenders,
   audioToTextAddMessage,
   audioToTextAddSender,
   audioToTextDeleteAllMessages,
@@ -48,6 +55,7 @@ import {
 import { ChatSettings } from "@/appComponents/chat/types";
 import { AudioToTextSettings } from "@/appComponents/audioToText/types";
 import { exportStorage, importStorage } from "../functions";
+import { adk_api_agenttraveler } from "@/appComponents/agentTraveler/constants";
 
 export class StorageGeneralMongoDB extends StorageGeneralBase {
   constructor(private _userId: string) {
@@ -224,5 +232,51 @@ export class StorageChatbotMongoDB extends StorageBase {
 
   async deleteSender(senderId: string): Promise<void> {
     await chatbotDeleteSender(senderId, this._userId);
+  }
+}
+
+export class StorageAgentTravelerMongoDB extends StorageBase {
+  constructor(private _userId: string) {
+    super();
+  }
+
+  // Messages
+  async getMessages(senderIds: string[]): Promise<ChatMessagesProps> {
+    return await agentTravelerGetMessages(senderIds, this._userId);
+  }
+
+  async addMessage(messages: MessageProps | MessageProps[]): Promise<void> {
+    await fetch(adk_api_agenttraveler, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages,
+        userId: this._userId,
+      }),
+    });
+    // await agentTravelerAddMessage(messages, this._userId);
+  }
+
+  async deleteSenderMessages(senderId: string): Promise<void> {
+    await agentTravelerDeleteSenderMessages(senderId, this._userId);
+  }
+
+  async deleteAllMessages(): Promise<void> {
+    await agentTravelerDeleteAllMessages(this._userId);
+  }
+
+  // Senders
+  async getSenders(): Promise<BaseSender[]> {
+    return await agentTravelerGetSenders(this._userId);
+  }
+
+  async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
+    await agentTravelerAddSender(sender, this._userId);
+  }
+
+  async deleteSender(senderId: string): Promise<void> {
+    await agentTravelerDeleteSender(senderId, this._userId);
   }
 }

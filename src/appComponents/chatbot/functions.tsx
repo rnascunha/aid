@@ -1,5 +1,5 @@
 import { ChatbotData, SessionType } from "./types";
-import { adk_api_events, app_name, defaultChatbotData } from "./constants";
+import { adk_api_chatbot, app_name, defaultChatbotData } from "./constants";
 import { generateUUID } from "@/libs/uuid";
 import { MessageProps, TypeMessage } from "@/libs/chat/types";
 import { PartialDataAggregator, readQuerySSE } from "@/libs/adk/base";
@@ -42,14 +42,13 @@ export async function messageResponse(
   },
   dispatch: ActionDispatch<[action: ChatActionArgs]>,
 ) {
-  const response = await fetch(adk_api_events, {
+  const response = await fetch(adk_api_chatbot, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       app_name,
       user,
       session: session.id,
-      url: adk_api_events,
       parts: [{ text: message }],
       streaming: true,
     }),
