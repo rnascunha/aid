@@ -68,7 +68,6 @@ function flattenMessagesFilter(
       now - m.timestamp > elapsedTimeMs
     )
       return acc;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { content, ...other } = m;
     const allm = m.content.map((mm) => ({
       ...other,

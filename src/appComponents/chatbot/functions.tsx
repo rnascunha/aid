@@ -1,4 +1,4 @@
-import { ChatbotData, SessionType } from "./types";
+import { ChatbotData } from "./types";
 import { adk_api_chatbot, app_name, defaultChatbotData } from "./constants";
 import { generateUUID } from "@/libs/uuid";
 import { MessageProps, TypeMessage } from "@/libs/chat/types";
@@ -7,6 +7,7 @@ import { ADKEvent } from "@/libs/adk/types";
 import { ActionDispatch } from "react";
 import { Actions, ChatActionArgs } from "@/libs/chat/state/types";
 import { ChatbotStorageBase } from "@/libs/chat/storage/storageBase";
+import { SessionType } from "@/libs/chat/adk/types";
 
 export function createNewSession(name: string = ""): SessionType {
   return {
@@ -19,8 +20,7 @@ export function createNewSession(name: string = ""): SessionType {
 async function getResponseBodyError(response: Response) {
   try {
     return await response.json();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
+  } catch {
     return {
       status: response.status,
       statusText: response.statusText,

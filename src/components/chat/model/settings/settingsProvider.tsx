@@ -110,8 +110,7 @@ function getAppCredentialsName(provider: ProviderProps) {
     const parsed = JSON.parse(provider.auth.application_credentials);
     if (!("project_id" in parsed)) return "";
     return `${parsed.project_id}.json`;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
+  } catch {
     return "";
   }
 }
@@ -423,12 +422,7 @@ const providerAuthMap = {
       }}
     />
   ),
-  [ProviderAuthType.NONE]: (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    provider: ProviderProps,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateAuthProvider: UpdateProviderAuthCallback,
-  ) => undefined,
+  [ProviderAuthType.NONE]: () => undefined,
 };
 
 function ProviderAuthConfig({
@@ -504,12 +498,7 @@ const providerConfigMap = {
       }}
     />
   ),
-  [ProviderConfigType.CONFIG_NONE]: (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    provider: ProviderProps,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateConfigProvider: UpdateProviderConfigCallback,
-  ) => undefined,
+  [ProviderConfigType.CONFIG_NONE]: () => undefined,
 } as const;
 
 function ProviderConfigConfig({

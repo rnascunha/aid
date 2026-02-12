@@ -99,7 +99,6 @@ export class MongoDBGeneralServer {
   }
 
   async updateTools(tools: ToolsProps, userId: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ip, ...others } = tools;
     await this.collection<DBTools>(this._collections.tools).findOneAndUpdate(
       { userId },

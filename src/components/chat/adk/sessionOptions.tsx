@@ -1,11 +1,11 @@
 import { IconButton, Stack, Tooltip } from "@mui/material";
-import { SessionType } from "../types";
 import { useState } from "react";
 import { DeleteDialog } from "@/components/dialogs/deleteDialog";
 import { EditDialog } from "@/components/dialogs/editDialog";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { SessionType } from "@/libs/chat/adk/types";
 
 function DeleteSession({ deleteSession }: { deleteSession: () => void }) {
   return (

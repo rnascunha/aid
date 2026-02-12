@@ -11,8 +11,7 @@ import { ChatCompletionResponse, ChatMessage } from "./types";
 function getFunctionArgs(args: string) {
   try {
     return JSON.parse(args);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
+  } catch {
     return {
       error: "Error parsing",
       arguments: args,
@@ -44,7 +43,7 @@ function getAllToolCalls(messages: ChatMessage[]) {
 
 function getToolResponse(
   toolId: string,
-  messages: ChatMessage[]
+  messages: ChatMessage[],
 ): PartFunctionResponse | undefined {
   const tool = messages.find((f) => f.tool_call_id === toolId);
   if (!tool) return;
@@ -57,15 +56,18 @@ function getToolResponse(
 
 function getToolCallsResponse(messages: ChatMessage[]) {
   const calls = getAllToolCalls(messages);
-  return calls.reduce((acc, call) => {
-    const response = getToolResponse(call.id, messages);
-    acc.push([call, response]);
-    return acc;
-  }, [] as [PartFunctionCall, PartFunctionResponse | undefined][]);
+  return calls.reduce(
+    (acc, call) => {
+      const response = getToolResponse(call.id, messages);
+      acc.push([call, response]);
+      return acc;
+    },
+    [] as [PartFunctionCall, PartFunctionResponse | undefined][],
+  );
 }
 
 function toolCallsResponseParts(
-  tools: [PartFunctionCall, PartFunctionResponse | undefined][]
+  tools: [PartFunctionCall, PartFunctionResponse | undefined][],
 ) {
   return tools.reduce((acc, [c, r]) => {
     acc.push({
@@ -88,7 +90,7 @@ export function getResponseParts(chatResponse: ChatCompletionResponse): Part[] {
   const intermediate_messages =
     chatResponse.choices[0].intermediate_messages ?? [];
   const toolsCalls = toolCallsResponseParts(
-    getToolCallsResponse(intermediate_messages)
+    getToolCallsResponse(intermediate_messages),
   );
 
   const content = getMessageContent(chatResponse);

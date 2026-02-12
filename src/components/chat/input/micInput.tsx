@@ -61,25 +61,24 @@ function RecordButton({
                       size: size,
                       data: d,
                     },
-                    TypeMessage.MESSAGE
+                    TypeMessage.MESSAGE,
                   );
                   setRecording(false);
-                }
+                },
               );
               await mic.current.start();
             } else {
               mic.current?.stop();
               mic.current = null;
             }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          } catch (e) {
+          } catch {
             mic.current?.reset();
             setRecording(false);
             mic.current = null;
           }
         }}
       >
-        {recording ? <StopIcon /> : icon ?? <MicIcon />}
+        {recording ? <StopIcon /> : (icon ?? <MicIcon />)}
       </Fab>
       {recording && (
         <CircularProgress

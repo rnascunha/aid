@@ -5,7 +5,7 @@ import { ChatHeader } from "@/components/chat/chatHeader";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { reducer } from "@/libs/chat/state/functions";
 import { useReducer, useState } from "react";
-import { SessionType } from "./types";
+// import { SessionType } from "./types";
 import { Actions } from "@/libs/chat/state/types";
 import { AgentTrevelerStorageBase } from "@/libs/chat/storage/storageBase";
 import {
@@ -24,8 +24,11 @@ import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messageList";
 import { MessageInput } from "@/components/chat/input/messageInput";
 import { createNewSession, messageResponse } from "./functions";
-import { AddSession } from "./components/addSession";
-import { SessionOptions } from "./components/sessionOptions";
+import { SessionType } from "@/libs/chat/adk/types";
+import { AddSession } from "@/components/chat/adk/addSession";
+import { SessionOptions } from "@/components/chat/adk/sessionOptions";
+// import { AddSession } from "./components/addSession";
+// import { SessionOptions } from "./components/sessionOptions";
 
 interface AgentTravelerProps {
   sessions: SessionType[];

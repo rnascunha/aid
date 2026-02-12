@@ -7,8 +7,7 @@ import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { useReducer } from "react";
-import { AddSession } from "./components/addSession";
-import { SessionType } from "./types";
+// import { AddSession } from "./components/addSession";
 import { createNewSession, messageResponse } from "./functions";
 import { MessageList } from "@/components/chat/messageList";
 import {
@@ -20,13 +19,16 @@ import {
 } from "@/libs/chat/types";
 import { sendMessageHandler } from "@/libs/chat/functions";
 import { MessagesHeader } from "@/components/chat/messagesHeader";
-import { ChatbotOptions } from "./components/sessionOptions";
+// import { ChatbotOptions } from "./components/sessionOptions";
 import { MessageInput } from "@/components/chat/input/messageInput";
 import { InputOutput } from "@/components/chat/input/types";
 import { reducer } from "@/libs/chat/state/functions";
 import { Actions } from "@/libs/chat/state/types";
 import { MultipleMessage } from "@/components/chat/input/multipleMessages";
 import { ChatbotStorageBase } from "@/libs/chat/storage/storageBase";
+import { SessionType } from "@/libs/chat/adk/types";
+import { AddSession } from "@/components/chat/adk/addSession";
+import { SessionOptions } from "@/components/chat/adk/sessionOptions";
 
 interface ChatBotProps {
   sessions: SessionType[];
@@ -161,7 +163,7 @@ export function Chatbot({
               <MessagesHeader
                 sender={state.selected}
                 options={
-                  <ChatbotOptions
+                  <SessionOptions
                     session={state.selected as SessionType}
                     onDeleteSession={onDeleteSession}
                     onEditSession={onEditSession}

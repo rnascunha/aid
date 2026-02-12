@@ -1,6 +1,6 @@
 "use client";
 
-import { AgentTravelerData, SessionType } from "./types";
+import { AgentTravelerData } from "./types";
 import { generateUUID } from "@/libs/uuid";
 import { MessageProps, Part, PartType, TypeMessage } from "@/libs/chat/types";
 import { PartialDataAggregator, readQuerySSE } from "@/libs/adk/base";
@@ -14,6 +14,7 @@ import {
   defaultAgentTravelerData,
 } from "./constants";
 import { InputOutput } from "@/components/chat/input/types";
+import { SessionType } from "@/libs/chat/adk/types";
 
 export function createNewSession(name: string = ""): SessionType {
   return {
@@ -26,8 +27,7 @@ export function createNewSession(name: string = ""): SessionType {
 async function getResponseBodyError(response: Response) {
   try {
     return await response.json();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
+  } catch {
     return {
       status: response.status,
       statusText: response.statusText,

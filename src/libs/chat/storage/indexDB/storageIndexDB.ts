@@ -122,7 +122,6 @@ export class StorageGeneralIndexDB extends StorageGeneralBase {
   }
 
   async updateTools(tools: ToolsProps): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ip, ...others } = tools;
     await this._store.tools.put(others, defaultToolKey);
   }

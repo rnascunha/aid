@@ -1,10 +1,3 @@
-import { BaseSender, ChatMessagesProps } from "@/libs/chat/types";
+import { ADKData } from "@/libs/chat/adk/types";
 
-export interface SessionType extends BaseSender {
-  state: Record<string, unknown>;
-}
-
-export interface AgentTravelerData {
-  chats: ChatMessagesProps;
-  sessions: SessionType[];
-}
+export type AgentTravelerData = ADKData;
