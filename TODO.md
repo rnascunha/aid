@@ -24,3 +24,7 @@
   - Image generative
 - Create Python FastAPI container
 - ~~Create types with Zod (and check inputs)~~(check data from DB?)
+- Security
+  - ~~API endpoints can be accessed to anyone (restrict to the site)~~ (only authenticated user can access API);
+  - Storage (indexDB) can be seeing by any user at the local computer;
+  - Storage api_keys are written as plain text;

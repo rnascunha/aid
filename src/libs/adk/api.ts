@@ -1,5 +1,6 @@
+import { auth } from "@/auth";
 import { fetchQuery, initiateSession } from "@/libs/adk/base";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function api_post(req: NextRequest, app_name: string) {
   const { user, session, parts, streaming } = await req.json();
@@ -56,4 +57,16 @@ export async function api_post(req: NextRequest, app_name: string) {
     });
 
   return response2;
+}
+
+export async function checkAuthenticatedUser() {
+  const user = !!(await auth())?.user;
+  if (!user) {
+    return NextResponse.json(
+      {
+        error: "User not authenticated",
+      },
+      { status: 401 },
+    );
+  }
 }
