@@ -1,6 +1,10 @@
 import { generateUUID } from "@/libs/uuid";
-import { ADKData, SessionType } from "./types";
-import { deleteSession as deleteSessionActions } from "@/actions/adk/common";
+import { ADKData, ADKState, SessionType } from "./types";
+import {
+  deleteSession as deleteSessionAction,
+  getSessionState as getSessionStateAction,
+  updateSessionState as updateSessionStateAction,
+} from "@/actions/adk/common";
 import {
   MessageContentStatus,
   MessageProps,
@@ -49,6 +53,92 @@ export async function updateSession(
   await storage?.addSender(session);
 }
 
+export async function getSessionState(
+  {
+    app_name,
+    session,
+    user,
+  }: { session: SessionType; app_name: string; user: string },
+  dispatch: ActionDispatch<[action: ChatActionArgs]>,
+  storage?: StorageBase,
+) {
+  const response = await getSessionStateAction({
+    app_name,
+    session: session.id,
+    user,
+  });
+  if (response.type !== TypeMessage.SUCCESS) {
+    const message = makeMessageStatusSend({
+      type: response.type,
+      content: response.content,
+      raw: response.raw as Record<string, unknown>,
+      senderId: session.id,
+    });
+    dispatch({
+      action: Actions.ADD_MESSAGE,
+      message,
+      sessionId: session.id,
+    });
+    await storage?.addMessage(message);
+    return;
+  }
+  await updateSession(
+    {
+      session: {
+        ...session,
+        state: response.raw.state as unknown as ADKState,
+      },
+    },
+    dispatch,
+    storage,
+  );
+  return response;
+}
+
+export async function updateSessionState(
+  {
+    app_name,
+    session,
+    user,
+    data,
+  }: { session: SessionType; app_name: string; user: string; data: ADKState },
+  dispatch: ActionDispatch<[action: ChatActionArgs]>,
+  storage?: StorageBase,
+) {
+  const response = await updateSessionStateAction({
+    app_name,
+    session: session.id,
+    user,
+    data,
+  });
+  if (response.type !== TypeMessage.SUCCESS) {
+    const message = makeMessageStatusSend({
+      type: response.type,
+      content: response.content,
+      raw: response.raw as Record<string, unknown>,
+      senderId: session.id,
+    });
+    dispatch({
+      action: Actions.ADD_MESSAGE,
+      message,
+      sessionId: session.id,
+    });
+    await storage?.addMessage(message);
+    return;
+  }
+  await updateSession(
+    {
+      session: {
+        ...session,
+        state: response.raw.state as unknown as ADKState,
+      },
+    },
+    dispatch,
+    storage,
+  );
+  return response;
+}
+
 export async function deleteSession(
   {
     app_name,
@@ -62,7 +152,7 @@ export async function deleteSession(
   dispatch: ActionDispatch<[action: ChatActionArgs]>,
   storage?: StorageBase,
 ) {
-  const ret = await deleteSessionActions({
+  const ret = await deleteSessionAction({
     app_name,
     session: sessionId,
     user: userId,
@@ -79,6 +169,7 @@ export async function deleteSession(
       message,
       sessionId: sessionId,
     });
+    await storage?.addMessage(message);
     return;
   }
   dispatch({ action: Actions.DELETE_SESSION, sessionId: sessionId });

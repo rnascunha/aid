@@ -21,14 +21,16 @@ import { MessagesHeader } from "@/components/chat/messagesHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messageList";
 import { MessageInput } from "@/components/chat/input/messageInput";
-import { SessionType } from "@/libs/chat/adk/types";
+import { ADKState, SessionType } from "@/libs/chat/adk/types";
 import { AddSession } from "@/components/chat/adk/addSession";
 import { SessionOptions } from "@/components/chat/adk/sessionOptions";
 import {
   addSession,
   deleteSession,
+  getSessionState,
   sendMessage,
   updateSession,
+  updateSessionState,
 } from "@/libs/chat/adk/functions";
 import { adk_api_agenttraveler, app_name } from "./constants";
 
@@ -79,6 +81,31 @@ export function AgentTraveler({
 
   const onAddSession = async (name: string = "") => {
     await addSession({ name }, dispatch, storage);
+  };
+
+  const onGetState = async (session: SessionType) => {
+    await getSessionState(
+      {
+        session,
+        app_name,
+        user,
+      },
+      dispatch,
+      storage,
+    );
+  };
+
+  const onUpdateState = async (session: SessionType, state: ADKState) => {
+    await updateSessionState(
+      {
+        session,
+        app_name,
+        user,
+        data: state,
+      },
+      dispatch,
+      storage,
+    );
   };
 
   const onSendMessage = async (
@@ -160,6 +187,8 @@ export function AgentTraveler({
                     session={state.selected as SessionType}
                     onDeleteSession={onDeleteSession}
                     onEditSession={onEditSession}
+                    onGetState={onGetState}
+                    onUpdateState={onUpdateState}
                   />
                 }
               />

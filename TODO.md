@@ -28,3 +28,5 @@
   - ~~API endpoints can be accessed to anyone (restrict to the site)~~ (only authenticated user can access API);
   - Storage (indexDB) can be seeing by any user at the local computer;
   - Storage api_keys are written as plain text;
+- ADK
+  - Get State. Using server action limits size of state (configure at next.config.ts). Use API to overcome this?

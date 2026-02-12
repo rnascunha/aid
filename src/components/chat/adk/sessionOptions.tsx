@@ -5,7 +5,7 @@ import { EditDialog } from "@/components/dialogs/editDialog";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { SessionType } from "@/libs/chat/adk/types";
+import { ADKState, SessionType } from "@/libs/chat/adk/types";
 import { StateDialog, ViewState } from "./state";
 
 function DeleteSession({ deleteSession }: { deleteSession: () => void }) {
@@ -34,6 +34,8 @@ export function SessionOptions({
   session,
   onDeleteSession,
   onEditSession,
+  onGetState,
+  onUpdateState,
 }: {
   session: SessionType;
   onDeleteSession: (sesssion: SessionType) => Promise<void>;
@@ -42,6 +44,8 @@ export function SessionOptions({
     key: K,
     value: SessionType[K],
   ) => Promise<void>;
+  onGetState: (session: SessionType) => Promise<void>;
+  onUpdateState: (session: SessionType, stateDelta: ADKState) => Promise<void>;
 }) {
   const [action, setAction] = useState<ActionList | null>(null);
 
@@ -78,7 +82,8 @@ export function SessionOptions({
           session={session}
           open={action === "viewState"}
           handleClose={() => setAction(null)}
-          getState={async () => {}}
+          getState={() => onGetState(session)}
+          updateState={(state) => onUpdateState(session, state)}
         />
       )}
     </>

@@ -9,78 +9,88 @@ import {
 } from "@/libs/adk/types";
 import { TypeMessage } from "@/libs/chat/types";
 
-export async function updateSession(args: UpdateSesionProps) {
-  try {
-    const data = await adk.updateSession(args);
-    console.log(data);
-    return data;
-  } catch (e) {
-    if (e instanceof ADKException) {
-      const errorResponse = e.json();
-      return {
-        type: TypeMessage.ERROR,
-        content: {
-          name: errorResponse.error,
-          text: errorResponse.message,
-        },
-        raw: errorResponse,
-      };
-    }
-    const error = e as Error;
+function throwResponse(error: Error) {
+  if (error instanceof ADKException) {
+    const response = error.json();
     return {
       type: TypeMessage.ERROR,
       content: {
-        name: error.name,
-        text: error.message,
+        name: response.error,
+        text: response.message,
       },
-      raw: JSON.stringify(error),
+      raw: response,
     };
+  }
+  const err = error as Error;
+  return {
+    type: TypeMessage.ERROR,
+    content: {
+      name: err.name,
+      text: err.message,
+    },
+    raw: JSON.stringify(err),
+  };
+}
+
+function errorReturn(
+  response: {
+    ok: true;
+    status: number;
+    statusText: string;
+    data: any;
+  },
+  title?: string,
+) {
+  return {
+    type: TypeMessage.ERROR,
+    content: {
+      name: title || "Error",
+      text: `[${response.status}] ${response.statusText}`,
+    },
+    raw: response.data,
+  };
+}
+
+export async function updateSessionState(args: UpdateSesionProps) {
+  try {
+    const response = await adk.updateSession(args);
+    console.log(response);
+    if (!response.ok)
+      return errorReturn(response, "Update Session State Error");
+    return {
+      type: TypeMessage.SUCCESS,
+      content: {
+        name: "Update State Success",
+        text: `State session id ${args.session}`,
+      },
+      raw: response.data,
+    };
+  } catch (e) {
+    return throwResponse(e as Error);
   }
 }
 
-export async function getSession(args: GetSessionProps) {
+export async function getSessionState(args: GetSessionProps) {
   try {
-    const data = await adk.getSession(args);
-    console.log(data);
-    return data;
-  } catch (e) {
-    if (e instanceof ADKException) {
-      const errorResponse = e.json();
-      return {
-        type: TypeMessage.ERROR,
-        content: {
-          name: errorResponse.error,
-          text: errorResponse.message,
-        },
-        raw: errorResponse,
-      };
-    }
-    const error = e as Error;
+    const response = await adk.getSession(args);
+    if (!response.ok) return errorReturn(response, "Get Session State Error");
     return {
-      type: TypeMessage.ERROR,
+      type: TypeMessage.SUCCESS,
       content: {
-        name: error.name,
-        text: error.message,
+        name: "Get State Success",
+        text: `State session id ${args.session}`,
       },
-      raw: JSON.stringify(error),
+      raw: response.data,
     };
+  } catch (e) {
+    return throwResponse(e as Error);
   }
 }
 
 export async function deleteSession(args: DeleteSessionProps) {
   try {
     const response = await adk.deleteSession(args);
-    console.log(response);
-    if (!response.ok) {
-      return {
-        type: TypeMessage.ERROR,
-        content: {
-          name: "Delete Session Error",
-          text: response.statusText,
-        },
-        raw: response,
-      };
-    }
+    if (!response.ok) return errorReturn(response, "Delete Session Error");
     return {
       type: TypeMessage.SUCCESS,
       content: {
@@ -90,25 +100,6 @@ export async function deleteSession(args: DeleteSessionProps) {
       raw: response,
     };
   } catch (e) {
-    if (e instanceof ADKException) {
-      const errorResponse = e.json();
-      return {
-        type: TypeMessage.ERROR,
-        content: {
-          name: errorResponse.error,
-          text: errorResponse.message,
-        },
-        raw: errorResponse,
-      };
-    }
-    const error = e as Error;
-    return {
-      type: TypeMessage.ERROR,
-      content: {
-        name: error.name,
-        text: error.message,
-      },
-      raw: JSON.stringify(error),
-    };
+    return throwResponse(e as Error);
   }
 }

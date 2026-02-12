@@ -22,14 +22,16 @@ import { reducer } from "@/libs/chat/state/functions";
 import { Actions } from "@/libs/chat/state/types";
 import { MultipleMessage } from "@/components/chat/input/multipleMessages";
 import { ChatbotStorageBase } from "@/libs/chat/storage/storageBase";
-import { SessionType } from "@/libs/chat/adk/types";
+import { ADKState, SessionType } from "@/libs/chat/adk/types";
 import { AddSession } from "@/components/chat/adk/addSession";
 import { SessionOptions } from "@/components/chat/adk/sessionOptions";
 import {
   addSession,
   deleteSession,
+  getSessionState,
   sendMessage,
   updateSession,
+  updateSessionState,
 } from "@/libs/chat/adk/functions";
 import { adk_api_chatbot, app_name } from "./constants";
 
@@ -79,6 +81,31 @@ export function Chatbot({
 
   const onAddSession = async (name: string = "") => {
     await addSession({ name }, dispatch, storage);
+  };
+
+  const onGetState = async (session: SessionType) => {
+    await getSessionState(
+      {
+        session,
+        app_name,
+        user,
+      },
+      dispatch,
+      storage,
+    );
+  };
+
+  const onUpdateState = async (session: SessionType, state: ADKState) => {
+    await updateSessionState(
+      {
+        session,
+        app_name,
+        user,
+        data: state,
+      },
+      dispatch,
+      storage,
+    );
   };
 
   const onSendMessage = async (
@@ -153,6 +180,8 @@ export function Chatbot({
                     session={state.selected as SessionType}
                     onDeleteSession={onDeleteSession}
                     onEditSession={onEditSession}
+                    onGetState={onGetState}
+                    onUpdateState={onUpdateState}
                   />
                 }
               />
