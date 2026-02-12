@@ -7,7 +7,7 @@ import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { useReducer } from "react";
 import { AddSession } from "./components/addSession";
-import { SessionType } from "./types";
+import { SessionTestType } from "./types";
 import { createNewSession, messageResponse } from "./functions";
 import {
   ChatMessagesProps,
@@ -28,14 +28,16 @@ import { Actions } from "@/libs/chat/state/types";
 import { reducer } from "@/libs/chat/state/functions";
 
 interface ChatTestProps {
-  sessions: SessionType[];
+  sessions: SessionTestType[];
   chats: ChatMessagesProps;
   user: string;
   onMessage?: (
     message: MessageProps | MessageProps[],
     contactId: string,
   ) => Promise<void> | void;
-  onAddRemoveSession?: (session: string | SessionType) => Promise<void> | void;
+  onAddRemoveSession?: (
+    session: string | SessionTestType,
+  ) => Promise<void> | void;
 }
 
 export default function TestChat({
@@ -50,15 +52,15 @@ export default function TestChat({
     selected: null,
     pending: [],
   });
-  const onDeleteSession = async (session: SessionType) => {
+  const onDeleteSession = async (session: SessionTestType) => {
     dispatch({ action: Actions.DELETE_SESSION, sessionId: session.id });
     await onAddRemoveSession?.(session.id);
   };
 
-  const onEditSession = async <K extends keyof SessionType>(
-    session: SessionType,
+  const onEditSession = async <K extends keyof SessionTestType>(
+    session: SessionTestType,
     field: K,
-    value: SessionType[K],
+    value: SessionTestType[K],
   ) => {
     const newSession = {
       ...session,
@@ -74,14 +76,14 @@ export default function TestChat({
     await onAddRemoveSession?.(newSession);
   };
 
-  const selectSession = (session: SessionType | null) => {
+  const selectSession = (session: SessionTestType | null) => {
     if (session)
       dispatch({ action: Actions.SELECT_SESSION, sessionId: session.id });
     else dispatch({ action: Actions.UNSELECT_SESSION });
   };
 
   const sendMessage = async (
-    session: SessionType,
+    session: SessionTestType,
     messages: InputOutput | MessageContentStatus,
     type: TypeMessage,
   ) => {
@@ -158,10 +160,10 @@ export default function TestChat({
             key={state.selected.id}
             header={
               <MessagesHeader
-                sender={state.selected as SessionType}
+                sender={state.selected as SessionTestType}
                 options={
                   <ChatbotOptions
-                    session={state.selected as SessionType}
+                    session={state.selected as SessionTestType}
                     onDeleteSession={onDeleteSession}
                     onEditSession={onEditSession}
                   />
@@ -173,7 +175,7 @@ export default function TestChat({
             input={
               <MessageInput
                 onSubmit={(value, type) =>
-                  sendMessage(state.selected as SessionType, value, type)
+                  sendMessage(state.selected as SessionTestType, value, type)
                 }
                 disabled={isPending}
                 attachment={false}

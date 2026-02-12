@@ -1,7 +1,9 @@
 import { BaseSender, ChatMessagesProps } from "../types";
 
+export type ADKState = Record<string, unknown>;
+
 export interface SessionType extends BaseSender {
-  state: Record<string, unknown>;
+  state: ADKState;
 }
 
 export interface ADKData {

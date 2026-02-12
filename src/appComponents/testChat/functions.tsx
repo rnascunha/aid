@@ -1,10 +1,10 @@
-import { SessionType } from "./types";
+import { SessionTestType } from "./types";
 import { generateUUID } from "@/libs/uuid";
 import { MessageProps, PartInlineData, TypeMessage } from "@/libs/chat/types";
 import { delay } from "@/libs/time";
 import { calculateBase64SizeInBytes, unicodeToBase64 } from "@/libs/base64";
 
-export function createNewSession(name: string = ""): SessionType {
+export function createNewSession(name: string = ""): SessionTestType {
   return {
     name: name || `Session-${Math.floor(Math.random() * 100)}`,
     id: generateUUID(),
@@ -12,7 +12,7 @@ export function createNewSession(name: string = ""): SessionType {
 }
 
 function createInlineData(
-  session: SessionType,
+  session: SessionTestType,
   message: string,
 ): { inlineData: PartInlineData } {
   const base64 = unicodeToBase64(
@@ -33,7 +33,7 @@ function createInlineData(
 
 async function getFakeData(
   newId: string,
-  session: SessionType,
+  session: SessionTestType,
   message: string,
 ): Promise<MessageProps[]> {
   const delayMs = 5000 + Math.floor(Math.random() * 100);
@@ -70,7 +70,7 @@ export async function messageResponse({
 }: {
   message: string;
   newId: string;
-  session: SessionType;
+  session: SessionTestType;
 }) {
   const response = await getFakeData(newId, session, message);
   return response;

@@ -5,7 +5,6 @@ import { ChatHeader } from "@/components/chat/chatHeader";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { reducer } from "@/libs/chat/state/functions";
 import { useReducer, useState } from "react";
-// import { SessionType } from "./types";
 import { Actions } from "@/libs/chat/state/types";
 import { AgentTrevelerStorageBase } from "@/libs/chat/storage/storageBase";
 import {
@@ -16,19 +15,22 @@ import {
   TypeMessage,
 } from "@/libs/chat/types";
 import { InputOutput } from "@/components/chat/input/types";
-import { sendMessageHandler } from "@/libs/chat/functions";
 import { ChatList, EmptyChatList } from "@/components/chat/chatList";
 import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
 import { MessagesHeader } from "@/components/chat/messagesHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messageList";
 import { MessageInput } from "@/components/chat/input/messageInput";
-import { createNewSession, messageResponse } from "./functions";
 import { SessionType } from "@/libs/chat/adk/types";
 import { AddSession } from "@/components/chat/adk/addSession";
 import { SessionOptions } from "@/components/chat/adk/sessionOptions";
-// import { AddSession } from "./components/addSession";
-// import { SessionOptions } from "./components/sessionOptions";
+import {
+  addSession,
+  deleteSession,
+  sendMessage,
+  updateSession,
+} from "@/libs/chat/adk/functions";
+import { adk_api_agenttraveler, app_name } from "./constants";
 
 interface AgentTravelerProps {
   sessions: SessionType[];
@@ -52,8 +54,15 @@ export function AgentTraveler({
   const [hasFiles, setHasFiles] = useState(false);
 
   const onDeleteSession = async (session: SessionType) => {
-    dispatch({ action: Actions.DELETE_SESSION, sessionId: session.id });
-    await storage?.deleteSender(session.id);
+    await deleteSession(
+      {
+        sessionId: session.id,
+        userId: user,
+        app_name: app_name,
+      },
+      dispatch,
+      storage,
+    );
   };
 
   const onEditSession = async <K extends keyof SessionType>(
@@ -65,23 +74,14 @@ export function AgentTraveler({
       ...session,
       [field]: value,
     };
-    dispatch({
-      action: Actions.EDIT_SESSION,
-      newSession,
-    });
-    await storage?.addSender(newSession);
+    await updateSession({ session: newSession }, dispatch, storage);
   };
 
   const onAddSession = async (name: string = "") => {
-    const newSession = createNewSession(name);
-    dispatch({
-      action: Actions.ADD_SESSION,
-      session: newSession,
-    });
-    await storage?.addSender(newSession);
+    await addSession({ name }, dispatch, storage);
   };
 
-  const sendMessage = async (
+  const onSendMessage = async (
     session: SessionType,
     messages: InputOutput | MessageContentStatus,
     type: TypeMessage,
@@ -92,32 +92,20 @@ export function AgentTraveler({
     )
       return;
 
-    const newMessage = sendMessageHandler(messages, type, session.id);
-    dispatch({
-      action: Actions.ADD_MESSAGE,
-      message: newMessage,
-      sessionId: session.id,
-    });
-    await storage?.addMessage(newMessage);
-
-    if (newMessage.type !== TypeMessage.MESSAGE) return;
-
-    dispatch({ action: Actions.ADD_PENDING, sessionId: session.id });
     try {
-      const response = await messageResponse(
+      await sendMessage(
         {
-          messages: messages as InputOutput,
-          user,
-          newId: newMessage.id,
-          session: session,
+          sessionId: session.id,
+          messages,
+          type,
+          userId: user,
+          url: adk_api_agenttraveler,
+          app_name,
         },
         dispatch,
+        storage,
       );
-      await storage?.addMessage(response);
-    } catch (e) {
-      console.error(e);
     } finally {
-      dispatch({ action: Actions.REMOVE_PENDING, sessionId: session.id });
       setHasFiles(false);
     }
   };
@@ -185,7 +173,7 @@ export function AgentTraveler({
             input={
               <MessageInput
                 onSubmit={(value, type) =>
-                  sendMessage(state.selected as SessionType, value, type)
+                  onSendMessage(state.selected as SessionType, value, type)
                 }
                 submit={{
                   disabled: !hasFiles,

@@ -6,6 +6,7 @@ import { EditDialog } from "@/components/dialogs/editDialog";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { SessionType } from "@/libs/chat/adk/types";
+import { StateDialog, ViewState } from "./state";
 
 function DeleteSession({ deleteSession }: { deleteSession: () => void }) {
   return (
@@ -27,6 +28,8 @@ function ChangeSessionName({ onEditName }: { onEditName: () => void }) {
   );
 }
 
+type ActionList = "delete" | "editName" | "viewState";
+
 export function SessionOptions({
   session,
   onDeleteSession,
@@ -40,11 +43,12 @@ export function SessionOptions({
     value: SessionType[K],
   ) => Promise<void>;
 }) {
-  const [action, setAction] = useState<"delete" | "editName" | null>(null);
+  const [action, setAction] = useState<ActionList | null>(null);
 
   return (
     <>
       <Stack direction="row">
+        <ViewState request={() => setAction("viewState")} />
         <ChangeSessionName onEditName={() => setAction("editName")} />
         <DeleteSession deleteSession={() => setAction("delete")} />
       </Stack>
@@ -67,6 +71,14 @@ export function SessionOptions({
           action={(value: string) => {
             onEditSession(session, "name", value);
           }}
+        />
+      )}
+      {action === "viewState" && (
+        <StateDialog
+          session={session}
+          open={action === "viewState"}
+          handleClose={() => setAction(null)}
+          getState={async () => {}}
         />
       )}
     </>

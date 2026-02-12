@@ -1,5 +1,5 @@
 import { IconButton, Stack, Tooltip } from "@mui/material";
-import { SessionType } from "../types";
+import { SessionTestType } from "../types";
 import { useState } from "react";
 import { DeleteDialog } from "@/components/dialogs/deleteDialog";
 import { EditDialog } from "@/components/dialogs/editDialog";
@@ -32,12 +32,12 @@ export function ChatbotOptions({
   onDeleteSession,
   onEditSession,
 }: {
-  session: SessionType;
-  onDeleteSession: (sesssion: SessionType) => Promise<void>;
-  onEditSession: <K extends keyof SessionType>(
-    sesssion: SessionType,
+  session: SessionTestType;
+  onDeleteSession: (sesssion: SessionTestType) => Promise<void>;
+  onEditSession: <K extends keyof SessionTestType>(
+    sesssion: SessionTestType,
     key: K,
-    value: SessionType[K]
+    value: SessionTestType[K]
   ) => Promise<void>;
 }) {
   const [action, setAction] = useState<"delete" | "editName" | null>(null);
