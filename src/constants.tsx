@@ -3,11 +3,15 @@ import { ReactNode } from "react";
 import ChatIcon from "@mui/icons-material/Chat";
 import MicIcon from "@mui/icons-material/Mic";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
+import AirplanemodeActiveIcon from "@mui/icons-material/AirplanemodeActive";
 
 export const restrictedPath = "/";
 export const loginPath = "/login";
 
-export const userListAllowed = new Set(["rnascunha@gmail.com", "rafaelnascunha@gmail.com"]);
+export const userListAllowed = new Set([
+  "rnascunha@gmail.com",
+  "rafaelnascunha@gmail.com",
+]);
 
 export interface Section {
   id: string;
@@ -38,6 +42,12 @@ export const sections: Section[] = [
     name: "ChatBot",
     icon: <SmartToyIcon />,
     path: `${basePath}/chatbot`,
+  },
+  {
+    id: "agenttraveler",
+    name: "Agent Traveler",
+    icon: <AirplanemodeActiveIcon />,
+    path: `${basePath}/agenttraveler`,
   },
 ];
 
