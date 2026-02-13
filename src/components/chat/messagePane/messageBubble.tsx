@@ -26,7 +26,7 @@ import { formatBytes } from "@/libs/formatData";
 
 import { isStatusMessage } from "@/libs/chat/functions";
 
-import { MarkdownText } from "./markdownText";
+import { MarkdownText } from "../markdownText";
 import { calculateBase64SizeInBytes } from "@/libs/base64";
 import { downloadBase64 } from "@/libs/download";
 

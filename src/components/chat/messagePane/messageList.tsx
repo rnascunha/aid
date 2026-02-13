@@ -9,10 +9,10 @@ import {
   Fab,
   Stack,
 } from "@mui/material";
-import { MessageProps } from "../../libs/chat/types";
+import { MessageProps } from "@/libs/chat/types";
 import { MessageBubble } from "./messageBubble";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import JSONOutput from "../JSONOutput";
+import JSONOutput from "@/components/JSONOutput";
 import { VList, VListHandle } from "virtua";
 
 function MessageDetail({ message }: { message: MessageProps }) {

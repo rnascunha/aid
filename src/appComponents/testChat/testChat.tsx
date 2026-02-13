@@ -3,7 +3,10 @@
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { ChatList, EmptyChatList } from "@/components/chat/chatList";
-import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
+import {
+  EmptyMessagesPane,
+  MessagesPane,
+} from "@/components/chat/messagePane/messagePane";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { useReducer } from "react";
 import { AddSession } from "./components/addSession";
@@ -19,10 +22,10 @@ import { sendMessageHandler } from "@/libs/chat/functions";
 import { InputOutput } from "@/components/chat/input/types";
 import { Stack } from "@mui/material";
 import { MultipleMessage } from "../../components/chat/input/multipleMessages";
-import { MessagesHeader } from "@/components/chat/messagesHeader";
+import { MessagesHeader } from "@/components/chat/messagePane/messageHeader";
 import { ChatbotOptions } from "./components/sessionOptions";
 import { MessageInput } from "@/components/chat/input/messageInput";
-import { MessageList } from "@/components/chat/messageList";
+import { MessageList } from "@/components/chat/messagePane/messageList";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { Actions } from "@/libs/chat/state/types";
 import { reducer } from "@/libs/chat/state/functions";

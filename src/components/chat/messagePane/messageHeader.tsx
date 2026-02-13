@@ -1,5 +1,5 @@
 import { IconButton, Stack, Typography } from "@mui/material";
-import { StaticAvatar } from "./staticAvatar";
+import { StaticAvatar } from "../staticAvatar";
 
 import { toggleMessagesPane } from "@/components/chat/utils";
 import { ReactNode } from "react";

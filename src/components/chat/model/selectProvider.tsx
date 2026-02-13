@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 
 import { providerBaseMap, providersBase } from "@/libs/chat/models/data";
-import { ProviderBaseProps, ProviderProps } from "../../../libs/chat/models/types";
+import { ProviderBaseProps, ProviderProps } from "@/libs/chat/models/types";
 import { StaticAvatar } from "../staticAvatar";
 
 function ProviderItem({ provider }: { provider: ProviderProps }) {
@@ -36,7 +36,7 @@ export function SelectProvider({
 }) {
   const handleChange = (event: SelectChangeEvent) => {
     setProvider(
-      providers.find((p) => p.id === event.target.value) as ProviderProps
+      providers.find((p) => p.id === event.target.value) as ProviderProps,
     );
     // setProvider(providers[event.target.value as string]);
   };

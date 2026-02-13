@@ -3,11 +3,14 @@
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { ChatList, EmptyChatList } from "@/components/chat/chatList";
-import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
+import {
+  EmptyMessagesPane,
+  MessagesPane,
+} from "@/components/chat/messagePane/messagePane";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { useReducer } from "react";
-import { MessageList } from "@/components/chat/messageList";
+import { MessageList } from "@/components/chat/messagePane/messageList";
 import {
   BaseSender,
   ChatMessagesProps,
@@ -15,7 +18,7 @@ import {
   MessageProps,
   TypeMessage,
 } from "@/libs/chat/types";
-import { MessagesHeader } from "@/components/chat/messagesHeader";
+import { MessagesHeader } from "@/components/chat/messagePane/messageHeader";
 import { MessageInput } from "@/components/chat/input/messageInput";
 import { InputOutput } from "@/components/chat/input/types";
 import { reducer } from "@/libs/chat/state/functions";

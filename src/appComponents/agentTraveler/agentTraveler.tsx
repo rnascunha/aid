@@ -16,10 +16,13 @@ import {
 } from "@/libs/chat/types";
 import { InputOutput } from "@/components/chat/input/types";
 import { ChatList, EmptyChatList } from "@/components/chat/chatList";
-import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
-import { MessagesHeader } from "@/components/chat/messagesHeader";
+import {
+  EmptyMessagesPane,
+  MessagesPane,
+} from "@/components/chat/messagePane/messagePane";
+import { MessagesHeader } from "@/components/chat/messagePane/messageHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
-import { MessageList } from "@/components/chat/messageList";
+import { MessageList } from "@/components/chat/messagePane/messageList";
 import { MessageInput } from "@/components/chat/input/messageInput";
 import { ADKState, SessionType } from "@/libs/chat/adk/types";
 import { AddSession } from "@/components/chat/adk/addSession";

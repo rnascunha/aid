@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { providerBaseMap } from "@/libs/chat/models/data";
-import { ModelProps, ProviderProps } from "../../../libs/chat/models/types";
-import { MessagesHeader } from "../messagesHeader";
+import { ModelProps, ProviderProps } from "@/libs/chat/models/types";
+import { MessagesHeader } from "../messagePane/messageHeader";
 
 type MessagesModelHeaderProps = {
   model: ModelProps;

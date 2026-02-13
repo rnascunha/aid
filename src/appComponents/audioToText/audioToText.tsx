@@ -5,9 +5,12 @@ import { ChatContainer } from "@/components/chat/chatContainer";
 import { EmptyChatList } from "@/components/chat/chatList";
 import { ChatModelList } from "@/components/chat/model/chatList";
 import { ChatsPane } from "@/components/chat/chatsPane";
-import { MessageList } from "@/components/chat/messageList";
-import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
-import { MessagesModelHeader } from "@/components/chat/model/messagesHeader";
+import { MessageList } from "@/components/chat/messagePane/messageList";
+import {
+  EmptyMessagesPane,
+  MessagesPane,
+} from "@/components/chat/messagePane/messagePane";
+import { MessagesModelHeader } from "@/components/chat/model/messageHeader";
 import {
   ChatMessagesProps,
   MessageContentStatus,

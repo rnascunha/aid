@@ -12,11 +12,14 @@ import { sendMessageHandler } from "@/libs/chat/functions";
 import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { ChatModelList } from "@/components/chat/model/chatList";
-import { EmptyMessagesPane, MessagesPane } from "@/components/chat/messagePane";
+import {
+  EmptyMessagesPane,
+  MessagesPane,
+} from "@/components/chat/messagePane/messagePane";
 import { MessageInput } from "@/components/chat/input/messageInput";
-import { MessagesModelHeader } from "@/components/chat/model/messagesHeader";
+import { MessagesModelHeader } from "@/components/chat/model/messageHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
-import { MessageList } from "@/components/chat/messageList";
+import { MessageList } from "@/components/chat/messagePane/messageList";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { DeleteMessagesButton } from "@/components/chat/deleteMessagesButton";
 import { AddModel, AddModelButton } from "@/components/chat/model/addModel";
