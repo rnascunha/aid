@@ -11,15 +11,16 @@ import {
 } from "@mui/material";
 
 import DataObjectIcon from "@mui/icons-material/DataObject";
+import PreviewIcon from "@mui/icons-material/Preview";
+
 import { useState } from "react";
-import { isEmpty, updateDeep } from "@/libs/object";
 
 interface DialogStateProps {
   session: SessionType;
   open: boolean;
   handleClose: () => void;
   getState: () => Promise<void>;
-  updateState: (update: ADKState) => Promise<void>;
+  updateState?: (update: ADKState) => Promise<void>;
 }
 
 type UpdatingState = "getState" | "updateState" | null;
@@ -32,14 +33,33 @@ export function StateDialog({
   updateState,
 }: DialogStateProps) {
   const [updatingState, setUpdatingState] = useState<UpdatingState>(null);
-  const [stateUpdate, setStateUpdate] = useState<ADKState>(session.state);
+  const [stateUpdate, setStateUpdate] = useState<ADKState>(
+    updateState ? (session.state.state as ADKState) : session.state,
+  );
   const [hasChange, setHasChange] = useState(false);
 
   const updateValue = ({ updated_src }: { updated_src: object }) => {
     setHasChange(true);
-    console.log(updated_src);
     setStateUpdate(updated_src as ADKState);
     return true;
+  };
+
+  const deleteValue = ({
+    name,
+    namespace,
+    updated_src,
+  }: {
+    name: string | null;
+    namespace: object;
+    updated_src: object;
+  }) => {
+    if ((namespace as string[]).length === 0) {
+      const newData = {
+        ...updated_src,
+        [name as string]: null,
+      };
+      return updateValue({ updated_src: newData });
+    } else return updateValue({ updated_src });
   };
 
   return (
@@ -47,37 +67,30 @@ export function StateDialog({
       <DialogTitle>State</DialogTitle>
       <DialogContent>
         <JSONOutput
-          src={session.state}
+          src={stateUpdate}
           quotesOnKeys={false}
           name={false}
           displayDataTypes={false}
-          onEdit={updateValue}
-          onAdd={updateValue}
-          onDelete={({ name, namespace, updated_src }) => {
-            if (namespace.length === 0) {
-              const newData = {
-                ...updated_src,
-                [name as string]: null,
-              };
-              updateValue({ updated_src: newData });
-            } else updateValue({ updated_src });
-          }}
+          onEdit={updateState ? updateValue : undefined}
+          onAdd={updateState ? updateValue : undefined}
+          onDelete={updateState ? deleteValue : undefined}
         />
       </DialogContent>
       <DialogActions>
-        <Button
-          onClick={async () => {
-            setUpdatingState("updateState");
-            console.log("stateUpdate", stateUpdate);
-            await updateState(stateUpdate);
-            setHasChange(false);
-            setUpdatingState(null);
-          }}
-          loading={updatingState === "updateState"}
-          disabled={updatingState !== null || !hasChange}
-        >
-          Update state
-        </Button>
+        {updateState && (
+          <Button
+            onClick={async () => {
+              setUpdatingState("updateState");
+              await updateState(stateUpdate);
+              setHasChange(false);
+              setUpdatingState(null);
+            }}
+            loading={updatingState === "updateState"}
+            disabled={updatingState !== null || !hasChange}
+          >
+            Update state
+          </Button>
+        )}
         <Button
           onClick={async () => {
             setUpdatingState("getState");
@@ -95,11 +108,21 @@ export function StateDialog({
   );
 }
 
-export function ViewState({ request }: { request: () => void }) {
+export function ViewUpdateState({ request }: { request: () => void }) {
   return (
-    <Tooltip title="Get state">
+    <Tooltip title="Update state">
       <IconButton size="small" edge="end" onClick={request}>
         <DataObjectIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  );
+}
+
+export function ViewFullState({ request }: { request: () => void }) {
+  return (
+    <Tooltip title="View full state">
+      <IconButton size="small" edge="end" onClick={request}>
+        <PreviewIcon fontSize="small" />
       </IconButton>
     </Tooltip>
   );

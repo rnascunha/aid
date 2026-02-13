@@ -86,7 +86,7 @@ export async function getSessionState(
     {
       session: {
         ...session,
-        state: response.raw.state as unknown as ADKState,
+        state: response.raw as unknown as ADKState,
       },
     },
     dispatch,
@@ -130,7 +130,7 @@ export async function updateSessionState(
     {
       session: {
         ...session,
-        state: response.raw.state as unknown as ADKState,
+        state: response.raw as unknown as ADKState,
       },
     },
     dispatch,

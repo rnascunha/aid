@@ -6,7 +6,7 @@ import { EditDialog } from "@/components/dialogs/editDialog";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ADKState, SessionType } from "@/libs/chat/adk/types";
-import { StateDialog, ViewState } from "./state";
+import { StateDialog, ViewFullState, ViewUpdateState } from "./state";
 
 function DeleteSession({ deleteSession }: { deleteSession: () => void }) {
   return (
@@ -28,7 +28,7 @@ function ChangeSessionName({ onEditName }: { onEditName: () => void }) {
   );
 }
 
-type ActionList = "delete" | "editName" | "viewState";
+type ActionList = "delete" | "editName" | "viewUpdateState" | "viewFullState";
 
 export function SessionOptions({
   session,
@@ -45,14 +45,15 @@ export function SessionOptions({
     value: SessionType[K],
   ) => Promise<void>;
   onGetState: (session: SessionType) => Promise<void>;
-  onUpdateState: (session: SessionType, stateDelta: ADKState) => Promise<void>;
+  onUpdateState?: (session: SessionType, stateDelta: ADKState) => Promise<void>;
 }) {
   const [action, setAction] = useState<ActionList | null>(null);
 
   return (
     <>
       <Stack direction="row">
-        <ViewState request={() => setAction("viewState")} />
+        <ViewFullState request={() => setAction("viewFullState")} />
+        <ViewUpdateState request={() => setAction("viewUpdateState")} />
         <ChangeSessionName onEditName={() => setAction("editName")} />
         <DeleteSession deleteSession={() => setAction("delete")} />
       </Stack>
@@ -77,13 +78,23 @@ export function SessionOptions({
           }}
         />
       )}
-      {action === "viewState" && (
+      {action === "viewUpdateState" && (
         <StateDialog
           session={session}
-          open={action === "viewState"}
+          open={action === "viewUpdateState"}
           handleClose={() => setAction(null)}
           getState={() => onGetState(session)}
-          updateState={(state) => onUpdateState(session, state)}
+          updateState={
+            onUpdateState ? (state) => onUpdateState(session, state) : undefined
+          }
+        />
+      )}
+      {action === "viewFullState" && (
+        <StateDialog
+          session={session}
+          open={action === "viewFullState"}
+          handleClose={() => setAction(null)}
+          getState={() => onGetState(session)}
         />
       )}
     </>
