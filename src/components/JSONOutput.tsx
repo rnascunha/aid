@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactJsonViewProps } from "@microlink/react-json-view";
+import { OnSelectProps, ReactJsonViewProps } from "@microlink/react-json-view";
 import { useColorScheme } from "@mui/material";
 import dynamic from "next/dynamic";
 
@@ -29,15 +29,22 @@ const darkScheme = {
 
 const chooseTheme = (
   mode: "light" | "dark" | "system" | undefined,
-  systemMode: "light" | "dark" | undefined
+  systemMode: "light" | "dark" | undefined,
 ) =>
   mode === "system"
     ? systemMode === "light"
       ? "rjv-default"
       : darkScheme
     : mode === "light"
-    ? "rjv-default"
-    : darkScheme;
+      ? "rjv-default"
+      : darkScheme;
+
+export function followIfLink({ value, type }: OnSelectProps) {
+  if (type !== "string") return;
+  const isUrl = /^http[s]?:\/\//.test(value as string);
+  if (!isUrl) return;
+  window.open(value as string, "_blank")?.focus();
+}
 
 export default function JSONOutput(props: ReactJsonViewProps) {
   const { mode, systemMode } = useColorScheme();
@@ -45,6 +52,10 @@ export default function JSONOutput(props: ReactJsonViewProps) {
     <ReactJson
       theme={chooseTheme(mode, systemMode)}
       collapseStringsAfterLength={124}
+      name={false}
+      displayDataTypes={false}
+      quotesOnKeys={false}
+      collapsed={2}
       {...props}
     />
   );

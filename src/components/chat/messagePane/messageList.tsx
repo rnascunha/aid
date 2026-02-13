@@ -16,7 +16,7 @@ import JSONOutput from "@/components/JSONOutput";
 import { VList, VListHandle } from "virtua";
 
 function MessageDetail({ message }: { message: MessageProps }) {
-  return <JSONOutput src={message} name={null} />;
+  return <JSONOutput src={message} name={false} displayDataTypes={false} />;
 }
 
 function MessageDetailDialog({

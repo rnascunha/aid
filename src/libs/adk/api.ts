@@ -1,8 +1,12 @@
 import { auth } from "@/auth";
-import { fetchQuery, initiateSession } from "@/libs/adk/base";
+import { fetchQuery, getSession, initiateSession } from "@/libs/adk/base";
 import { NextRequest, NextResponse } from "next/server";
+import { TypeMessage } from "../chat/types";
 
-export async function api_post(req: NextRequest, app_name: string) {
+export async function postFetchRequestStreamingMessage(
+  req: NextRequest,
+  app_name: string,
+) {
   const { user, session, parts, streaming } = await req.json();
 
   const response = await fetchQuery({
@@ -69,4 +73,46 @@ export async function checkAuthenticatedUser() {
       { status: 401 },
     );
   }
+}
+
+export async function getSessionStateAPI(req: NextRequest, app_name: string) {
+  const searchParams = req.nextUrl.searchParams;
+  const session = searchParams.get("session");
+  const user = searchParams.get("user");
+  if (!session || !user)
+    return NextResponse.json(
+      { error: "Missing query values ['session' / 'user']" },
+      { status: 422 },
+    );
+
+  const response = await getSession({
+    app_name,
+    session,
+    user,
+  });
+
+  if (!response.ok)
+    return NextResponse.json(
+      {
+        type: TypeMessage.ERROR,
+        content: {
+          name: "Error getting state",
+          text: `[${response.status}] ${response.statusText}`,
+        },
+        raw: response,
+      },
+      { status: response.status },
+    );
+
+  return NextResponse.json(
+    {
+      type: TypeMessage.SUCCESS,
+      content: {
+        name: "Get State Success",
+        text: `State session id ${session}`,
+      },
+      raw: response.data,
+    },
+    { status: response.status },
+  );
 }

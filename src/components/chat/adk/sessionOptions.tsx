@@ -30,13 +30,7 @@ function ChangeSessionName({ onEditName }: { onEditName: () => void }) {
 
 type ActionList = "delete" | "editName" | "viewUpdateState" | "viewFullState";
 
-export function SessionOptions({
-  session,
-  onDeleteSession,
-  onEditSession,
-  onGetState,
-  onUpdateState,
-}: {
+interface SessionOptionsProps {
   session: SessionType;
   onDeleteSession: (sesssion: SessionType) => Promise<void>;
   onEditSession: <K extends keyof SessionType>(
@@ -44,16 +38,28 @@ export function SessionOptions({
     key: K,
     value: SessionType[K],
   ) => Promise<void>;
-  onGetState: (session: SessionType) => Promise<void>;
+  onGetState?: (session: SessionType) => Promise<void>;
   onUpdateState?: (session: SessionType, stateDelta: ADKState) => Promise<void>;
-}) {
+}
+
+export function SessionOptions({
+  session,
+  onDeleteSession,
+  onEditSession,
+  onGetState,
+  onUpdateState,
+}: SessionOptionsProps) {
   const [action, setAction] = useState<ActionList | null>(null);
 
   return (
     <>
       <Stack direction="row">
-        <ViewFullState request={() => setAction("viewFullState")} />
-        <ViewUpdateState request={() => setAction("viewUpdateState")} />
+        {onGetState && (
+          <ViewFullState request={() => setAction("viewFullState")} />
+        )}
+        {onGetState && onUpdateState && (
+          <ViewUpdateState request={() => setAction("viewUpdateState")} />
+        )}
         <ChangeSessionName onEditName={() => setAction("editName")} />
         <DeleteSession deleteSession={() => setAction("delete")} />
       </Stack>
@@ -78,7 +84,7 @@ export function SessionOptions({
           }}
         />
       )}
-      {action === "viewUpdateState" && (
+      {onGetState && action === "viewUpdateState" && (
         <StateDialog
           session={session}
           open={action === "viewUpdateState"}
@@ -89,7 +95,7 @@ export function SessionOptions({
           }
         />
       )}
-      {action === "viewFullState" && (
+      {onGetState && action === "viewFullState" && (
         <StateDialog
           session={session}
           open={action === "viewFullState"}

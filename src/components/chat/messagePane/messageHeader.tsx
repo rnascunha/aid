@@ -24,12 +24,11 @@ export function MessagesHeader({
   return (
     <Stack
       direction="row"
+      alignItems="center"
       sx={{
-        py: { xs: 2, md: 2 },
-        px: { xs: 1, md: 2 },
+        p: 1,
         borderBottom: "1px solid",
         borderColor: "divider",
-        overflow: "hidden",
       }}
     >
       <Stack

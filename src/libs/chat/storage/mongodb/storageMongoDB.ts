@@ -273,7 +273,17 @@ export class StorageAgentTravelerMongoDB extends StorageBase {
   }
 
   async addSender(sender: BaseSender | BaseSender[]): Promise<void> {
-    await agentTravelerAddSender(sender, this._userId);
+    await fetch(adk_api_agenttraveler, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sender,
+        userId: this._userId,
+      }),
+    });
+    // await agentTravelerAddSender(sender, this._userId);
   }
 
   async deleteSender(senderId: string): Promise<void> {

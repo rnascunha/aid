@@ -30,12 +30,19 @@ import { SessionOptions } from "@/components/chat/adk/sessionOptions";
 import {
   addSession,
   deleteSession,
-  getSessionState,
+  // getSessionState,
   sendMessage,
   updateSession,
-  updateSessionState,
+  // updateSessionState,
 } from "@/libs/chat/adk/functions";
 import { adk_api_agenttraveler, app_name } from "./constants";
+import {
+  MessagePaneChat,
+  MessagePaneContentTabs,
+  MessagePaneState,
+  MessagesPaneTabs,
+} from "@/components/chat/messagePane/messagePaneTabs";
+import { getSessionState } from "./functions";
 
 interface AgentTravelerProps {
   sessions: SessionType[];
@@ -90,26 +97,25 @@ export function AgentTraveler({
     await getSessionState(
       {
         session,
-        app_name,
-        user,
+        userId: user,
       },
       dispatch,
       storage,
     );
   };
 
-  const onUpdateState = async (session: SessionType, state: ADKState) => {
-    await updateSessionState(
-      {
-        session,
-        app_name,
-        user,
-        data: state,
-      },
-      dispatch,
-      storage,
-    );
-  };
+  // const onUpdateState = async (session: SessionType, state: ADKState) => {
+  //   await updateSessionState(
+  //     {
+  //       session,
+  //       app_name,
+  //       user,
+  //       data: state,
+  //     },
+  //     dispatch,
+  //     storage,
+  //   );
+  // };
 
   const onSendMessage = async (
     session: SessionType,
@@ -181,7 +187,7 @@ export function AgentTraveler({
         !state.selected ? (
           <EmptyMessagesPane />
         ) : (
-          <MessagesPane
+          <MessagesPaneTabs
             header={
               <MessagesHeader
                 sender={state.selected}
@@ -190,33 +196,63 @@ export function AgentTraveler({
                     session={state.selected as SessionType}
                     onDeleteSession={onDeleteSession}
                     onEditSession={onEditSession}
-                    onGetState={onGetState}
-                    onUpdateState={onUpdateState}
                   />
                 }
               />
             }
-            loader={isPending && <BouncingLoader />}
-            messages={
-              <MessageList
-                messages={state.chats[state.selected.id] as MessageProps[]}
-              />
-            }
-            input={
-              <MessageInput
-                onSubmit={(value, type) =>
-                  onSendMessage(state.selected as SessionType, value, type)
-                }
-                submit={{
-                  disabled: !hasFiles,
-                }}
-                onInputChange={(data) => setHasFiles(data.files.length !== 0)}
-                disabled={isPending}
-                attachment={{
-                  multiple: true,
-                  accept: "application/pdf,text/pdf,image/*",
-                }}
-                record={false}
+            content={
+              <MessagePaneContentTabs
+                tabs={[
+                  {
+                    label: "Chat",
+                    panel: (
+                      <MessagePaneChat
+                        loader={isPending && <BouncingLoader />}
+                        messages={
+                          <MessageList
+                            messages={
+                              state.chats[state.selected.id] as MessageProps[]
+                            }
+                          />
+                        }
+                        input={
+                          <MessageInput
+                            onSubmit={(value, type) =>
+                              onSendMessage(
+                                state.selected as SessionType,
+                                value,
+                                type,
+                              )
+                            }
+                            submit={{
+                              disabled: !hasFiles,
+                            }}
+                            onInputChange={(data) =>
+                              setHasFiles(data.files.length !== 0)
+                            }
+                            disabled={isPending}
+                            attachment={{
+                              multiple: true,
+                              accept: "application/pdf,text/pdf,image/*",
+                            }}
+                            record={false}
+                          />
+                        }
+                      />
+                    ),
+                  },
+                  {
+                    label: "State",
+                    panel: (
+                      <MessagePaneState
+                        state={(state.selected as SessionType).state}
+                        onGetState={() =>
+                          onGetState(state.selected as SessionType)
+                        }
+                      />
+                    ),
+                  },
+                ]}
               />
             }
           />

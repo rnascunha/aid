@@ -1,6 +1,13 @@
-import { agentTravelerAddMessage } from "@/actions/mongodb";
+import {
+  agentTravelerAddMessage,
+  agentTravelerAddSender,
+} from "@/actions/mongodb";
 import { app_name } from "@/appComponents/agentTraveler/constants";
-import { api_post, checkAuthenticatedUser } from "@/libs/adk/api";
+import {
+  postFetchRequestStreamingMessage,
+  checkAuthenticatedUser,
+  getSessionStateAPI,
+} from "@/libs/adk/api";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -8,15 +15,21 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   const noAuth = await checkAuthenticatedUser();
   if (noAuth) return noAuth;
-  return await api_post(req, app_name);
+  return await postFetchRequestStreamingMessage(req, app_name);
 }
 
+/**
+ * Add to database MongoDB
+ */
 export async function PUT(req: NextRequest) {
   const noAuth = await checkAuthenticatedUser();
   if (noAuth) return noAuth;
   try {
-    const { userId, messages } = await req.json();
-    await agentTravelerAddMessage(messages, userId);
+    const { userId, messages, sender } = await req.json();
+    await Promise.all([
+      messages ? agentTravelerAddMessage(messages, userId) : undefined,
+      sender ? agentTravelerAddSender(sender, userId) : undefined,
+    ]);
     return new Response(null, {
       status: 200,
       statusText: "Added data to database",
@@ -27,4 +40,13 @@ export async function PUT(req: NextRequest) {
       statusText: "Internal Error",
     });
   }
+}
+
+/**
+ * Get state
+ */
+export async function GET(req: NextRequest) {
+  const noAuth = await checkAuthenticatedUser();
+  if (noAuth) return noAuth;
+  return await getSessionStateAPI(req, app_name);
 }

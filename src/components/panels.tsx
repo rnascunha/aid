@@ -21,6 +21,7 @@ export interface PanelConfig {
 
 interface ArrayPanelProps {
   sxHeader?: SxProps;
+  sxTab?: SxProps;
   panels: PanelConfig[];
   value?: string | number;
   centerTabs?: boolean;
@@ -33,13 +34,14 @@ const calcId = (p: PanelConfig, i: number) => p.id ?? i;
 export function ArrayPanel({
   panels,
   sxHeader,
+  sxTab,
   centerTabs,
   variant,
   value,
   onChange,
 }: ArrayPanelProps) {
   const [tab, setTab] = useState<string | number>(
-    value ?? (panels.length > 0 ? calcId(panels[0], 0) : 0)
+    value ?? (panels.length > 0 ? calcId(panels[0], 0) : 0),
   );
 
   if (panels.length === 0) return undefined;
@@ -62,7 +64,12 @@ export function ArrayPanel({
         variant={variant ?? "standard"}
       >
         {panels.map((p, i) => (
-          <Tab key={calcId(p, i)} label={p.label} value={calcId(p, i)} />
+          <Tab
+            key={calcId(p, i)}
+            label={p.label}
+            value={calcId(p, i)}
+            sx={sxTab}
+          />
         ))}
       </Tabs>
       {panels.map((p, i) => (
