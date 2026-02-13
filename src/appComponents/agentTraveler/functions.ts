@@ -40,6 +40,24 @@ export async function getSessionState(
   const url = `${adk_api_agenttraveler}?${query}`;
 
   const response = await fetch(url);
+
+  if (!response.ok) {
+    const message = makeMessageStatusSend({
+      type: TypeMessage.ERROR,
+      content: {
+        name: "[Get Session] Fetch Error",
+        text: `[${response.status}] ${response.statusText}`,
+      },
+      senderId: session.id,
+    });
+    dispatch({
+      action: Actions.ADD_MESSAGE,
+      message,
+      sessionId: session.id,
+    });
+    await storage?.addMessage(message);
+    return;
+  }
   const data = await response.json();
 
   if (data.type !== TypeMessage.SUCCESS) {

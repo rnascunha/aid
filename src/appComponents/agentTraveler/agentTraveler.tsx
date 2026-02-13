@@ -24,7 +24,7 @@ import { MessagesHeader } from "@/components/chat/messagePane/messageHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messagePane/messageList";
 import { MessageInput } from "@/components/chat/input/messageInput";
-import { ADKState, SessionType } from "@/libs/chat/adk/types";
+import { SessionType } from "@/libs/chat/adk/types";
 import { AddSession } from "@/components/chat/adk/addSession";
 import { SessionOptions } from "@/components/chat/adk/sessionOptions";
 import {

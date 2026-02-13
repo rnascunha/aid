@@ -98,7 +98,7 @@ export function MessagePaneState({ state, onGetState }: MessagePaneStateProps) {
             left: 0,
           }}
         >
-          <JSONOutput src={state} onSelect={followIfLink} collapsed={1} />
+          <JSONOutput src={state}  onSelect={followIfLink} collapsed={1} />
         </Box>
       </Container>
     </Stack>
