@@ -43,6 +43,8 @@ import {
   MessagesPaneTabs,
 } from "@/components/chat/messagePane/messagePaneTabs";
 import { getSessionState } from "./functions";
+import { StateType } from "./components/types";
+import { EditStateTab } from "./components/editStateTab";
 
 interface AgentTravelerProps {
   sessions: SessionType[];
@@ -248,6 +250,17 @@ export function AgentTraveler({
                         state={(state.selected as SessionType).state}
                         onGetState={() =>
                           onGetState(state.selected as SessionType)
+                        }
+                      />
+                    ),
+                  },
+                  {
+                    label: "Data",
+                    panel: (
+                      <EditStateTab
+                        state={
+                          (state.selected as SessionType).state
+                            .state as StateType
                         }
                       />
                     ),

@@ -9,9 +9,9 @@ import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 
 import "./global.css";
 import { Metadata } from "next";
-// import { LocalizerProvider } from "@/components/localizerProvider";
 
 import "@/libs/chat/storage/mongodb/instance";
+import { LocalizerProvider } from "@/components/datetime/provider";
 
 const description = "Test site for AI features";
 const name = "AId";
@@ -86,12 +86,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <InitColorSchemeScript attribute="class" />
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          {/* <LocalizerProvider> */}
-          <ThemeProvider theme={theme}>
-            <CssBaseline enableColorScheme />
-            {children}
-          </ThemeProvider>
-          {/* </LocalizerProvider> */}
+          <LocalizerProvider>
+            <ThemeProvider theme={theme}>
+              <CssBaseline enableColorScheme />
+              {children}
+            </ThemeProvider>
+          </LocalizerProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

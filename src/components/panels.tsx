@@ -1,6 +1,15 @@
 "use client";
 
-import { SxProps, Tab, Tabs } from "@mui/material";
+import { generateUUID } from "@/libs/uuid";
+import {
+  Box,
+  Stack,
+  SxProps,
+  Tab,
+  TabProps,
+  Tabs,
+  TabsProps,
+} from "@mui/material";
 import { ReactNode, useState } from "react";
 
 interface TabPanelProps {
@@ -29,7 +38,7 @@ interface ArrayPanelProps {
   onChange?: (newValue: string | number) => void;
 }
 
-const calcId = (p: PanelConfig, i: number) => p.id ?? i;
+const calcId = (p: PanelConfig | PanelUnit, i: number) => p.id ?? i;
 
 export function ArrayPanel({
   panels,
@@ -78,6 +87,80 @@ export function ArrayPanel({
         </CustomTabPanel>
       ))}
     </>
+  );
+}
+
+export interface PanelUnit extends Omit<TabProps, "id"> {
+  panel: ReactNode;
+  id?: string | number;
+}
+
+interface PanelListProps extends Omit<TabsProps, "onChange"> {
+  tabProps?: TabProps;
+  value?: string | number;
+  panels: PanelUnit[];
+  onChange?: (newValue: string | number) => void;
+}
+
+export function PanelList({
+  tabProps,
+  value,
+  panels,
+  onChange,
+  ...tabsProps
+}: PanelListProps) {
+  const [tab, setTab] = useState<string | number>(
+    value ?? (panels.length > 0 ? calcId(panels[0], 0) : 0),
+  );
+
+  if (panels.length === 0) return undefined;
+
+  const idx = panels.find((p, i) => tab === calcId(p, i));
+  if (idx === undefined) {
+    setTab(calcId(panels[0], 0));
+  }
+
+  return (
+    <Stack
+      sx={{
+        height: "100%",
+      }}
+      gap={0.5}
+      direction={tabsProps.orientation === "vertical" ? "row" : "column"}
+    >
+      <Tabs
+        value={tab}
+        onChange={(event, newValue) => {
+          setTab(newValue);
+          onChange?.(newValue);
+        }}
+        {...tabsProps}
+      >
+        {panels.map((p, i) => {
+          const { panel, id, ...others } = p;
+          return (
+            <Tab
+              key={calcId(p, i)}
+              value={calcId(p, i)}
+              {...tabProps}
+              {...others}
+            />
+          );
+        })}
+      </Tabs>
+      <Box
+        sx={{
+          height: "100%",
+          width: "100%",
+        }}
+      >
+        {panels.map((p, i) => (
+          <CustomTabPanel key={calcId(p, i)} value={tab} index={calcId(p, i)}>
+            {p.panel}
+          </CustomTabPanel>
+        ))}
+      </Box>
+    </Stack>
   );
 }
 
