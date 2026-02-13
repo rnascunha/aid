@@ -30,3 +30,4 @@
   - Storage api_keys are written as plain text;
 - ADK
   - Get State. Using server action limits size of state (configure at next.config.ts). Use API to overcome this?
+  - root state key not been removed. Setting it to null as a workaround.

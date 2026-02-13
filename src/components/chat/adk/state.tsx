@@ -32,36 +32,14 @@ export function StateDialog({
   updateState,
 }: DialogStateProps) {
   const [updatingState, setUpdatingState] = useState<UpdatingState>(null);
-  const [stateUpdate, setStateUpdate] = useState<ADKState>({});
+  const [stateUpdate, setStateUpdate] = useState<ADKState>(session.state);
+  const [hasChange, setHasChange] = useState(false);
 
-  const updateValue = ({
-    name,
-    new_value,
-    namespace,
-  }: {
-    namespace: object;
-    name: string | null;
-    new_value?: unknown;
-  }) => {
-    if (!name || !new_value) return false;
-    setStateUpdate((prev) =>
-      Object.assign(
-        {},
-        updateDeep(prev, [...(namespace as string[]), name], new_value),
-      ),
-    );
+  const updateValue = ({ updated_src }: { updated_src: object }) => {
+    setHasChange(true);
+    console.log(updated_src);
+    setStateUpdate(updated_src as ADKState);
     return true;
-  };
-  const hasChange = !isEmpty(stateUpdate);
-
-  const deleteValue = ({
-    namespace,
-    name,
-  }: {
-    name: string | null;
-    namespace: object;
-  }) => {
-    return updateValue({ name, namespace });
   };
 
   return (
@@ -75,7 +53,15 @@ export function StateDialog({
           displayDataTypes={false}
           onEdit={updateValue}
           onAdd={updateValue}
-          onDelete={deleteValue}
+          onDelete={({ name, namespace, updated_src }) => {
+            if (namespace.length === 0) {
+              const newData = {
+                ...updated_src,
+                [name as string]: null,
+              };
+              updateValue({ updated_src: newData });
+            } else updateValue({ updated_src });
+          }}
         />
       </DialogContent>
       <DialogActions>
@@ -84,7 +70,7 @@ export function StateDialog({
             setUpdatingState("updateState");
             console.log("stateUpdate", stateUpdate);
             await updateState(stateUpdate);
-            setStateUpdate({});
+            setHasChange(false);
             setUpdatingState(null);
           }}
           loading={updatingState === "updateState"}

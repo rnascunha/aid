@@ -11,13 +11,17 @@ export function isEmpty(obj: Record<string, unknown>) {
 export function updateDeep(
   original: Record<string, unknown>,
   keys: string[],
-  value?: object | string | number,
+  value?: object | string | number | boolean | null,
 ) {
+  if (keys.length === 0 && typeof value === "object") {
+    return value as Record<string, unknown>;
+  }
+
   let current = original;
-  for (let i = 0; i < keys.length - 1; i++) {
+  for (let i = 0; i < keys.length - 1; ++i) {
     const key = keys[i];
     if (!current[key] || typeof current[key] !== "object") {
-      current[key] = {};
+      current[key] = Array.isArray(current) ? [] : {};
     }
     current = current[key] as Record<string, unknown>;
   }

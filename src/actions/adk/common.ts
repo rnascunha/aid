@@ -54,7 +54,6 @@ function errorReturn(
 export async function updateSessionState(args: UpdateSesionProps) {
   try {
     const response = await adk.updateSession(args);
-    console.log(response);
     if (!response.ok)
       return errorReturn(response, "Update Session State Error");
     return {
