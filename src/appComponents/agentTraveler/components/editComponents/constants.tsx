@@ -8,6 +8,4 @@ export const containerSxProps: SxProps = {
   mb: marginBottomDefault,
   p: 0.5,
   pt: 1,
-  // border: "1px solid var(--mui-palette-divider)",
-  // borderRadius: "5px",
 };

@@ -236,16 +236,22 @@ export function MaxHeightContainer({
     }
   }, []);
 
-  return !expand || (height && height < limit) ? (
-    <Box
-      ref={containerRef}
-      sx={{
-        maxHeight: !expand ? limit : undefined,
-        overflow: "hidden",
-        position: "relative",
-      }}
-    >
-      {children}
+  if (height && height < limit) return children;
+
+  return !expand ? (
+    <Box>
+      <Box
+        ref={containerRef}
+        sx={{
+          maxHeight: !expand ? limit : undefined,
+          overflow: "hidden",
+          position: "relative",
+          maskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,1) 75%, rgba(0,0,0,0))",
+        }}
+      >
+        {children}
+      </Box>
       <Button
         sx={{
           alignSelf: "center",

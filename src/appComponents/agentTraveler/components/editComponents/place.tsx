@@ -28,7 +28,7 @@ function PlaceEdit({ place }: { place: PlaceType }) {
       </Stack>
       <InputField label="Place ID" defaultValue={place.place_id} />
       <TimezoneAutocomplete label="Timezone" value={place.timezone} />
-      <ImageBoard images={place.photos} alt={place.name} />
+      <ImageBoard images={place.photos.slice(0,3)} alt={place.name} />
     </Stack>
   );
 }
