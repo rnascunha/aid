@@ -43,7 +43,7 @@ import {
   MessagesPaneTabs,
 } from "@/components/chat/messagePane/messagePaneTabs";
 import { getSessionState } from "./functions";
-import { StateType } from "./components/types";
+import { StateType } from "./components/editComponents/types";
 import { EditStateTab } from "./components/editStateTab";
 
 interface AgentTravelerProps {
