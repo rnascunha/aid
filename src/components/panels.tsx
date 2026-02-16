@@ -100,6 +100,7 @@ interface PanelListProps extends Omit<TabsProps, "onChange"> {
   value?: string | number;
   panels: PanelUnit[];
   onChange?: (newValue: string | number) => void;
+  containerSx?: SxProps;
 }
 
 export function PanelList({
@@ -107,6 +108,7 @@ export function PanelList({
   value,
   panels,
   onChange,
+  containerSx,
   ...tabsProps
 }: PanelListProps) {
   const [tab, setTab] = useState<string | number>(
@@ -152,6 +154,8 @@ export function PanelList({
         sx={{
           height: "100%",
           width: "100%",
+          maxWidth: "100%",
+          ...containerSx,
         }}
       >
         {panels.map((p, i) => (

@@ -40,6 +40,8 @@ import { PickerValue } from "@mui/x-date-pickers/internals";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ClearIcon from "@mui/icons-material/Clear";
+import AddIcon from "@mui/icons-material/Add";
+
 import { EditDialog } from "@/components/dialogs/editDialog";
 
 function isHTML(value?: string) {
@@ -108,12 +110,14 @@ export function InputField({
                 endAdornment: (
                   <InputAdornment position="end">
                     {endAdornment}
-                    <ResetValue
-                      updateState={() => {
-                        setV(original);
-                        updateState?.(original);
-                      }}
-                    />
+                    {original !== undefined && (
+                      <ResetValue
+                        updateState={() => {
+                          setV(original);
+                          updateState?.(original);
+                        }}
+                      />
+                    )}
                     {isHtml && (
                       <Link href={valid as string} target="_blank">
                         <LaunchIcon fontSize="small" color="action" />
@@ -247,11 +251,7 @@ function ResetValueButton({
   if (!original) return <InputAdornment {...others}>{children}</InputAdornment>;
   return (
     <InputAdornment {...others}>
-      <Tooltip title="Reset value">
-        <IconButton onClick={() => onResetField()}>
-          <RestartAltIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <ResetValue updateState={onResetField} />
       {children}
     </InputAdornment>
   );
@@ -420,18 +420,14 @@ export function SelectChoices({
           },
         }}
         endAdornment={
-          original ? (
+          original !== undefined && updateState ? (
             <InputAdornment
               position="end"
               sx={{
                 pr: 1,
               }}
             >
-              <Tooltip title="Reset value">
-                <IconButton onClick={() => updateState?.(original)}>
-                  <RestartAltIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              <ResetValue updateState={() => updateState(original)} />
             </InputAdornment>
           ) : undefined
         }
@@ -443,6 +439,43 @@ export function SelectChoices({
         ))}
       </Select>
     </FormControl>
+  );
+}
+
+export function SelectElement<T extends { id: string }>({
+  title,
+  selected,
+  options,
+  updatePage,
+  getName,
+}: {
+  title: string;
+  selected: undefined | string;
+  options: T[];
+  updatePage: (page: number) => void;
+  getName: (op: T) => string;
+}) {
+  const [value, setValue] = useState(selected);
+  return (
+    <Select
+      size="small"
+      // defaultValue={selected}
+      value={value}
+      label={title}
+      onChange={(ev) => {
+        const v = ev.target.value;
+        setValue(v);
+        const op = options.findIndex((o) => o.id === v);
+        if (op !== -1) updatePage(op + 1);
+      }}
+      autoWidth
+    >
+      {options.map((o) => (
+        <MenuItem value={o.id} key={o.id}>
+          {getName(o)}
+        </MenuItem>
+      ))}
+    </Select>
   );
 }
 
@@ -524,11 +557,7 @@ export function ImageBoard({
               Add
             </Button>
             {original && (
-              <Tooltip title="Reset value">
-                <IconButton onClick={() => updateState(original)}>
-                  <RestartAltIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              <ResetValue updateState={() => updateState(original)} />
             )}
             <EditDialog
               title="Add photo"
@@ -589,17 +618,18 @@ export function ImageBoard({
   );
 }
 
-interface ElementCarouselCarouselProps extends StackProps {
+interface ElementCarouselProps extends StackProps {
   data: ReactNode[];
-  page?: number;
+  page: number;
+  updatePage: (newPage: number) => void;
 }
 
 export function ElementCarousel({
   data,
-  page: initPage,
+  page,
+  updatePage,
   ...props
-}: ElementCarouselCarouselProps) {
-  const [page, setPage] = useState(initPage ? initPage : 1);
+}: ElementCarouselProps) {
   const ref = useRef<HTMLDivElement>(null);
   const matches = useMediaQuery("(max-width: 300px)");
   return (
@@ -619,10 +649,69 @@ export function ElementCarousel({
         count={data.length}
         page={page}
         onChange={(ev, newPage) => {
-          setPage(newPage);
+          updatePage(newPage);
           if (ref.current) ref.current.scrollTo({ top: 0, behavior: "smooth" });
         }}
       />
+    </Stack>
+  );
+}
+
+interface AddRemoveElementProps {
+  children: ReactNode | ReactNode[];
+  addElement?: () => void;
+  removeElement?: () => void;
+  resetValue?: () => void;
+  endElement?: ReactNode;
+}
+
+export function AddRemoveElement({
+  children,
+  addElement,
+  removeElement,
+  resetValue,
+  endElement,
+}: AddRemoveElementProps) {
+  return (
+    <Stack
+      sx={{
+        height: "100%",
+      }}
+    >
+      <Stack direction="row" alignItems="center" justifyContent="flex-start">
+        {addElement && (
+          <Tooltip title="Add new element">
+            <IconButton onClick={addElement}>
+              <AddIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+        {removeElement && (
+          <Tooltip title="Remove this element">
+            <IconButton onClick={removeElement}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+        {resetValue && <ResetValue updateState={resetValue} />}
+        {endElement}
+      </Stack>
+      {children}
+    </Stack>
+  );
+}
+
+export function EmptyElement() {
+  return (
+    <Stack
+      sx={{
+        width: "100%",
+        height: "100%",
+      }}
+      justifyContent="center"
+      alignItems="center"
+    >
+      No elements added
     </Stack>
   );
 }

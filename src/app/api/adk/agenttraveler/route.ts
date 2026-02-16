@@ -48,5 +48,5 @@ export async function PUT(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const noAuth = await checkAuthenticatedUser();
   if (noAuth) return noAuth;
-  return await getSessionStateAPI(req, app_name);
+  return await getSessionStateAPI(req, app_name);;
 }

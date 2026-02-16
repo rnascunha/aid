@@ -5,22 +5,25 @@ import {
   ArrayString,
   BorderBox,
   DateTimeInput,
-  ElementCarousel,
   InputField,
   ReadOnlyInputField,
   SelectChoices,
   TimezoneAutocomplete,
 } from "./general";
-import dayjs from "@/libs/dayjs";
 import { setDateTimePicker, updateDateTime } from "./functions";
+import { ElementList } from "./component";
 
 interface BusTrainEditProps {
-  busTrain: BusTrainType;
+  data: BusTrainType;
   original?: BusTrainType;
   updateState: (name: keyof BusTrainType, value: unknown) => void;
 }
 
-function BusTrainEdit({ busTrain, original, updateState }: BusTrainEditProps) {
+function BusTrainEdit({
+  data: busTrain,
+  original,
+  updateState,
+}: BusTrainEditProps) {
   return (
     <Stack sx={containerSxProps}>
       <InputField
@@ -169,25 +172,28 @@ interface BusTraisListProps {
     name: keyof BusTrainType,
     value: unknown,
   ) => void;
+  addElement?: () => number;
+  removeElement?: (id: string) => void;
+  resetValue?: () => void;
 }
 
 export function BusTrainList({
   busTrains,
   original,
   updateState,
+  addElement,
+  removeElement,
+  resetValue,
 }: BusTraisListProps) {
-  if (busTrains.length === 0) return;
-
   return (
-    <ElementCarousel
-      data={busTrains.map((busTrain, index) => (
-        <BusTrainEdit
-          busTrain={busTrain}
-          key={index}
-          original={original?.[index]}
-          updateState={(name, value) => updateState(index, name, value)}
-        />
-      ))}
+    <ElementList
+      elements={busTrains}
+      original={original}
+      updateState={updateState}
+      addElement={addElement}
+      removeElement={removeElement}
+      resetValue={resetValue}
+      as={BusTrainEdit}
     />
   );
 }

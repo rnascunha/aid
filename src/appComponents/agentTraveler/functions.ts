@@ -12,6 +12,8 @@ import { ADKState, SessionType } from "@/libs/chat/adk/types";
 import { ActionDispatch } from "react";
 import { TypeMessage } from "@/libs/chat/types";
 import { makeMessageStatusSend } from "@/libs/chat/functions";
+import { StateType } from "./components/editComponents/types";
+import { generateUUID } from "@/libs/uuid";
 
 export async function getAgentTravelerData({
   storage,
@@ -20,6 +22,18 @@ export async function getAgentTravelerData({
   defaultData?: AgentTravelerData;
 }): Promise<AgentTravelerData> {
   return await getData({ storage, defaultData: defaultAgentTravelerData });
+}
+
+function addIdToAllElements(state: StateType) {
+  Object.values(state.extracted_data).forEach((field) => {
+    field.forEach((f) => {
+      f.id = generateUUID();
+    });
+  });
+
+  state.places_data.forEach((f) => {
+    f.id = generateUUID();
+  });
 }
 
 export async function getSessionState(
@@ -75,6 +89,8 @@ export async function getSessionState(
     await storage?.addMessage(message);
     return;
   }
+  // Success receiving data
+  addIdToAllElements(data.raw.state);
   await updateSession(
     {
       session: {

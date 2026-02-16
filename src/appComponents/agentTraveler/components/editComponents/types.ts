@@ -1,6 +1,10 @@
 import z from "zod";
 
-const TravelerType = z.object({
+const BaseElementType = z.object({
+  id: z.string(),
+});
+
+const TravelerType = BaseElementType.extend({
   name: z.string(),
   age: z.string(),
   passport: z.string(),
@@ -9,7 +13,7 @@ const TravelerType = z.object({
 });
 export type TravelerType = z.infer<typeof TravelerType>;
 
-const HotelType = z.object({
+const HotelType = BaseElementType.extend({
   name: z.string(),
   address: z.string(),
   checkin_date: z.string(),
@@ -25,7 +29,7 @@ const HotelType = z.object({
 });
 export type HotelType = z.infer<typeof HotelType>;
 
-const FlightType = z.object({
+const FlightType = BaseElementType.extend({
   company_name: z.string(),
   booking_reference: z.string(),
   flight_number: z.string(),
@@ -44,7 +48,7 @@ const FlightType = z.object({
 });
 export type FlightType = z.infer<typeof FlightType>;
 
-const BusTrainType = z.object({
+const BusTrainType = BaseElementType.extend({
   company_name: z.string(),
   type: z.literal(["bus", "train"]),
   ticket_reference: z.string(),
@@ -67,7 +71,7 @@ const BusTrainType = z.object({
 });
 export type BusTrainType = z.infer<typeof BusTrainType>;
 
-const CarRentType = z.object({
+const CarRentType = BaseElementType.extend({
   name: z.string(),
   pickup_loc_ref: z.string(),
   pickup_address: z.string(),
@@ -86,7 +90,7 @@ const CarRentType = z.object({
 });
 export type CarRentType = z.infer<typeof CarRentType>;
 
-const EventType = z.object({
+const EventType = BaseElementType.extend({
   name: z.string(),
   address: z.string(),
   address_loc_ref: z.string(),
@@ -109,7 +113,7 @@ const ExtractedDataType = z.object({
 });
 export type ExtractedDataType = z.infer<typeof ExtractedDataType>;
 
-const PlaceType = z.object({
+const PlaceType = BaseElementType.extend({
   name: z.string(),
   type: z.string(),
   types: z.array(z.string()),
@@ -129,3 +133,11 @@ const StateType = z.object({
   places_data: z.array(PlaceType),
 });
 export type StateType = z.infer<typeof StateType>;
+
+export type ExtractedDataKey = keyof StateType["extracted_data"];
+export type ExtractedDataValue<T extends ExtractedDataKey> =
+  StateType["extracted_data"][T][number];
+
+export type EmptyValuesType = {
+  [K in ExtractedDataKey]: ExtractedDataValue<K>;
+};

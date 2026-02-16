@@ -1,15 +1,20 @@
 import { Stack } from "@mui/material";
 import { TravelerType } from "./types";
-import { ArrayString, ElementCarousel, InputField } from "./general";
+import { ArrayString, InputField } from "./general";
 import { containerSxProps } from "./constants";
+import { ElementList } from "./component";
 
 interface TravelerEditProps {
-  traveler: TravelerType;
+  data: TravelerType;
   original?: TravelerType;
   updateState: (name: keyof TravelerType, value: unknown) => void;
 }
 
-function TravelerEdit({ traveler, original, updateState }: TravelerEditProps) {
+function TravelerEdit({
+  data: traveler,
+  original,
+  updateState,
+}: TravelerEditProps) {
   return (
     <Stack sx={containerSxProps}>
       <InputField
@@ -61,25 +66,28 @@ interface TravelerListProps {
     name: keyof TravelerType,
     value: unknown,
   ) => void;
+  addElement?: () => number;
+  removeElement?: (id: string) => void;
+  resetValue?: () => void;
 }
 
 export function TravelerList({
   travelers,
   original,
   updateState,
+  addElement,
+  removeElement,
+  resetValue,
 }: TravelerListProps) {
-  if (travelers.length === 0) return;
-
   return (
-    <ElementCarousel
-      data={travelers.map((traveler, index) => (
-        <TravelerEdit
-          traveler={traveler}
-          key={index}
-          original={original?.[index]}
-          updateState={(name, value) => updateState(index, name, value)}
-        />
-      ))}
+    <ElementList
+      elements={travelers}
+      original={original}
+      updateState={updateState}
+      addElement={addElement}
+      removeElement={removeElement}
+      resetValue={resetValue}
+      as={TravelerEdit}
     />
   );
 }

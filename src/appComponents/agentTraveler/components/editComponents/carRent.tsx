@@ -2,23 +2,26 @@ import { Stack } from "@mui/material";
 import {
   BorderBox,
   DateTimeInput,
-  ElementCarousel,
   InputField,
   ReadOnlyInputField,
   TimezoneAutocomplete,
 } from "./general";
 import { containerSxProps, defaultGap } from "./constants";
 import { CarRentType } from "./types";
-import dayjs from "@/libs/dayjs";
 import { setDateTimePicker, updateDateTime } from "./functions";
+import { ElementList } from "./component";
 
 interface CarRentEditProps {
-  carRent: CarRentType;
+  data: CarRentType;
   original?: CarRentType;
   updateState: (name: keyof CarRentType, value: unknown) => void;
 }
 
-function CarRentEdit({ carRent, original, updateState }: CarRentEditProps) {
+function CarRentEdit({
+  data: carRent,
+  original,
+  updateState,
+}: CarRentEditProps) {
   return (
     <Stack sx={containerSxProps}>
       <InputField
@@ -151,25 +154,28 @@ interface CarRentListProps {
   carRents: CarRentType[];
   original?: CarRentType[];
   updateState: (index: number, name: keyof CarRentType, value: unknown) => void;
+  addElement?: () => number;
+  removeElement?: (id: string) => void;
+  resetValue?: () => void;
 }
 
 export function CarRentList({
   carRents,
   original,
   updateState,
+  addElement,
+  removeElement,
+  resetValue,
 }: CarRentListProps) {
-  if (carRents.length === 0) return;
-
   return (
-    <ElementCarousel
-      data={carRents.map((carRent, index) => (
-        <CarRentEdit
-          carRent={carRent}
-          key={index}
-          original={original?.[index]}
-          updateState={(name, value) => updateState(index, name, value)}
-        />
-      ))}
+    <ElementList
+      elements={carRents}
+      original={original}
+      updateState={updateState}
+      addElement={addElement}
+      removeElement={removeElement}
+      resetValue={resetValue}
+      as={CarRentEdit}
     />
   );
 }

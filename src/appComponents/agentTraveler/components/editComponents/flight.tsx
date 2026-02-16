@@ -2,23 +2,22 @@ import { Stack } from "@mui/material";
 import {
   BorderBox,
   DateTimeInput,
-  ElementCarousel,
   InputField,
   ReadOnlyInputField,
   TimezoneAutocomplete,
 } from "./general";
 import { containerSxProps, defaultGap } from "./constants";
 import { FlightType } from "./types";
-import dayjs from "@/libs/dayjs";
 import { setDateTimePicker, updateDateTime } from "./functions";
+import { ElementList } from "./component";
 
 interface FligthEditProps {
-  flight: FlightType;
+  data: FlightType;
   original?: FlightType;
   updateState: (name: keyof FlightType, value: unknown) => void;
 }
 
-function FlightEdit({ flight, original, updateState }: FligthEditProps) {
+function FlightEdit({ data: flight, original, updateState }: FligthEditProps) {
   return (
     <Stack sx={containerSxProps}>
       <InputField
@@ -53,10 +52,7 @@ function FlightEdit({ flight, original, updateState }: FligthEditProps) {
       />
       <BorderBox title="Departure">
         <Stack gap={defaultGap}>
-          <ReadOnlyInputField
-            label="Ref"
-            value={flight.departure_loc_ref}
-          />
+          <ReadOnlyInputField label="Ref" value={flight.departure_loc_ref} />
           <InputField
             label="Airport"
             value={flight.departure_airport}
@@ -97,10 +93,7 @@ function FlightEdit({ flight, original, updateState }: FligthEditProps) {
       </BorderBox>
       <BorderBox title="Arrival">
         <Stack gap={defaultGap}>
-          <ReadOnlyInputField
-            label="Ref"
-            value={flight.arrival_loc_ref}
-          />
+          <ReadOnlyInputField label="Ref" value={flight.arrival_loc_ref} />
           <InputField
             label="Airport"
             value={flight.arrival_airport}
@@ -147,25 +140,28 @@ interface FlightListProps {
   flights: FlightType[];
   original?: FlightType[];
   updateState: (index: number, name: keyof FlightType, value: unknown) => void;
+  addElement?: () => number;
+  removeElement?: (id: string) => void;
+  resetValue?: () => void;
 }
 
 export function FlightList({
   flights,
   original,
   updateState,
+  addElement,
+  removeElement,
+  resetValue,
 }: FlightListProps) {
-  if (flights.length === 0) return;
-
   return (
-    <ElementCarousel
-      data={flights.map((flight, index) => (
-        <FlightEdit
-          flight={flight}
-          key={index}
-          original={original?.[index]}
-          updateState={(name, value) => updateState(index, name, value)}
-        />
-      ))}
+    <ElementList
+      elements={flights}
+      original={original}
+      updateState={updateState}
+      addElement={addElement}
+      removeElement={removeElement}
+      resetValue={resetValue}
+      as={FlightEdit}
     />
   );
 }

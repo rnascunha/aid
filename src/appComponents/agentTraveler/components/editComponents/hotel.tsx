@@ -2,7 +2,6 @@ import { Stack } from "@mui/material";
 import {
   ArrayString,
   DateTimeInput,
-  ElementCarousel,
   InputField,
   ReadOnlyInputField,
   TimezoneAutocomplete,
@@ -10,14 +9,15 @@ import {
 import { HotelType } from "./types";
 import { containerSxProps } from "./constants";
 import { setDateTimePicker, updateDateTime } from "./functions";
+import { ElementList } from "./component";
 
 interface HotelEditProps {
-  hotel: HotelType;
+  data: HotelType;
   original?: HotelType;
   updateState: (name: keyof HotelType, value: unknown) => void;
 }
 
-function HotelEdit({ hotel, original, updateState }: HotelEditProps) {
+function HotelEdit({ data: hotel, original, updateState }: HotelEditProps) {
   return (
     <Stack sx={containerSxProps}>
       <ReadOnlyInputField label="Ref" defaultValue={hotel.loc_ref} />
@@ -123,21 +123,42 @@ interface HotelListProps {
   hotels: HotelType[];
   original?: HotelType[];
   updateState: (index: number, name: keyof HotelType, value: unknown) => void;
+  addElement?: () => number;
+  removeElement?: (id: string) => void;
+  resetValue?: () => void;
 }
 
-export function HotelList({ hotels, original, updateState }: HotelListProps) {
-  if (hotels.length === 0) return;
-
+export function HotelList({
+  hotels,
+  original,
+  updateState,
+  addElement,
+  removeElement,
+  resetValue,
+}: HotelListProps) {
   return (
-    <ElementCarousel
-      data={hotels.map((hotel, index) => (
-        <HotelEdit
-          hotel={hotel}
-          key={index}
-          original={original?.[index]}
-          updateState={(name, value) => updateState(index, name, value)}
-        />
-      ))}
+    <ElementList
+      elements={hotels}
+      original={original}
+      updateState={updateState}
+      addElement={addElement}
+      removeElement={removeElement}
+      resetValue={resetValue}
+      as={HotelEdit}
     />
   );
+  // if (hotels.length === 0) return;
+
+  // return (
+  //   <ElementCarousel
+  //     data={hotels.map((hotel, index) => (
+  //       <HotelEdit
+  //         hotel={hotel}
+  //         key={index}
+  //         original={original?.[index]}
+  //         updateState={(name, value) => updateState(index, name, value)}
+  //       />
+  //     ))}
+  //   />
+  // );
 }

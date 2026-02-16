@@ -2,7 +2,6 @@ import { Stack } from "@mui/material";
 import {
   ArrayString,
   DateTimeInput,
-  ElementCarousel,
   InputField,
   ReadOnlyInputField,
   TimezoneAutocomplete,
@@ -10,14 +9,15 @@ import {
 import { containerSxProps } from "./constants";
 import { EventType } from "./types";
 import { setDateTimePicker, updateDateTime } from "./functions";
+import { ElementList } from "./component";
 
 interface EventEditProps {
-  event: EventType;
+  data: EventType;
   original?: EventType;
   updateState: (name: keyof EventType, value: unknown) => void;
 }
 
-function EventEdit({ event, original, updateState }: EventEditProps) {
+function EventEdit({ data: event, original, updateState }: EventEditProps) {
   return (
     <Stack sx={containerSxProps}>
       <InputField
@@ -86,21 +86,28 @@ interface EventListProps {
   events: EventType[];
   original?: EventType[];
   updateState: (index: number, name: keyof EventType, value: unknown) => void;
+  addElement?: () => number;
+  removeElement?: (id: string) => void;
+  resetValue?: () => void;
 }
 
-export function EventList({ events, original, updateState }: EventListProps) {
-  if (events.length === 0) return;
-
+export function EventList({
+  events,
+  original,
+  updateState,
+  addElement,
+  removeElement,
+  resetValue,
+}: EventListProps) {
   return (
-    <ElementCarousel
-      data={events.map((event, index) => (
-        <EventEdit
-          event={event}
-          key={index}
-          original={original?.[index]}
-          updateState={(name, value) => updateState(index, name, value)}
-        />
-      ))}
+    <ElementList
+      elements={events}
+      original={original}
+      updateState={updateState}
+      addElement={addElement}
+      removeElement={removeElement}
+      resetValue={resetValue}
+      as={EventEdit}
     />
   );
 }

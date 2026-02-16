@@ -1,4 +1,4 @@
-import { PlaceType, StateType } from "./editComponents/types";
+import { ExtractedDataKey, PlaceType, StateType } from "./editComponents/types";
 import { PanelList, PanelUnit } from "@/components/panels";
 import { TravelerList } from "./editComponents/traveler";
 import { HotelList } from "./editComponents/hotel";
@@ -16,6 +16,8 @@ import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { PlaceList } from "./editComponents/place";
 import { useState } from "react";
+import { emptyExtractedValues, emptyPlaces } from "./editComponents/constants";
+import { generateUUID } from "@/libs/uuid";
 
 interface EditStateTabProps {
   state: StateType;
@@ -29,8 +31,34 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
     structuredClone(originalState.places_data),
   );
 
+  const addElement = (namespace: ExtractedDataKey) => {
+    const newPage = state[namespace].length + 1;
+    setState((prev) => ({
+      ...prev,
+      [namespace]: [
+        ...prev[namespace],
+        { ...emptyExtractedValues[namespace], id: generateUUID() },
+      ],
+    }));
+    return newPage;
+  };
+
+  const removeElement = (namespace: ExtractedDataKey, id: string) => {
+    setState((prev) => ({
+      ...prev,
+      [namespace]: prev[namespace].filter((p) => p.id !== id),
+    }));
+  };
+
+  const resetValue = (namespace: ExtractedDataKey) => {
+    setState((prev) => ({
+      ...prev,
+      [namespace]: originalState.extracted_data[namespace],
+    }));
+  };
+
   const updateState = (
-    namespace: keyof StateType["extracted_data"],
+    namespace: ExtractedDataKey,
     index: number,
     name: string,
     value: unknown,
@@ -42,6 +70,20 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
         return { ...(v as object), [name]: value };
       }),
     }));
+  };
+
+  const addPlace = () => {
+    const newPage = places.length + 1;
+    setPlaces((prev) => [...prev, { ...emptyPlaces, id: generateUUID() }]);
+    return newPage;
+  };
+
+  const removePlace = (id: string) => {
+    setPlaces((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const resetPlaceValue = () => {
+    setPlaces(originalState.places_data);
   };
 
   const updatePlaces = (index: number, name: keyof PlaceType, value: unknown) =>
@@ -61,6 +103,9 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
           updateState={(index, name, value) =>
             updateState("travelers", index, name, value)
           }
+          addElement={() => addElement("travelers")}
+          removeElement={(id: string) => removeElement("travelers", id)}
+          resetValue={() => resetValue("travelers")}
         />
       ),
     },
@@ -75,6 +120,9 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
           updateState={(index, name, value) =>
             updateState("hotels", index, name, value)
           }
+          addElement={() => addElement("hotels")}
+          removeElement={(id: string) => removeElement("hotels", id)}
+          resetValue={() => resetValue("hotels")}
         />
       ),
     },
@@ -89,6 +137,9 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
           updateState={(index, name, value) =>
             updateState("flights", index, name, value)
           }
+          addElement={() => addElement("flights")}
+          removeElement={(id: string) => removeElement("flights", id)}
+          resetValue={() => resetValue("flights")}
         />
       ),
     },
@@ -103,6 +154,9 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
           updateState={(index, name, value) =>
             updateState("bus_trains", index, name, value)
           }
+          addElement={() => addElement("bus_trains")}
+          removeElement={(id: string) => removeElement("bus_trains", id)}
+          resetValue={() => resetValue("bus_trains")}
         />
       ),
     },
@@ -117,6 +171,9 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
           updateState={(index, name, value) =>
             updateState("car_rents", index, name, value)
           }
+          addElement={() => addElement("car_rents")}
+          removeElement={(id: string) => removeElement("car_rents", id)}
+          resetValue={() => resetValue("car_rents")}
         />
       ),
     },
@@ -131,6 +188,9 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
           updateState={(index, name, value) =>
             updateState("events", index, name, value)
           }
+          addElement={() => addElement("events")}
+          removeElement={(id: string) => removeElement("events", id)}
+          resetValue={() => resetValue("events")}
         />
       ),
     },
@@ -143,6 +203,9 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
           places={places}
           original={originalState.places_data}
           updateState={updatePlaces}
+          addElement={addPlace}
+          removeElement={removePlace}
+          resetValue={resetPlaceValue}
         />
       ),
     },
@@ -160,6 +223,9 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
           width: "100%",
           p: 0,
         },
+      }}
+      containerSx={{
+        maxWidth: "calc(100% - 50px)",
       }}
     />
   );

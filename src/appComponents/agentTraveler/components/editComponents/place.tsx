@@ -1,21 +1,21 @@
 import { Stack } from "@mui/material";
 import {
   ArrayString,
-  ElementCarousel,
   ImageBoard,
   InputField,
   TimezoneAutocomplete,
 } from "./general";
 import { containerSxProps, defaultGap } from "./constants";
 import { PlaceType } from "./types";
+import { ElementList } from "./component";
 
 interface PlaceEditProps {
-  place: PlaceType;
+  data: PlaceType;
   original?: PlaceType;
   updateState: (name: keyof PlaceType, value: unknown) => void;
 }
 
-function PlaceEdit({ place, original, updateState }: PlaceEditProps) {
+function PlaceEdit({ data: place, original, updateState }: PlaceEditProps) {
   return (
     <Stack sx={containerSxProps}>
       <InputField
@@ -77,7 +77,12 @@ function PlaceEdit({ place, original, updateState }: PlaceEditProps) {
         original={original?.timezone}
         updateState={(value) => updateState("timezone", value)}
       />
-      <ImageBoard images={place.photos} alt={place.name} original={original?.photos} updateState={(value) => updateState("photos", value)} />
+      <ImageBoard
+        images={place.photos}
+        alt={place.name}
+        original={original?.photos}
+        updateState={(value) => updateState("photos", value)}
+      />
     </Stack>
   );
 }
@@ -86,21 +91,28 @@ interface PlaceListProps {
   places: PlaceType[];
   original?: PlaceType[];
   updateState: (index: number, name: keyof PlaceType, value: unknown) => void;
+  addElement?: () => number;
+  removeElement?: (id: string) => void;
+  resetValue?: () => void;
 }
 
-export function PlaceList({ places, original, updateState }: PlaceListProps) {
-  if (places.length === 0) return;
-
+export function PlaceList({
+  places,
+  original,
+  updateState,
+  addElement,
+  removeElement,
+  resetValue,
+}: PlaceListProps) {
   return (
-    <ElementCarousel
-      data={places.map((place, index) => (
-        <PlaceEdit
-          place={place}
-          key={index}
-          original={original?.[index]}
-          updateState={(name, value) => updateState(index, name, value)}
-        />
-      ))}
+    <ElementList
+      elements={places}
+      original={original}
+      updateState={updateState}
+      addElement={addElement}
+      removeElement={removeElement}
+      resetValue={resetValue}
+      as={PlaceEdit}
     />
   );
 }
