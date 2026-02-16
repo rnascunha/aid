@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "places.googleapis.com",
       },
+      {
+        protocol: "https",
+        hostname: "*",
+      },
     ],
   },
   devIndicators: false,

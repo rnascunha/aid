@@ -9,37 +9,97 @@ import {
 import { containerSxProps, defaultGap } from "./constants";
 import { PlaceType } from "./types";
 
-function PlaceEdit({ place }: { place: PlaceType }) {
+interface PlaceEditProps {
+  place: PlaceType;
+  original?: PlaceType;
+  updateState: (name: keyof PlaceType, value: unknown) => void;
+}
+
+function PlaceEdit({ place, original, updateState }: PlaceEditProps) {
   return (
     <Stack sx={containerSxProps}>
-      <InputField label="Name" defaultValue={place.name} />
-      <InputField label="Address" defaultValue={place.address} />
-      <InputField label="Type" defaultValue={place.type} />
-      <ArrayString title="Types" data={place.types} />
+      <InputField
+        label="Name"
+        value={place.name}
+        original={original?.name}
+        updateState={(value) => updateState("name", value)}
+      />
+      <InputField
+        label="Address"
+        value={place.address}
+        original={original?.address}
+        updateState={(value) => updateState("address", value)}
+      />
+      <InputField
+        label="Type"
+        value={place.type}
+        original={original?.type}
+        updateState={(value) => updateState("type", value)}
+      />
+      <ArrayString
+        title="Types"
+        data={place.types}
+        original={original?.types}
+        updateState={(value) => updateState("types", value)}
+      />
       <ArrayString title="Reference" data={place.reference} readOnly />
-      <InputField label="Map URL" defaultValue={place.map_url} />
+      <InputField
+        label="Map URL"
+        value={place.map_url}
+        original={original?.map_url}
+        updateState={(value) => updateState("map_url", value)}
+      />
       <Stack direction="row" gap={defaultGap}>
-        <InputField fullWidth label="Latitude" defaultValue={place.latitude} />
+        <InputField
+          fullWidth
+          label="Latitude"
+          value={place.latitude}
+          original={original?.latitude}
+          updateState={(value) => updateState("latitude", value)}
+        />
         <InputField
           fullWidth
           label="Longitude"
-          defaultValue={place.longitude}
+          value={place.longitude}
+          original={original?.longitude}
+          updateState={(value) => updateState("longitude", value)}
         />
       </Stack>
-      <InputField label="Place ID" defaultValue={place.place_id} />
-      <TimezoneAutocomplete label="Timezone" value={place.timezone} />
-      <ImageBoard images={place.photos.slice(0,3)} alt={place.name} />
+      <InputField
+        label="Place ID"
+        value={place.place_id}
+        original={original?.place_id}
+        updateState={(value) => updateState("place_id", value)}
+      />
+      <TimezoneAutocomplete
+        label="Timezone"
+        value={place.timezone}
+        original={original?.timezone}
+        updateState={(value) => updateState("timezone", value)}
+      />
+      <ImageBoard images={place.photos} alt={place.name} original={original?.photos} updateState={(value) => updateState("photos", value)} />
     </Stack>
   );
 }
 
-export function PlaceList({ places }: { places: PlaceType[] }) {
+interface PlaceListProps {
+  places: PlaceType[];
+  original?: PlaceType[];
+  updateState: (index: number, name: keyof PlaceType, value: unknown) => void;
+}
+
+export function PlaceList({ places, original, updateState }: PlaceListProps) {
   if (places.length === 0) return;
 
   return (
     <ElementCarousel
       data={places.map((place, index) => (
-        <PlaceEdit place={place} key={index} />
+        <PlaceEdit
+          place={place}
+          key={index}
+          original={original?.[index]}
+          updateState={(name, value) => updateState(index, name, value)}
+        />
       ))}
     />
   );

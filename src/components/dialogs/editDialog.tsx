@@ -6,6 +6,7 @@ import {
   DialogContentText,
   DialogProps,
   DialogTitle,
+  SxProps,
   TextField,
 } from "@mui/material";
 
@@ -20,6 +21,8 @@ interface EditDialogProps extends DialogProps {
   description?: ReactNode;
   action: (value: string) => void | Promise<void>;
   value?: string;
+  sxContent?: SxProps;
+  clear?: boolean;
 }
 
 export function EditDialog({
@@ -29,6 +32,8 @@ export function EditDialog({
   open,
   handleClose,
   value,
+  clear,
+  ...props
 }: EditDialogProps) {
   const [newValue, setNewValue] = useState(value ?? "");
 
@@ -38,6 +43,7 @@ export function EditDialog({
       onClose={handleClose}
       aria-labelledby="edit-dialog-title"
       aria-describedby="eidt-dialog-description"
+      {...props}
     >
       <DialogTitle id="edit-dialog-title">{title}</DialogTitle>
       <DialogContent>
@@ -60,6 +66,7 @@ export function EditDialog({
             const vv = newValue.trim();
             if (vv === "") return;
             await action(vv);
+            if (clear) setNewValue("");
             handleClose();
           }}
           autoFocus
