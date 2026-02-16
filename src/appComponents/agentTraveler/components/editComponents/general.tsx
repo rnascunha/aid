@@ -47,6 +47,22 @@ function isHTML(value?: string) {
   return /^http[s]?:\/\//.test(value);
 }
 
+interface ResetValueProps<T> {
+  updateState?: () => void;
+}
+
+function ResetValue<T>({ updateState }: ResetValueProps<T>) {
+  return (
+    updateState !== undefined && (
+      <Tooltip title="Reset value">
+        <IconButton onClick={() => updateState()}>
+          <RestartAltIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    )
+  );
+}
+
 interface InputFieldProps extends TextFieldProps<"standard"> {
   updateState?: (value: unknown) => void;
   original?: unknown;
@@ -92,18 +108,12 @@ export function InputField({
                 endAdornment: (
                   <InputAdornment position="end">
                     {endAdornment}
-                    {original !== undefined && (
-                      <Tooltip title="Reset value">
-                        <IconButton
-                          onClick={() => {
-                            setV(original);
-                            updateState?.(original);
-                          }}
-                        >
-                          <RestartAltIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                    <ResetValue
+                      updateState={() => {
+                        setV(original);
+                        updateState?.(original);
+                      }}
+                    />
                     {isHtml && (
                       <Link href={valid as string} target="_blank">
                         <LaunchIcon fontSize="small" color="action" />
@@ -183,15 +193,20 @@ export function ArrayString({
     <BorderBox title={title}>
       <Stack gap={0.5}>
         {updateState && (
-          <Button
-            sx={{
-              alignSelf: "flex-start",
-            }}
-            variant="contained"
-            onClick={addField}
-          >
-            Add
-          </Button>
+          <Stack direction="row" alignItems="center">
+            <Button
+              sx={{
+                alignSelf: "flex-start",
+              }}
+              variant="contained"
+              onClick={addField}
+            >
+              Add
+            </Button>
+            <ResetValue
+              updateState={original ? () => updateState(original) : undefined}
+            />
+          </Stack>
         )}
         {data.map((d, i) =>
           !readOnly ? (
