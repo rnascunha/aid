@@ -7,6 +7,7 @@ import { ReactNode, useState } from "react";
 
 import DownloadIcon from "@mui/icons-material/Download";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 interface MessagePaneChatProps {
   messages: ReactNode;
@@ -35,10 +36,17 @@ export function MessagePaneChat({
 interface MessagePaneStateProps {
   state: Record<string, unknown>;
   onGetState?: () => Promise<void>;
+  onUpdateState?: () => Promise<void>;
 }
 
-export function MessagePaneState({ state, onGetState }: MessagePaneStateProps) {
-  const [action, setAction] = useState<"download" | "getstate" | null>(null);
+export function MessagePaneState({
+  state,
+  onGetState,
+  onUpdateState,
+}: MessagePaneStateProps) {
+  const [action, setAction] = useState<
+    "download" | "getstate" | "updatestate" | null
+  >(null);
   return (
     <Stack
       sx={{
@@ -62,6 +70,24 @@ export function MessagePaneState({ state, onGetState }: MessagePaneStateProps) {
                 size="small"
               >
                 <CloudDownloadIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
+        {onUpdateState && (
+          <Tooltip title="Update State">
+            <span>
+              <IconButton
+                onClick={async () => {
+                  setAction("updatestate");
+                  await onUpdateState();
+                  setAction(null);
+                }}
+                disabled={action !== null}
+                loading={action === "updatestate"}
+                size="small"
+              >
+                <CloudUploadIcon fontSize="small" />
               </IconButton>
             </span>
           </Tooltip>

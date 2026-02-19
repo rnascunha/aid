@@ -20,20 +20,20 @@ import { InputOutput } from "@/components/chat/input/types";
 import { PartialDataAggregator, readQuerySSE } from "@/libs/adk/base";
 import { ADKEvent } from "@/libs/adk/types";
 
-export function createNewSession(name: string = ""): SessionType {
+export function createNewSession(session: Partial<SessionType>): SessionType {
   return {
-    name: name || `Session-${Math.floor(Math.random() * 100)}`,
+    name: session.name || `Session-${Math.floor(Math.random() * 100)}`,
     id: generateUUID(),
-    state: {},
+    state: session.state ?? {},
   };
 }
 
 export async function addSession(
-  { name = "" }: { name: string },
+  session: Partial<SessionType>,
   dispatch: ActionDispatch<[action: ChatActionArgs]>,
   storage?: StorageBase,
 ) {
-  const newSession = createNewSession(name);
+  const newSession = createNewSession(session);
   dispatch({
     action: Actions.ADD_SESSION,
     session: newSession,

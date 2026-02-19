@@ -1,5 +1,10 @@
 import { SxProps } from "@mui/material";
-import { EmptyDataValues, EmptyExtracredValuesType, PlaceType } from "./types";
+import {
+  EmptyDataValues,
+  EmptyExtracredValuesType,
+  PlaceType,
+  StateType,
+} from "./types";
 
 export const defaultGap = 0.75;
 export const marginBottomDefault = 2;
@@ -133,11 +138,19 @@ export const stateEmptyValues: EmptyDataValues = {
     address: "",
     type: "",
   },
-  destinations: {
-    id: "",
-    name: "",
-    country: "",
-    brief: "",
-    highlights: [],
+};
+
+export const emptyState: StateType = {
+  extracted_data: {
+    travelers: [],
+    bus_trains: [],
+    car_rents: [],
+    events: [],
+    flights: [],
+    hotels: [],
   },
+  destination_data: [],
+  places_data: [],
+  problem_data: { problem_data: [] },
+  what_to_pack_data: { what_to_pack_data: [] },
 };

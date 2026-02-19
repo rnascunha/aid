@@ -1,5 +1,7 @@
 import dayjs from "@/libs/dayjs";
 import { Dayjs } from "dayjs";
+import { StateType } from "./types";
+import { emptyState } from "./constants";
 
 export function setDateTimePicker(
   date: string,
@@ -18,4 +20,18 @@ export function updateDateTime<T>(
 ) {
   updateState(date, value?.format("DD/MM/YYYY") ?? "");
   updateState(time, value?.format("HH:mm") ?? "");
+}
+
+export function mergeState(
+  state: Partial<StateType>,
+  empty: StateType = emptyState,
+): StateType {
+  return {
+    ...empty,
+    ...state,
+    extracted_data: {
+      ...empty["extracted_data"],
+      ...state?.["extracted_data"],
+    },
+  };
 }

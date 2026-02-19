@@ -13,7 +13,7 @@ import { CarRentList } from "./editComponents/carRent";
 import { EventList } from "./editComponents/event";
 
 import { PlaceList } from "./editComponents/place";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   emptyExtractedValues,
   stateEmptyValues,
@@ -34,13 +34,22 @@ import MapIcon from "@mui/icons-material/Map";
 
 import { ProblemList } from "./editComponents/problem";
 import { DestinationDataList } from "./editComponents/destinationData";
+import { mergeState } from "./editComponents/functions";
 
 interface EditStateTabProps {
   state: StateType;
+  original: StateType;
+  setState: Dispatch<SetStateAction<StateType>>;
 }
 
-export function EditStateTab({ state: originalState }: EditStateTabProps) {
-  const [state, setState] = useState(structuredClone(originalState));
+export function EditStateTab({
+  state,
+  original: originalState,
+  setState,
+}: EditStateTabProps) {
+  // const [state, setState] = useState(
+  //   mergeState(structuredClone(originalState)),
+  // );
 
   const addExtracted = (namespace: ExtractedDataKey) => {
     const newPage = state.extracted_data[namespace].length + 1;

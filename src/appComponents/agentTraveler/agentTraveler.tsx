@@ -4,7 +4,7 @@ import { ChatContainer } from "@/components/chat/chatContainer";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { ChatsPane } from "@/components/chat/chatsPane";
 import { reducer } from "@/libs/chat/state/functions";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Actions } from "@/libs/chat/state/types";
 import { AgentTrevelerStorageBase } from "@/libs/chat/storage/storageBase";
 import {
@@ -16,15 +16,12 @@ import {
 } from "@/libs/chat/types";
 import { InputOutput } from "@/components/chat/input/types";
 import { ChatList, EmptyChatList } from "@/components/chat/chatList";
-import {
-  EmptyMessagesPane,
-  MessagesPane,
-} from "@/components/chat/messagePane/messagePane";
+import { EmptyMessagesPane } from "@/components/chat/messagePane/messagePane";
 import { MessagesHeader } from "@/components/chat/messagePane/messageHeader";
 import { BouncingLoader } from "@/components/bouncingLoader";
 import { MessageList } from "@/components/chat/messagePane/messageList";
 import { MessageInput } from "@/components/chat/input/messageInput";
-import { SessionType } from "@/libs/chat/adk/types";
+import { SessionType as ADKSessionType } from "@/libs/chat/adk/types";
 import { AddSession } from "@/components/chat/adk/addSession";
 import { SessionOptions } from "@/components/chat/adk/sessionOptions";
 import {
@@ -33,6 +30,7 @@ import {
   // getSessionState,
   sendMessage,
   updateSession,
+  updateSessionState,
   // updateSessionState,
 } from "@/libs/chat/adk/functions";
 import { adk_api_agenttraveler, app_name } from "./constants";
@@ -45,6 +43,8 @@ import {
 import { getSessionState } from "./functions";
 import { StateType } from "./components/editComponents/types";
 import { EditStateTab } from "./components/editStateTab";
+import { emptyState } from "./components/editComponents/constants";
+import { SessionType } from "./types";
 
 interface AgentTravelerProps {
   sessions: SessionType[];
@@ -66,6 +66,21 @@ export function AgentTraveler({
     pending: [],
   });
   const [hasFiles, setHasFiles] = useState(false);
+  const [sessionState, setSessionState] = useState<StateType>(
+    !state.selected
+      ? emptyState
+      : structuredClone((state.selected as SessionType).state.state),
+  );
+
+  useEffect(() => {
+    if (!state.selected) {
+      setSessionState(emptyState);
+      return;
+    }
+    setSessionState(
+      structuredClone((state.selected as SessionType).state.state),
+    );
+  }, [state.selected]);
 
   const onDeleteSession = async (session: SessionType) => {
     await deleteSession(
@@ -92,7 +107,7 @@ export function AgentTraveler({
   };
 
   const onAddSession = async (name: string = "") => {
-    await addSession({ name }, dispatch, storage);
+    await addSession({ name, state: { state: emptyState } }, dispatch, storage);
   };
 
   const onGetState = async (session: SessionType) => {
@@ -106,18 +121,18 @@ export function AgentTraveler({
     );
   };
 
-  // const onUpdateState = async (session: SessionType, state: ADKState) => {
-  //   await updateSessionState(
-  //     {
-  //       session,
-  //       app_name,
-  //       user,
-  //       data: state,
-  //     },
-  //     dispatch,
-  //     storage,
-  //   );
-  // };
+  const onUpdateState = async (session: SessionType, state: StateType) => {
+    await updateSessionState(
+      {
+        session,
+        app_name,
+        user,
+        data: state,
+      },
+      dispatch,
+      storage,
+    );
+  };
 
   const onSendMessage = async (
     session: SessionType,
@@ -196,8 +211,16 @@ export function AgentTraveler({
                 options={
                   <SessionOptions
                     session={state.selected as SessionType}
-                    onDeleteSession={onDeleteSession}
-                    onEditSession={onEditSession}
+                    onDeleteSession={
+                      onDeleteSession as (id: ADKSessionType) => Promise<void>
+                    }
+                    onEditSession={
+                      onEditSession as (
+                        id: ADKSessionType,
+                        name: keyof ADKSessionType,
+                        value: unknown,
+                      ) => Promise<void>
+                    }
                   />
                 }
               />
@@ -251,6 +274,12 @@ export function AgentTraveler({
                         onGetState={() =>
                           onGetState(state.selected as SessionType)
                         }
+                        onUpdateState={() =>
+                          onUpdateState(
+                            state.selected as SessionType,
+                            sessionState,
+                          )
+                        }
                       />
                     ),
                   },
@@ -258,10 +287,12 @@ export function AgentTraveler({
                     label: "Data",
                     panel: (
                       <EditStateTab
-                        state={
+                        state={sessionState}
+                        original={
                           (state.selected as SessionType).state
                             .state as StateType
                         }
+                        setState={setSessionState}
                       />
                     ),
                   },
