@@ -153,7 +153,7 @@ function CarRentEdit({
 interface CarRentListProps {
   carRents: CarRentType[];
   original?: CarRentType[];
-  updateState: (index: number, name: keyof CarRentType, value: unknown) => void;
+  updateState: (id: string, name: keyof CarRentType, value: unknown) => void;
   addElement?: () => number;
   removeElement?: (id: string) => void;
   resetValue?: () => void;

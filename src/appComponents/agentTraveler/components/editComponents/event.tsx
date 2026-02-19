@@ -85,7 +85,7 @@ function EventEdit({ data: event, original, updateState }: EventEditProps) {
 interface EventListProps {
   events: EventType[];
   original?: EventType[];
-  updateState: (index: number, name: keyof EventType, value: unknown) => void;
+  updateState: (id: string, name: keyof EventType, value: unknown) => void;
   addElement?: () => number;
   removeElement?: (id: string) => void;
   resetValue?: () => void;

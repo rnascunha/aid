@@ -122,7 +122,7 @@ function HotelEdit({ data: hotel, original, updateState }: HotelEditProps) {
 interface HotelListProps {
   hotels: HotelType[];
   original?: HotelType[];
-  updateState: (index: number, name: keyof HotelType, value: unknown) => void;
+  updateState: (id: string, name: keyof HotelType, value: unknown) => void;
   addElement?: () => number;
   removeElement?: (id: string) => void;
   resetValue?: () => void;

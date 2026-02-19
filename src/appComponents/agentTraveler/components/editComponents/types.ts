@@ -128,9 +128,54 @@ const PlaceType = BaseElementType.extend({
 });
 export type PlaceType = z.infer<typeof PlaceType>;
 
+const DestinationDataType = z.object({
+  id: z.string(),
+  name: z.string(),
+  country: z.string(),
+  brief: z.string(),
+  reference: z.string(),
+  highlights: z.array(z.string()),
+  map_url: z.string(),
+  address: z.string(),
+  type: z.string(),
+});
+export type DestinationDataType = z.infer<typeof DestinationDataType>;
+
+// const HighlightType = z.object({
+//   name: z.string(),
+//   address: z.string(),
+//   map_url: z.string(),
+//   type: z.string(),
+//   photos: z.array(z.string()),
+// });
+// export type HighlightType = z.infer<typeof HighlightType>;
+
+// const DestinationType = z.object({
+//   id: z.string(),
+//   name: z.string(),
+//   country: z.string(),
+//   brief: z.string(),
+//   highlights: z.array(HighlightType),
+// });
+// export type DestinationType = z.infer<typeof DestinationType>;
+
+const WhatToPackType = z.object({
+  what_to_pack_data: z.array(z.string()),
+});
+export type WhatToPackType = z.infer<typeof WhatToPackType>;
+
+const ProblemDataType = z.object({
+  problem_data: z.array(z.string()),
+});
+export type ProblemDataType = z.infer<typeof ProblemDataType>;
+
 const StateType = z.object({
   extracted_data: ExtractedDataType,
   places_data: z.array(PlaceType),
+  destination_data: z.array(DestinationDataType),
+  // destinations: z.array(DestinationType),
+  what_to_pack_data: WhatToPackType,
+  problem_data: ProblemDataType,
 });
 export type StateType = z.infer<typeof StateType>;
 
@@ -138,6 +183,16 @@ export type ExtractedDataKey = keyof StateType["extracted_data"];
 export type ExtractedDataValue<T extends ExtractedDataKey> =
   StateType["extracted_data"][T][number];
 
-export type EmptyValuesType = {
+export type EmptyExtracredValuesType = {
   [K in ExtractedDataKey]: ExtractedDataValue<K>;
+};
+
+export type StateDataKey = keyof Omit<
+  StateType,
+  "extracted_data" | "what_to_pack_data" | "problem_data"
+>;
+export type StateDataValue<T extends StateDataKey> = StateType[T][number];
+
+export type EmptyDataValues = {
+  [K in StateDataKey]: StateDataValue<K>;
 };

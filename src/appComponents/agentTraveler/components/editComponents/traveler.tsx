@@ -61,11 +61,7 @@ function TravelerEdit({
 interface TravelerListProps {
   travelers: TravelerType[];
   original?: TravelerType[];
-  updateState: (
-    index: number,
-    name: keyof TravelerType,
-    value: unknown,
-  ) => void;
+  updateState: (id: string, name: keyof TravelerType, value: unknown) => void;
   addElement?: () => number;
   removeElement?: (id: string) => void;
   resetValue?: () => void;

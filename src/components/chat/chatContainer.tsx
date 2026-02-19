@@ -31,7 +31,7 @@ export function ChatContainer({
         display: "grid",
         gridTemplateColumns: {
           xs: "1fr",
-          sm: "minmax(min-content, min(30%, 400px)) 1fr",
+          sm: "minmax(min-content, min(30%, 300px)) 1fr",
         },
         px: 0,
         pt: 1,

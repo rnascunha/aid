@@ -139,10 +139,11 @@ function FlightEdit({ data: flight, original, updateState }: FligthEditProps) {
 interface FlightListProps {
   flights: FlightType[];
   original?: FlightType[];
-  updateState: (index: number, name: keyof FlightType, value: unknown) => void;
+  updateState: (id: string, name: keyof FlightType, value: unknown) => void;
   addElement?: () => number;
   removeElement?: (id: string) => void;
   resetValue?: () => void;
+  getLabel?: (f: FlightType) => string;
 }
 
 export function FlightList({
@@ -152,6 +153,7 @@ export function FlightList({
   addElement,
   removeElement,
   resetValue,
+  getLabel,
 }: FlightListProps) {
   return (
     <ElementList
@@ -162,6 +164,7 @@ export function FlightList({
       removeElement={removeElement}
       resetValue={resetValue}
       as={FlightEdit}
+      getLabel={getLabel as (f: { id: string }) => string}
     />
   );
 }

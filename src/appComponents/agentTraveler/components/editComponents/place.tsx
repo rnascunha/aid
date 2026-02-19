@@ -90,7 +90,7 @@ function PlaceEdit({ data: place, original, updateState }: PlaceEditProps) {
 interface PlaceListProps {
   places: PlaceType[];
   original?: PlaceType[];
-  updateState: (index: number, name: keyof PlaceType, value: unknown) => void;
+  updateState: (id: string, name: keyof PlaceType, value: unknown) => void;
   addElement?: () => number;
   removeElement?: (id: string) => void;
   resetValue?: () => void;

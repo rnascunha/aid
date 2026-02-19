@@ -1,5 +1,11 @@
 import { ComponentProps, ElementType, useState } from "react";
-import { AddRemoveElement, ElementCarousel, EmptyElement } from "./general";
+import {
+  AddRemoveElement,
+  ArrayString,
+  ElementCarousel,
+  EmptyElement,
+  ScrollableContainer,
+} from "./general";
 
 type ElementProps<E extends ElementType, T> = {
   as: E;
@@ -20,11 +26,12 @@ function Element<E extends ElementType, T extends { id: string }>({
 interface ElementListProps<T extends { id: string }> {
   elements: T[];
   original?: T[];
-  updateState: (index: number, name: keyof T, value: unknown) => void;
+  updateState: (id: string, name: keyof T, value: unknown) => void;
   addElement?: () => number;
   removeElement?: (id: string) => void;
   resetValue?: () => void;
   as: ElementType;
+  getLabel?: (op: { id: string }) => string;
 }
 
 export function ElementList<T extends { id: string }>({
@@ -35,6 +42,7 @@ export function ElementList<T extends { id: string }>({
   removeElement,
   resetValue,
   as: El,
+  getLabel,
 }: ElementListProps<T>) {
   const [page, setPage] = useState(1);
 
@@ -80,14 +88,16 @@ export function ElementList<T extends { id: string }>({
         <ElementCarousel
           page={page}
           updatePage={setPage}
-          data={elements.map((element, index) => (
+          elements={elements}
+          getLabel={getLabel}
+          data={elements.map((element) => (
             <Element
               as={El}
               data={element}
               key={element.id}
               original={original?.find((o) => o.id === element.id)}
               updateState={(name: keyof T, value: unknown) =>
-                updateState(index, name, value)
+                updateState(element.id, name, value)
               }
             />
           ))}
@@ -96,5 +106,36 @@ export function ElementList<T extends { id: string }>({
         <EmptyElement />
       )}
     </AddRemoveElement>
+  );
+}
+
+interface ElementArrayStringProps {
+  elements: string[];
+  original?: string[];
+  updateState: (value: string[]) => void;
+  title: string;
+  multiline?: boolean;
+  rows?: number;
+}
+
+export function ElementArrayString({
+  elements,
+  original,
+  updateState,
+  title,
+  multiline,
+  rows,
+}: ElementArrayStringProps) {
+  return (
+    <ScrollableContainer>
+      <ArrayString
+        data={elements}
+        original={original}
+        title={title}
+        updateState={updateState}
+        multiline={multiline}
+        rows={rows}
+      />
+    </ScrollableContainer>
   );
 }

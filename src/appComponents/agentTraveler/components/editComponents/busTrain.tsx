@@ -167,14 +167,11 @@ function BusTrainEdit({
 interface BusTraisListProps {
   busTrains: BusTrainType[];
   original?: BusTrainType[];
-  updateState: (
-    index: number,
-    name: keyof BusTrainType,
-    value: unknown,
-  ) => void;
+  updateState: (id: string, name: keyof BusTrainType, value: unknown) => void;
   addElement?: () => number;
   removeElement?: (id: string) => void;
   resetValue?: () => void;
+  getLabel?: (f: BusTrainType) => string;
 }
 
 export function BusTrainList({
@@ -184,6 +181,7 @@ export function BusTrainList({
   addElement,
   removeElement,
   resetValue,
+  getLabel,
 }: BusTraisListProps) {
   return (
     <ElementList
@@ -194,6 +192,7 @@ export function BusTrainList({
       removeElement={removeElement}
       resetValue={resetValue}
       as={BusTrainEdit}
+      getLabel={getLabel as (f: { id: string }) => string}
     />
   );
 }

@@ -12,10 +12,10 @@ import {
   InputAdornmentProps,
   InputLabel,
   MenuItem,
-  Pagination,
   Select,
   Stack,
   StackProps,
+  SxProps,
   TextField,
   TextFieldProps,
   Tooltip,
@@ -37,12 +37,14 @@ import Image from "next/image";
 import { Dayjs } from "dayjs";
 import { PickerValue } from "@mui/x-date-pickers/internals";
 
+import { EditDialog } from "@/components/dialogs/editDialog";
+
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ClearIcon from "@mui/icons-material/Clear";
 import AddIcon from "@mui/icons-material/Add";
-
-import { EditDialog } from "@/components/dialogs/editDialog";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 function isHTML(value?: string) {
   if (!value) return false;
@@ -176,6 +178,8 @@ interface ArrayStringProps {
   original?: string[];
   updateState?: (value: string[]) => void;
   readOnly?: boolean;
+  multiline?: boolean;
+  rows?: number;
 }
 
 export function ArrayString({
@@ -184,6 +188,8 @@ export function ArrayString({
   original,
   readOnly,
   updateState,
+  multiline,
+  rows = 3,
 }: ArrayStringProps) {
   const addField = () => updateState?.([...data, ""]);
   const deleteField = (index: number) =>
@@ -219,6 +225,8 @@ export function ArrayString({
               key={`${d}-${i}`}
               original={original?.[i]}
               updateState={(v) => updateField(v as string, i)}
+              multiline={multiline}
+              rows={rows}
               endAdornment={
                 <Tooltip title="Delete field">
                   <IconButton onClick={() => deleteField(i)}>
@@ -308,7 +316,7 @@ export function ScrollableContainer({
   ref,
 }: {
   children: ReactNode | ReactNode[];
-  ref: RefObject<HTMLDivElement | null>;
+  ref?: RefObject<HTMLDivElement | null>;
 }) {
   return (
     <Container
@@ -363,7 +371,6 @@ export function TimezoneAutocomplete({
       value={v}
       onChange={(ev, value) => setV(value)}
       onBlur={() => {
-        console.log(v?.timezone);
         updateState?.(v?.timezone ?? "");
       }}
       groupBy={(op) => op.offset}
@@ -448,34 +455,43 @@ export function SelectElement<T extends { id: string }>({
   options,
   updatePage,
   getName,
+  sx,
 }: {
-  title: string;
+  title?: string;
   selected: undefined | string;
   options: T[];
   updatePage: (page: number) => void;
-  getName: (op: T) => string;
+  getName?: (op: T) => string;
+  sx?: SxProps;
 }) {
-  const [value, setValue] = useState(selected);
   return (
-    <Select
-      size="small"
-      // defaultValue={selected}
-      value={value}
-      label={title}
-      onChange={(ev) => {
-        const v = ev.target.value;
-        setValue(v);
-        const op = options.findIndex((o) => o.id === v);
-        if (op !== -1) updatePage(op + 1);
+    <FormControl
+      sx={{
+        width: "100%",
+        maxWidth: "100%",
+        ...sx,
       }}
-      autoWidth
     >
-      {options.map((o) => (
-        <MenuItem value={o.id} key={o.id}>
-          {getName(o)}
-        </MenuItem>
-      ))}
-    </Select>
+      <Select
+        size="small"
+        value={selected ?? options[0].id}
+        label={title}
+        onChange={(ev) => {
+          const v = ev.target.value;
+          const op = options.findIndex((o) => o.id === v);
+          if (op !== -1) updatePage(op + 1);
+        }}
+        sx={{
+          textAlign: "center",
+        }}
+      >
+        {options.map((o) => (
+          <MenuItem value={o.id} key={o.id}>
+            {getName?.(o) ?? o.id}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
   );
 }
 
@@ -618,20 +634,70 @@ export function ImageBoard({
   );
 }
 
-interface ElementCarouselProps extends StackProps {
-  data: ReactNode[];
+export function SelectPagination({
+  data,
+  page,
+  updatePage,
+  getName,
+}: {
+  data: { id: string }[];
   page: number;
   updatePage: (newPage: number) => void;
+  getName?: (op: { id: string }) => string;
+}) {
+  return (
+    <Stack
+      direction="row"
+      alignItems="center"
+      justifyContent="space-between"
+      sx={{
+        width: "100%",
+        maxWidth: "100%",
+      }}
+    >
+      <IconButton
+        disabled={data.length === 0 || page === 1}
+        onClick={() => updatePage(Math.max(1, page - 1))}
+      >
+        <ArrowBackIosNewIcon fontSize="small" />
+      </IconButton>
+      <SelectElement
+        selected={data[page - 1].id}
+        options={data}
+        updatePage={updatePage}
+        getName={(op) =>
+          getName?.(op) ?? ("name" in op ? (op.name as string) : op.id)
+        }
+      />
+      <IconButton
+        disabled={data.length === 0 || page === data.length}
+        onClick={() => updatePage(Math.min(page + 1, data.length))}
+      >
+        <ArrowForwardIosIcon fontSize="small" />
+      </IconButton>
+    </Stack>
+  );
+}
+
+interface ElementCarouselProps extends StackProps {
+  data: ReactNode[];
+  elements: { id: string }[];
+  page: number;
+  updatePage: (newPage: number) => void;
+  pagination?: ReactNode;
+  getLabel?: (op: { id: string }) => string;
 }
 
 export function ElementCarousel({
   data,
+  elements,
   page,
   updatePage,
+  pagination,
+  getLabel,
   ...props
 }: ElementCarouselProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const matches = useMediaQuery("(max-width: 300px)");
   return (
     <Stack
       gap={1}
@@ -642,16 +708,14 @@ export function ElementCarousel({
       {...props}
     >
       <ScrollableContainer ref={ref}>{data[page - 1]}</ScrollableContainer>
-      <Pagination
-        sx={{
-          alignSelf: "center",
-        }}
-        count={data.length}
+      <SelectPagination
         page={page}
-        onChange={(ev, newPage) => {
+        data={elements}
+        updatePage={(newPage) => {
           updatePage(newPage);
           if (ref.current) ref.current.scrollTo({ top: 0, behavior: "smooth" });
         }}
+        getName={getLabel}
       />
     </Stack>
   );

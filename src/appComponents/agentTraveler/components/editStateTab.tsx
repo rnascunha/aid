@@ -1,4 +1,9 @@
-import { ExtractedDataKey, PlaceType, StateType } from "./editComponents/types";
+import {
+  ExtractedDataKey,
+  PlaceType,
+  StateDataKey,
+  StateType,
+} from "./editComponents/types";
 import { PanelList, PanelUnit } from "@/components/panels";
 import { TravelerList } from "./editComponents/traveler";
 import { HotelList } from "./editComponents/hotel";
@@ -7,6 +12,15 @@ import { BusTrainList } from "./editComponents/busTrain";
 import { CarRentList } from "./editComponents/carRent";
 import { EventList } from "./editComponents/event";
 
+import { PlaceList } from "./editComponents/place";
+import { useState } from "react";
+import {
+  emptyExtractedValues,
+  stateEmptyValues,
+} from "./editComponents/constants";
+import { generateUUID } from "@/libs/uuid";
+import { WhatToPackList } from "./editComponents/whatToPack";
+
 import HotelIcon from "@mui/icons-material/Hotel";
 import PersonIcon from "@mui/icons-material/Person";
 import LocalAirportIcon from "@mui/icons-material/LocalAirport";
@@ -14,82 +28,113 @@ import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import CarRentalIcon from "@mui/icons-material/CarRental";
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { PlaceList } from "./editComponents/place";
-import { useState } from "react";
-import { emptyExtractedValues, emptyPlaces } from "./editComponents/constants";
-import { generateUUID } from "@/libs/uuid";
+import BackpackIcon from "@mui/icons-material/Backpack";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import MapIcon from "@mui/icons-material/Map";
+
+import { ProblemList } from "./editComponents/problem";
+import { DestinationDataList } from "./editComponents/destinationData";
 
 interface EditStateTabProps {
   state: StateType;
 }
 
 export function EditStateTab({ state: originalState }: EditStateTabProps) {
-  const [state, setState] = useState(
-    structuredClone(originalState.extracted_data),
-  );
-  const [places, setPlaces] = useState(
-    structuredClone(originalState.places_data),
-  );
+  const [state, setState] = useState(structuredClone(originalState));
 
-  const addElement = (namespace: ExtractedDataKey) => {
+  const addExtracted = (namespace: ExtractedDataKey) => {
+    const newPage = state.extracted_data[namespace].length + 1;
+    setState((prev) => ({
+      ...prev,
+      extracted_data: {
+        ...prev.extracted_data,
+        [namespace]: [
+          ...prev.extracted_data[namespace],
+          { ...emptyExtractedValues[namespace], id: generateUUID() },
+        ],
+      },
+    }));
+    return newPage;
+  };
+
+  const removeExtracted = (namespace: ExtractedDataKey, id: string) => {
+    setState((prev) => ({
+      ...prev,
+      extracted_data: {
+        ...prev.extracted_data,
+        [namespace]: prev.extracted_data[namespace].filter((p) => p.id !== id),
+      },
+    }));
+  };
+
+  const resetExtracted = (namespace: ExtractedDataKey) => {
+    setState((prev) => ({
+      ...prev,
+      extracted_data: {
+        ...prev.extracted_data,
+        [namespace]: originalState.extracted_data[namespace],
+      },
+    }));
+  };
+
+  const updateExtracted = (
+    namespace: ExtractedDataKey,
+    id: string,
+    name: string,
+    value: unknown,
+  ) => {
+    setState((prev) => ({
+      ...prev,
+      extracted_data: {
+        ...prev.extracted_data,
+        [namespace]: (prev.extracted_data[namespace] as { id: string }[]).map(
+          (v) => {
+            if (v.id !== id) return v;
+            return { ...(v as object), [name]: value };
+          },
+        ),
+      },
+    }));
+  };
+
+  const addState = (namespace: StateDataKey) => {
     const newPage = state[namespace].length + 1;
     setState((prev) => ({
       ...prev,
       [namespace]: [
         ...prev[namespace],
-        { ...emptyExtractedValues[namespace], id: generateUUID() },
+        { ...stateEmptyValues[namespace], id: generateUUID() },
       ],
     }));
     return newPage;
   };
 
-  const removeElement = (namespace: ExtractedDataKey, id: string) => {
+  const removeState = (namespace: StateDataKey, id: string) => {
     setState((prev) => ({
       ...prev,
       [namespace]: prev[namespace].filter((p) => p.id !== id),
     }));
   };
 
-  const resetValue = (namespace: ExtractedDataKey) => {
+  const resetStateValue = (namespace: StateDataKey) => {
     setState((prev) => ({
       ...prev,
-      [namespace]: originalState.extracted_data[namespace],
+      [namespace]: originalState[namespace],
     }));
   };
 
   const updateState = (
-    namespace: ExtractedDataKey,
-    index: number,
+    namespace: StateDataKey,
+    id: string,
     name: string,
     value: unknown,
-  ) => {
+  ) =>
     setState((prev) => ({
       ...prev,
-      [namespace]: (prev[namespace] as unknown[]).map((v, i) => {
-        if (i !== index) return v;
-        return { ...(v as object), [name]: value };
-      }),
+      [namespace]: prev[namespace].map((v) =>
+        v.id !== id ? v : { ...v, [name]: value },
+      ),
     }));
-  };
-
-  const addPlace = () => {
-    const newPage = places.length + 1;
-    setPlaces((prev) => [...prev, { ...emptyPlaces, id: generateUUID() }]);
-    return newPage;
-  };
-
-  const removePlace = (id: string) => {
-    setPlaces((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const resetPlaceValue = () => {
-    setPlaces(originalState.places_data);
-  };
-
-  const updatePlaces = (index: number, name: keyof PlaceType, value: unknown) =>
-    setPlaces((prev) =>
-      prev.map((v, i) => (i !== index ? v : { ...v, [name]: value })),
-    );
 
   const panels: PanelUnit[] = [
     {
@@ -98,14 +143,14 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
       title: "Travelers",
       panel: (
         <TravelerList
-          travelers={state.travelers}
+          travelers={state.extracted_data.travelers}
           original={originalState.extracted_data.travelers}
-          updateState={(index, name, value) =>
-            updateState("travelers", index, name, value)
+          updateState={(id, name, value) =>
+            updateExtracted("travelers", id, name, value)
           }
-          addElement={() => addElement("travelers")}
-          removeElement={(id: string) => removeElement("travelers", id)}
-          resetValue={() => resetValue("travelers")}
+          addElement={() => addExtracted("travelers")}
+          removeElement={(id: string) => removeExtracted("travelers", id)}
+          resetValue={() => resetExtracted("travelers")}
         />
       ),
     },
@@ -115,14 +160,14 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
       icon: <HotelIcon />,
       panel: (
         <HotelList
-          hotels={state.hotels}
+          hotels={state.extracted_data.hotels}
           original={originalState.extracted_data.hotels}
-          updateState={(index, name, value) =>
-            updateState("hotels", index, name, value)
+          updateState={(id, name, value) =>
+            updateExtracted("hotels", id, name, value)
           }
-          addElement={() => addElement("hotels")}
-          removeElement={(id: string) => removeElement("hotels", id)}
-          resetValue={() => resetValue("hotels")}
+          addElement={() => addExtracted("hotels")}
+          removeElement={(id: string) => removeExtracted("hotels", id)}
+          resetValue={() => resetExtracted("hotels")}
         />
       ),
     },
@@ -132,14 +177,15 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
       icon: <LocalAirportIcon />,
       panel: (
         <FlightList
-          flights={state.flights}
+          flights={state.extracted_data.flights}
           original={originalState.extracted_data.flights}
-          updateState={(index, name, value) =>
-            updateState("flights", index, name, value)
+          updateState={(id, name, value) =>
+            updateExtracted("flights", id, name, value)
           }
-          addElement={() => addElement("flights")}
-          removeElement={(id: string) => removeElement("flights", id)}
-          resetValue={() => resetValue("flights")}
+          addElement={() => addExtracted("flights")}
+          removeElement={(id: string) => removeExtracted("flights", id)}
+          resetValue={() => resetExtracted("flights")}
+          getLabel={(f) => `${f.company_name} ${f.flight_number}`}
         />
       ),
     },
@@ -149,14 +195,15 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
       icon: <DirectionsBusIcon />,
       panel: (
         <BusTrainList
-          busTrains={state.bus_trains}
+          busTrains={state.extracted_data.bus_trains}
           original={originalState.extracted_data.bus_trains}
-          updateState={(index, name, value) =>
-            updateState("bus_trains", index, name, value)
+          updateState={(id, name, value) =>
+            updateExtracted("bus_trains", id, name, value)
           }
-          addElement={() => addElement("bus_trains")}
-          removeElement={(id: string) => removeElement("bus_trains", id)}
-          resetValue={() => resetValue("bus_trains")}
+          addElement={() => addExtracted("bus_trains")}
+          removeElement={(id: string) => removeExtracted("bus_trains", id)}
+          resetValue={() => resetExtracted("bus_trains")}
+          getLabel={(f) => `${f.company_name}: ${f.origin} - ${f.destination}`}
         />
       ),
     },
@@ -166,14 +213,14 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
       icon: <CarRentalIcon />,
       panel: (
         <CarRentList
-          carRents={state.car_rents}
+          carRents={state.extracted_data.car_rents}
           original={originalState.extracted_data.car_rents}
-          updateState={(index, name, value) =>
-            updateState("car_rents", index, name, value)
+          updateState={(id, name, value) =>
+            updateExtracted("car_rents", id, name, value)
           }
-          addElement={() => addElement("car_rents")}
-          removeElement={(id: string) => removeElement("car_rents", id)}
-          resetValue={() => resetValue("car_rents")}
+          addElement={() => addExtracted("car_rents")}
+          removeElement={(id: string) => removeExtracted("car_rents", id)}
+          resetValue={() => resetExtracted("car_rents")}
         />
       ),
     },
@@ -183,14 +230,14 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
       icon: <TheaterComedyIcon />,
       panel: (
         <EventList
-          events={state.events}
+          events={state.extracted_data.events}
           original={originalState.extracted_data.events}
-          updateState={(index, name, value) =>
-            updateState("events", index, name, value)
+          updateState={(id, name, value) =>
+            updateExtracted("events", id, name, value)
           }
-          addElement={() => addElement("events")}
-          removeElement={(id: string) => removeElement("events", id)}
-          resetValue={() => resetValue("events")}
+          addElement={() => addExtracted("events")}
+          removeElement={(id: string) => removeExtracted("events", id)}
+          resetValue={() => resetExtracted("events")}
         />
       ),
     },
@@ -200,12 +247,67 @@ export function EditStateTab({ state: originalState }: EditStateTabProps) {
       icon: <LocationOnIcon />,
       panel: (
         <PlaceList
-          places={places}
+          places={state.places_data}
           original={originalState.places_data}
-          updateState={updatePlaces}
-          addElement={addPlace}
-          removeElement={removePlace}
-          resetValue={resetPlaceValue}
+          updateState={(id, name, value) =>
+            updateState("places_data", id, name, value)
+          }
+          addElement={() => addState("places_data")}
+          removeElement={(id) => removeState("places_data", id)}
+          resetValue={() => resetStateValue("places_data")}
+        />
+      ),
+    },
+    {
+      "aria-label": "Destination data",
+      title: "Destination Data",
+      icon: <MapIcon />,
+      panel: (
+        <DestinationDataList
+          destinationsData={state.destination_data}
+          original={originalState.destination_data}
+          updateState={(id, name, value) =>
+            updateState("destination_data", id, name, value)
+          }
+          addElement={() => addState("destination_data")}
+          removeElement={(id) => removeState("destination_data", id)}
+          resetValue={() => resetStateValue("destination_data")}
+        />
+      ),
+    },
+    {
+      "aria-label": "What to pack",
+      title: "What To Pack",
+      icon: <BackpackIcon />,
+      panel: (
+        <WhatToPackList
+          whatToPack={state.what_to_pack_data}
+          original={originalState.what_to_pack_data}
+          updateState={(v) =>
+            setState((prev) => ({
+              ...prev,
+              what_to_pack_data: { what_to_pack_data: v },
+            }))
+          }
+        />
+      ),
+    },
+    {
+      "aria-label": "Point of attention",
+      title: "Point of Attention",
+      icon: <ReportProblemIcon />,
+      panel: (
+        <ProblemList
+          problems={state.problem_data}
+          original={originalState.problem_data}
+          updateState={(v) =>
+            setState((prev) => ({
+              ...prev,
+              problem_data: { problem_data: v },
+            }))
+          }
+          multiline
+          rows={4}
         />
       ),
     },
